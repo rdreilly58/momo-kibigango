@@ -14,6 +14,17 @@ let project = Project(
             ]),
             sources: ["Sources/**"],
             resources: ["Resources/**"]
+        ),
+        .target(
+            name: "MomotaroTests",
+            destinations: .iOS,
+            product: .unitTests,
+            bundleId: "com.reillydesign.momotaro.tests",
+            infoPlist: .default,
+            sources: ["Tests/**"],
+            dependencies: [
+                .target(name: "Momotaro")
+            ]
         )
     ]
 )

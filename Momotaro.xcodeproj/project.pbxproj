@@ -7,13 +7,36 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		191829248EFDC9AFAD514754 /* Mocks.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9885A1633A4E12BAB6A59B9 /* Mocks.swift */; };
+		1A3DF0FA037FE2AE45CAA1FA /* GatewayClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6EAC7DA0E554DEA4BE01198 /* GatewayClientTests.swift */; };
+		26711DDF6B2B8E23D90A9B4E /* GatewayMessageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A2E8688491D294D29A32E47 /* GatewayMessageTests.swift */; };
 		6A8602D4BA2F77924982AB26 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA3EA450BC1CE83F2933FF61 /* ContentView.swift */; };
 		975FA45527B174D0765381E2 /* MomotaroApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E8F745975DB1A2864F300FB /* MomotaroApp.swift */; };
 		C751AB3E09A0C4AA85F0C5BE /* GatewayClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6730BC6EB6FC3EDAA89CDA9 /* GatewayClient.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		B53B779EE1CF3C9C046E6185 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8FBC154B9CAE7A1391801EFC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D9E4C6368D9010052CF99FB3;
+			remoteInfo = Momotaro;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXCopyFilesBuildPhase section */
 		ABB67E8CEC78E40940DF10F8 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DD73527FD6A646E563823786 /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
@@ -27,7 +50,12 @@
 
 /* Begin PBXFileReference section */
 		3E8F745975DB1A2864F300FB /* MomotaroApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MomotaroApp.swift; sourceTree = "<group>"; };
+		5A2E8688491D294D29A32E47 /* GatewayMessageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GatewayMessageTests.swift; sourceTree = "<group>"; };
 		BA3EA450BC1CE83F2933FF61 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		BF0F0ED5C2A14E807FC5E223 /* MomotaroTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "MomotaroTests-Info.plist"; sourceTree = "<group>"; };
+		C6EAC7DA0E554DEA4BE01198 /* GatewayClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GatewayClientTests.swift; sourceTree = "<group>"; };
+		C9885A1633A4E12BAB6A59B9 /* Mocks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mocks.swift; sourceTree = "<group>"; };
+		CDCEECC46C1E1AF60C090B30 /* MomotaroTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MomotaroTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CEAF101FB240F7AD8A0C5575 /* Momotaro-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Momotaro-Info.plist"; sourceTree = "<group>"; };
 		DADC9EFA44C82B8D974738A2 /* Momotaro.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Momotaro.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E6730BC6EB6FC3EDAA89CDA9 /* GatewayClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GatewayClient.swift; sourceTree = "<group>"; };
@@ -35,6 +63,13 @@
 
 /* Begin PBXFrameworksBuildPhase section */
 		64F88ACA2910BC5C07D48080 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BCD2EE1ECE757B49782A547F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -50,6 +85,16 @@
 				75267E4D0A44E182E20000A6 /* InfoPlists */,
 			);
 			path = Derived;
+			sourceTree = "<group>";
+		};
+		2E718C183E30ABF5058B8F60 /* MomotaroTests */ = {
+			isa = PBXGroup;
+			children = (
+				C6EAC7DA0E554DEA4BE01198 /* GatewayClientTests.swift */,
+				5A2E8688491D294D29A32E47 /* GatewayMessageTests.swift */,
+				C9885A1633A4E12BAB6A59B9 /* Mocks.swift */,
+			);
+			path = MomotaroTests;
 			sourceTree = "<group>";
 		};
 		30AAA6E9F9AC58BD63F2AD2A = {
@@ -75,6 +120,7 @@
 			children = (
 				01D6ED7FBD15E4C1923B4D66 /* Derived */,
 				919DF207612C8F0C16674DB5 /* Sources */,
+				9DC6C0827CC58CDA980519EF /* Tests */,
 			);
 			name = Project;
 			sourceTree = "<group>";
@@ -83,6 +129,7 @@
 			isa = PBXGroup;
 			children = (
 				CEAF101FB240F7AD8A0C5575 /* Momotaro-Info.plist */,
+				BF0F0ED5C2A14E807FC5E223 /* MomotaroTests-Info.plist */,
 			);
 			path = InfoPlists;
 			sourceTree = "<group>";
@@ -95,10 +142,19 @@
 			path = Sources;
 			sourceTree = "<group>";
 		};
+		9DC6C0827CC58CDA980519EF /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				2E718C183E30ABF5058B8F60 /* MomotaroTests */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
 		A4980E6A47405BA353D3C5D6 /* Products */ = {
 			isa = PBXGroup;
 			children = (
 				DADC9EFA44C82B8D974738A2 /* Momotaro.app */,
+				CDCEECC46C1E1AF60C090B30 /* MomotaroTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -106,6 +162,27 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		9A7ECEF6E0BC777F127A6089 /* MomotaroTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5E38D60D1B412ED454460815 /* Build configuration list for PBXNativeTarget "MomotaroTests" */;
+			buildPhases = (
+				174FBBD38814B8D825C7F3C8 /* Sources */,
+				BFDCDEC4A87070BA3C212F9B /* Resources */,
+				BCD2EE1ECE757B49782A547F /* Frameworks */,
+				DD73527FD6A646E563823786 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				39D94F1CDA1AF1DE7764A7F7 /* PBXTargetDependency */,
+			);
+			name = MomotaroTests;
+			packageProductDependencies = (
+			);
+			productName = MomotaroTests;
+			productReference = CDCEECC46C1E1AF60C090B30 /* MomotaroTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		D9E4C6368D9010052CF99FB3 /* Momotaro */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = AA408451FB6CEF305A1076FA /* Build configuration list for PBXNativeTarget "Momotaro" */;
@@ -134,6 +211,9 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				TargetAttributes = {
+					9A7ECEF6E0BC777F127A6089 = {
+						TestTargetID = D9E4C6368D9010052CF99FB3;
+					};
 				};
 			};
 			buildConfigurationList = 7A196FD3E03A89DFE0E0AFED /* Build configuration list for PBXProject "Momotaro" */;
@@ -150,6 +230,7 @@
 			projectRoot = "";
 			targets = (
 				D9E4C6368D9010052CF99FB3 /* Momotaro */,
+				9A7ECEF6E0BC777F127A6089 /* MomotaroTests */,
 			);
 		};
 /* End PBXProject section */
@@ -162,9 +243,26 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		BFDCDEC4A87070BA3C212F9B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		174FBBD38814B8D825C7F3C8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1A3DF0FA037FE2AE45CAA1FA /* GatewayClientTests.swift in Sources */,
+				26711DDF6B2B8E23D90A9B4E /* GatewayMessageTests.swift in Sources */,
+				191829248EFDC9AFAD514754 /* Mocks.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		7B76BA3DD41C5632A4E42E8B /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -176,6 +274,15 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		39D94F1CDA1AF1DE7764A7F7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = Momotaro;
+			target = D9E4C6368D9010052CF99FB3 /* Momotaro */;
+			targetProxy = B53B779EE1CF3C9C046E6185 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		239EA3DD55184FA73A4603C4 /* Release */ = {
@@ -228,6 +335,36 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		396718F3668950988E891A9E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = "Derived/InfoPlists/MomotaroTests-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-L$(DT_TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME)",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.reillydesign.momotaro.tests;
+				PRODUCT_NAME = MomotaroTests;
+				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Momotaro.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Momotaro";
+				TEST_TARGET_NAME = Momotaro;
 			};
 			name = Release;
 		};
@@ -352,9 +489,52 @@
 			};
 			name = Debug;
 		};
+		E750905CB731D33BBF3D7430 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = "Derived/InfoPlists/MomotaroTests-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-L$(DT_TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME)",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.reillydesign.momotaro.tests;
+				PRODUCT_NAME = MomotaroTests;
+				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = (
+					"$(inherited)",
+					DEBUG,
+				);
+				SWIFT_COMPILATION_MODE = singlefile;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Momotaro.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Momotaro";
+				TEST_TARGET_NAME = Momotaro;
+			};
+			name = Debug;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		5E38D60D1B412ED454460815 /* Build configuration list for PBXNativeTarget "MomotaroTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E750905CB731D33BBF3D7430 /* Debug */,
+				396718F3668950988E891A9E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		7A196FD3E03A89DFE0E0AFED /* Build configuration list for PBXProject "Momotaro" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
