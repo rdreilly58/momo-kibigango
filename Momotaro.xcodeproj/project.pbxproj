@@ -8,20 +8,24 @@
 
 /* Begin PBXBuildFile section */
 		0A1B539E6CEEBCADB192FB8F /* SecurityManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E43009743D2FA648B2B5A320 /* SecurityManagerTests.swift */; };
+		0F600716391DA0EE77A63398 /* AnalyticsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D54D76AE421F1D2C44AB416B /* AnalyticsManager.swift */; };
 		17B90390A167F5A59327CD12 /* AASessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4BF480D275A5C348267F33D /* AASessionManager.swift */; };
 		191829248EFDC9AFAD514754 /* Mocks.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9885A1633A4E12BAB6A59B9 /* Mocks.swift */; };
 		1A3DF0FA037FE2AE45CAA1FA /* GatewayClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6EAC7DA0E554DEA4BE01198 /* GatewayClientTests.swift */; };
+		1A689389B931895EE39F51F7 /* SubscriptionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41752B89FF5982CBAA9069D0 /* SubscriptionView.swift */; };
 		221351ABAC8A11C54D262802 /* SubscriptionModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03C4C88FC05A66676BFDE0AC /* SubscriptionModels.swift */; };
 		26711DDF6B2B8E23D90A9B4E /* GatewayMessageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A2E8688491D294D29A32E47 /* GatewayMessageTests.swift */; };
 		31A3EA445458BC949534BEF7 /* MessageStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E5F35D00D32E3548BE90179 /* MessageStoreTests.swift */; };
 		37E8E7A233F11D2E4A450074 /* SecurityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7386143AC55255C9F2A7438 /* SecurityManager.swift */; };
 		4F98F1FD7C8B800FCCDADBE3 /* SessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7164A9B752A910E532B6C31 /* SessionTests.swift */; };
+		659D880942ADF718DA38A04D /* AnalyticsManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 610358C68226E5A3EDFFDE18 /* AnalyticsManagerTests.swift */; };
 		6A147F9B589435461BA12B52 /* MessageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35A53D01CB3F43AE1701DB23 /* MessageStore.swift */; };
 		6A8602D4BA2F77924982AB26 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA3EA450BC1CE83F2933FF61 /* ContentView.swift */; };
 		6DCD28914B3382834CC1FB8C /* MessagePersistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECD83E3AB20ECA849102658F /* MessagePersistence.swift */; };
 		78903FF1C1E5349F9D51E945 /* FeatureManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A29907B09C6E350619BCDE80 /* FeatureManager.swift */; };
 		975FA45527B174D0765381E2 /* MomotaroApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E8F745975DB1A2864F300FB /* MomotaroApp.swift */; };
 		9FB5C33FA578AF462C42F57A /* SubscriptionManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D03B7A19EC2BC7D8C83042A /* SubscriptionManagerTests.swift */; };
+		BBC799D72F943502999190FD /* SubscriptionViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06AC9FFA148C662C30DAA16B /* SubscriptionViewTests.swift */; };
 		C751AB3E09A0C4AA85F0C5BE /* GatewayClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6730BC6EB6FC3EDAA89CDA9 /* GatewayClient.swift */; };
 		CE7ECA9A8726326F34966408 /* SubscriptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6732C71727DACE885035E1E6 /* SubscriptionManager.swift */; };
 		D600661C822FD330AE2B047B /* FeatureManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C75734784456A1E7013F226 /* FeatureManagerTests.swift */; };
@@ -63,11 +67,14 @@
 
 /* Begin PBXFileReference section */
 		03C4C88FC05A66676BFDE0AC /* SubscriptionModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionModels.swift; sourceTree = "<group>"; };
+		06AC9FFA148C662C30DAA16B /* SubscriptionViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionViewTests.swift; sourceTree = "<group>"; };
 		35A53D01CB3F43AE1701DB23 /* MessageStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageStore.swift; sourceTree = "<group>"; };
 		3E8F745975DB1A2864F300FB /* MomotaroApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MomotaroApp.swift; sourceTree = "<group>"; };
 		3EE02B3B4E90256FA98607E7 /* MessagePersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessagePersistenceTests.swift; sourceTree = "<group>"; };
+		41752B89FF5982CBAA9069D0 /* SubscriptionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionView.swift; sourceTree = "<group>"; };
 		4C75734784456A1E7013F226 /* FeatureManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureManagerTests.swift; sourceTree = "<group>"; };
 		5A2E8688491D294D29A32E47 /* GatewayMessageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GatewayMessageTests.swift; sourceTree = "<group>"; };
+		610358C68226E5A3EDFFDE18 /* AnalyticsManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsManagerTests.swift; sourceTree = "<group>"; };
 		6732C71727DACE885035E1E6 /* SubscriptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionManager.swift; sourceTree = "<group>"; };
 		7D03B7A19EC2BC7D8C83042A /* SubscriptionManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionManagerTests.swift; sourceTree = "<group>"; };
 		7E5F35D00D32E3548BE90179 /* MessageStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageStoreTests.swift; sourceTree = "<group>"; };
@@ -81,6 +88,7 @@
 		C9885A1633A4E12BAB6A59B9 /* Mocks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mocks.swift; sourceTree = "<group>"; };
 		CDCEECC46C1E1AF60C090B30 /* MomotaroTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MomotaroTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CEAF101FB240F7AD8A0C5575 /* Momotaro-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Momotaro-Info.plist"; sourceTree = "<group>"; };
+		D54D76AE421F1D2C44AB416B /* AnalyticsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsManager.swift; sourceTree = "<group>"; };
 		DADC9EFA44C82B8D974738A2 /* Momotaro.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Momotaro.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E43009743D2FA648B2B5A320 /* SecurityManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecurityManagerTests.swift; sourceTree = "<group>"; };
 		E6730BC6EB6FC3EDAA89CDA9 /* GatewayClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GatewayClient.swift; sourceTree = "<group>"; };
@@ -116,6 +124,7 @@
 		2E718C183E30ABF5058B8F60 /* MomotaroTests */ = {
 			isa = PBXGroup;
 			children = (
+				610358C68226E5A3EDFFDE18 /* AnalyticsManagerTests.swift */,
 				4C75734784456A1E7013F226 /* FeatureManagerTests.swift */,
 				C6EAC7DA0E554DEA4BE01198 /* GatewayClientTests.swift */,
 				5A2E8688491D294D29A32E47 /* GatewayMessageTests.swift */,
@@ -125,6 +134,7 @@
 				E43009743D2FA648B2B5A320 /* SecurityManagerTests.swift */,
 				A7164A9B752A910E532B6C31 /* SessionTests.swift */,
 				7D03B7A19EC2BC7D8C83042A /* SubscriptionManagerTests.swift */,
+				06AC9FFA148C662C30DAA16B /* SubscriptionViewTests.swift */,
 			);
 			path = MomotaroTests;
 			sourceTree = "<group>";
@@ -141,6 +151,7 @@
 			isa = PBXGroup;
 			children = (
 				A4BF480D275A5C348267F33D /* AASessionManager.swift */,
+				D54D76AE421F1D2C44AB416B /* AnalyticsManager.swift */,
 				BA3EA450BC1CE83F2933FF61 /* ContentView.swift */,
 				A29907B09C6E350619BCDE80 /* FeatureManager.swift */,
 				E6730BC6EB6FC3EDAA89CDA9 /* GatewayClient.swift */,
@@ -150,6 +161,7 @@
 				A7386143AC55255C9F2A7438 /* SecurityManager.swift */,
 				6732C71727DACE885035E1E6 /* SubscriptionManager.swift */,
 				03C4C88FC05A66676BFDE0AC /* SubscriptionModels.swift */,
+				41752B89FF5982CBAA9069D0 /* SubscriptionView.swift */,
 			);
 			path = Momotaro;
 			sourceTree = "<group>";
@@ -296,6 +308,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				659D880942ADF718DA38A04D /* AnalyticsManagerTests.swift in Sources */,
 				D600661C822FD330AE2B047B /* FeatureManagerTests.swift in Sources */,
 				1A3DF0FA037FE2AE45CAA1FA /* GatewayClientTests.swift in Sources */,
 				26711DDF6B2B8E23D90A9B4E /* GatewayMessageTests.swift in Sources */,
@@ -305,6 +318,7 @@
 				0A1B539E6CEEBCADB192FB8F /* SecurityManagerTests.swift in Sources */,
 				4F98F1FD7C8B800FCCDADBE3 /* SessionTests.swift in Sources */,
 				9FB5C33FA578AF462C42F57A /* SubscriptionManagerTests.swift in Sources */,
+				BBC799D72F943502999190FD /* SubscriptionViewTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -313,6 +327,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				17B90390A167F5A59327CD12 /* AASessionManager.swift in Sources */,
+				0F600716391DA0EE77A63398 /* AnalyticsManager.swift in Sources */,
 				6A8602D4BA2F77924982AB26 /* ContentView.swift in Sources */,
 				78903FF1C1E5349F9D51E945 /* FeatureManager.swift in Sources */,
 				C751AB3E09A0C4AA85F0C5BE /* GatewayClient.swift in Sources */,
@@ -322,6 +337,7 @@
 				37E8E7A233F11D2E4A450074 /* SecurityManager.swift in Sources */,
 				CE7ECA9A8726326F34966408 /* SubscriptionManager.swift in Sources */,
 				221351ABAC8A11C54D262802 /* SubscriptionModels.swift in Sources */,
+				1A689389B931895EE39F51F7 /* SubscriptionView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
