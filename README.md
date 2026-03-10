@@ -9,6 +9,8 @@
 - Basic chat interface with AI agents ✅
 - **Multi-session management** - Switch between AI agents ✅
 - Session history with last-used tracking ✅
+- **Message history & persistence** - Save all conversations locally ✅
+- Full-text search across messages ✅
 - System dashboard and status monitoring ✅
 - File uploads up to 10MB
 
@@ -32,8 +34,10 @@
 ### Core Components
 - **GatewayClient** - WebSocket connection and gateway communication (URLSessionWebSocketTask)
 - **GatewayMessage** - Codable message model with JSON encoding/decoding
-- **SessionManager** - Multi-session management with agent switching ✨ NEW
+- **SessionManager** - Multi-session management with agent switching ✨
 - **SessionInfo** - Session model with metadata and tracking
+- **MessageStore** - Core Data persistence and message operations ✨ NEW
+- **StoredMessage** - Message data model for local storage
 - **OpenClawManager** - High-level gateway management and session handling
 - **SubscriptionManager** - StoreKit 2 integration for freemium features
 - **FeatureManager** - Premium feature gating and entitlement management
@@ -107,12 +111,14 @@ momotaro-ios/
 │   ├── GatewayClient.swift          # WebSocket client (@MainActor)
 │   ├── GatewayMessage.swift         # Message model (Codable)
 │   ├── AASessionManager.swift       # Session management ✨
+│   ├── MessageStore.swift           # Core Data persistence ✨ NEW
 │   ├── ContentView.swift            # Main UI with session picker
 │   └── MomotaroApp.swift            # App entry point
 ├── Tests/MomotaroTests/
 │   ├── GatewayClientTests.swift     # 20 unit tests ✅
 │   ├── GatewayMessageTests.swift    # 14 unit tests ✅
-│   ├── SessionTests.swift           # 24 unit tests ✅
+│   ├── SessionTests.swift           # 20 unit tests ✅
+│   ├── MessageStoreTests.swift      # 22 unit tests ✅
 │   └── Mocks.swift                  # Mock infrastructure
 ├── Project.swift                     # Tuist project definition
 ├── TESTING.md                        # Testing guide
@@ -149,16 +155,57 @@ struct SessionInfo: Codable, Identifiable {
 }
 ```
 
+### Message Persistence
+
+**Features:**
+- ✅ Local Core Data storage (no server required)
+- ✅ Full-text search across messages
+- ✅ Per-session message organization
+- ✅ Automatic message cleanup
+- ✅ 22 comprehensive unit tests
+- ✅ In-memory store for testing
+
+**MessageStore Operations:**
+```swift
+// Save messages
+store.saveMessage(message)
+store.saveMultipleMessages([msg1, msg2])
+
+// Fetch messages
+let all = store.fetchAllMessages()
+let sessionMsgs = store.fetchMessages(for: "session_id")
+
+// Search
+let results = store.searchMessages(query: "hello")
+
+// Delete
+store.deleteMessage(id)
+store.deleteOldMessages(olderThan: date)
+store.deleteMessages(for: "session_id")
+```
+
+**Core Data Model:**
+```
+MessageEntity
+├── id: String (indexed)
+├── content: String
+├── type: String
+├── sessionId: String? (indexed)
+├── timestamp: Date
+└── isRead: Boolean
+```
+
 ## 🧪 Testing
 
 ### Unit Test Suite ✅
-- **Status:** 56/56 tests passing (100%)
+- **Status:** 80/80 tests passing (100%)
 - **Execution Time:** ~8 seconds (CI/CD ready)
 - **Coverage:**
   - GatewayMessageTests: 14/14 (Codable, encoding/decoding, edge cases)
   - GatewayClientTests: 20/20 (Initialization, messages, callbacks, state)
   - SessionInfoTests: 4/4 (Model creation, equality, icon, coding)
   - SessionManagerTests: 20/20 (Fetch, switch, lookup, error handling)
+  - MessageStoreTests: 22/22 (Save, fetch, search, delete, Core Data operations)
 
 ### Running Tests
 ```bash
