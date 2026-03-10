@@ -62,10 +62,20 @@
 
 ## Bob's Preferences
 
-- **Email:** robert.reilly@reillydesignstudio.com
+- **Personal Email:** robert.reilly@reillydesignstudio.com (work account)
 - **Timezone:** America/New_York (EDT)
 - **Name Preference:** Bob
 - **Called me:** Momotaro (peach emoji 🍑)
+
+## Email Accounts
+
+### ReillyDesignStudio Work Account
+- **Email:** robert.reilly@reillydesignstudio.com
+- **Tool:** Himalaya CLI (IMAP/SMTP)
+- **Status:** ✅ Configured (awaiting authentication)
+- **Config:** ~/.config/himalaya/config.toml
+- **Email Scan:** bash ~/.openclaw/workspace/scripts/email-scan.sh
+- **Next:** Run `himalaya account configure` to authenticate & store password in keyring
 
 ## Daily Briefing Schedule
 
