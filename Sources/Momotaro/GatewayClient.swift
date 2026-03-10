@@ -19,14 +19,16 @@ class GatewayClient: NSObject, ObservableObject {
     private var reconnectAttempts = 0
     private let maxReconnectAttempts = 5
     private var receiveTask: Task<Void, Never>?
+    private var urlSession: URLSession
     
     // MARK: - Callbacks
     var onMessageReceived: ((GatewayMessage) -> Void)?
     var onConnectionStatusChanged: ((Bool) -> Void)?
     
     // MARK: - Initialization
-    init(gatewayURL: String = "ws://localhost:8080") {
+    init(gatewayURL: String = "ws://localhost:8080", urlSession: URLSession? = nil) {
         self.gatewayURL = gatewayURL
+        self.urlSession = urlSession ?? URLSession(configuration: .default)
         super.init()
     }
     
@@ -59,8 +61,7 @@ class GatewayClient: NSObject, ObservableObject {
             request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
         
-        let urlSession = URLSession(configuration: .default)
-        webSocket = urlSession.webSocketTask(with: url)
+        webSocket = self.urlSession.webSocketTask(with: url)
         webSocket?.resume()
         
         // Signal connected
