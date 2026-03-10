@@ -5,10 +5,11 @@
 ## ✨ Features
 
 ### 🆓 Essential Tier (Free)
-- Connect to OpenClaw gateway via WebSocket
-- Basic chat interface with AI agents
-- Session management and switching
-- System dashboard and status monitoring
+- Connect to OpenClaw gateway via WebSocket ✅
+- Basic chat interface with AI agents ✅
+- **Multi-session management** - Switch between AI agents ✅
+- Session history with last-used tracking ✅
+- System dashboard and status monitoring ✅
 - File uploads up to 10MB
 
 ### 💎 Pro Tier ($9.99/month)
@@ -31,6 +32,8 @@
 ### Core Components
 - **GatewayClient** - WebSocket connection and gateway communication (URLSessionWebSocketTask)
 - **GatewayMessage** - Codable message model with JSON encoding/decoding
+- **SessionManager** - Multi-session management with agent switching ✨ NEW
+- **SessionInfo** - Session model with metadata and tracking
 - **OpenClawManager** - High-level gateway management and session handling
 - **SubscriptionManager** - StoreKit 2 integration for freemium features
 - **FeatureManager** - Premium feature gating and entitlement management
@@ -103,25 +106,59 @@ momotaro-ios/
 ├── Sources/Momotaro/
 │   ├── GatewayClient.swift          # WebSocket client (@MainActor)
 │   ├── GatewayMessage.swift         # Message model (Codable)
-│   ├── ContentView.swift            # Main UI
+│   ├── AASessionManager.swift       # Session management ✨
+│   ├── ContentView.swift            # Main UI with session picker
 │   └── MomotaroApp.swift            # App entry point
 ├── Tests/MomotaroTests/
 │   ├── GatewayClientTests.swift     # 20 unit tests ✅
 │   ├── GatewayMessageTests.swift    # 14 unit tests ✅
+│   ├── SessionTests.swift           # 24 unit tests ✅
 │   └── Mocks.swift                  # Mock infrastructure
 ├── Project.swift                     # Tuist project definition
 ├── TESTING.md                        # Testing guide
 └── README.md                         # This file
 ```
 
+### Session Management
+
+**Features:**
+- ✅ Multi-session support (fetch, switch, track)
+- ✅ Last-used session history
+- ✅ Session type filtering (agent, custom)
+- ✅ Error handling & recovery
+- ✅ @MainActor safety
+- ✅ 24 comprehensive unit tests
+
+**UI:**
+- Session selector button in header (👥)
+- Current session display with icon
+- Session picker modal with descriptions
+- Active session indicator (✓)
+- Loading state during switches
+
+**SessionInfo Model:**
+```swift
+struct SessionInfo: Codable, Identifiable {
+    let id: String              // Unique ID
+    let name: String            // Display name
+    let description: String     // Capabilities
+    let type: String            // "agent" | "custom"
+    var isActive: Bool          // Currently selected
+    let createdAt: Date         // Creation time
+    var lastUsedAt: Date?       // Last switch time
+}
+```
+
 ## 🧪 Testing
 
 ### Unit Test Suite ✅
-- **Status:** 34/34 tests passing (100%)
-- **Execution Time:** ~1.0 second (CI/CD ready)
+- **Status:** 56/56 tests passing (100%)
+- **Execution Time:** ~8 seconds (CI/CD ready)
 - **Coverage:**
   - GatewayMessageTests: 14/14 (Codable, encoding/decoding, edge cases)
   - GatewayClientTests: 20/20 (Initialization, messages, callbacks, state)
+  - SessionInfoTests: 4/4 (Model creation, equality, icon, coding)
+  - SessionManagerTests: 20/20 (Fetch, switch, lookup, error handling)
 
 ### Running Tests
 ```bash

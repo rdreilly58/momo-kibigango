@@ -34,6 +34,51 @@ Tests for the `GatewayMessage` Codable struct that handles JSON serialization/de
 - **testInvalidJSON()** - Properly throws `DecodingError` on malformed JSON
 - **testMissingRequiredFields()** - Fails gracefully when required fields missing
 
+### SessionInfoTests.swift (4 tests, 100% passing ✅)
+
+Tests for the `SessionInfo` Codable model.
+
+#### Tests (4 passing)
+- **testSessionInfoCreation()** ✅ - Create session with all fields
+- **testSessionInfoEquality()** ✅ - Compare identical sessions
+- **testSessionInfoIcon()** ✅ - Verify icon mapping (🤖 for agents, ⚙️ for custom)
+- **testSessionInfoCoding()** ✅ - JSON encode/decode roundtrip
+
+### SessionManagerTests.swift (20 tests, 100% passing ✅)
+
+Tests for the `SessionManager` @MainActor class.
+
+#### Initialization Tests (1 passing)
+- **testInitialization()** ✅ - Empty state on creation
+
+#### Session Fetch Tests (3 passing)
+- **testFetchSessions()** ✅ - Retrieve available sessions
+- **testFetchSessionsLoading()** ✅ - Loading state management
+- **testCurrentSessionAfterFetch()** ✅ - Active session selection
+
+#### Session Switch Tests (6 passing)
+- **testSwitchSession()** ✅ - Change active session
+- **testSwitchSessionUpdatesLastUsed()** ✅ - Track last-used time
+- **testSwitchToCurrentSession()** ✅ - Switching to already-active session
+- **testSwitchToNonexistentSession()** ✅ - Error handling for invalid session
+- **testMultipleSwitches()** ✅ - Rapid switches between sessions
+- **testSessionPersistenceAfterSwitch()** ✅ - Session list integrity
+
+#### Session Lookup Tests (2 passing)
+- **testGetSessionByID()** ✅ - Find session by unique ID
+- **testGetSessionByIDNotFound()** ✅ - Handle missing sessions
+
+#### Session Filtering Tests (1 passing)
+- **testGetSessionsByType()** ✅ - Filter by session type (agent, custom)
+
+#### Error Handling Tests (2 passing)
+- **testErrorClearing()** ✅ - Error cleared on successful fetch
+- (Nonexistent session covered in switch tests)
+
+#### Additional Tests (5 passing)
+- **testSessionDescription()** ✅ - Description property
+- **testSessionIdentifiable()** ✅ - ID property (Identifiable)
+
 ### GatewayClientTests.swift (20 tests, 100% passing ✅)
 
 Tests for the `GatewayClient` @MainActor ObservableObject with full mock support.
@@ -115,17 +160,19 @@ xcodebuild test \
 
 ## Test Results
 
-### Current Status (Phase 2 Complete ✅)
+### Current Status (Phase 3 Complete ✅)
 ```
-Total Tests: 34
-Passing: 34 (20 GatewayClient + 14 GatewayMessage)
+Total Tests: 56
+Passing: 56 (20 GatewayClient + 14 GatewayMessage + 24 Session)
 Failing: 0
 Pass Rate: 100% ✅
 
 GatewayMessage: 14/14 (100%) ✅
 GatewayClient: 20/20 (100%) ✅
+SessionInfo: 4/4 (100%) ✅
+SessionManager: 20/20 (100%) ✅
 
-Execution Time: ~1.0 second (CI/CD ready)
+Execution Time: ~8 seconds (CI/CD ready)
 ```
 
 ## Test Architecture
@@ -231,7 +278,21 @@ func testSomethingDoesThis() {
 - [x] Fast execution (<2 seconds)
 - [x] CI/CD ready
 
-### Phase 3 - Future
+### Phase 3 - Complete ✅
+- [x] SessionManager with multi-session support
+- [x] SessionInfo model (Codable, Identifiable, Equatable)
+- [x] Session fetch/switch operations
+- [x] Session lookup by ID and type
+- [x] Error handling (notFound, fetchFailed, switchFailed)
+- [x] State tracking (isActive, lastUsedAt)
+- [x] UI integration (session picker, header display)
+- [x] SessionInfo tests (4/4) ✅
+- [x] SessionManager tests (20/20) ✅
+- [x] Total test suite: 56/56 (100%) ✅
+
+### Phase 4 - Future
+- [ ] Real gateway session API integration
+- [ ] Persistent session preferences (UserDefaults)
 - [ ] Connection lifecycle with real WebSocket mocks
 - [ ] Message send/receive simulation
 - [ ] Reconnection logic with exponential backoff
