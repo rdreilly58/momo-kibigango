@@ -2,11 +2,16 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var gateway = GatewayClient()
+    @EnvironmentObject var featureManager: FeatureManager
+    @EnvironmentObject var subscriptionManager: SubscriptionManager
+    @EnvironmentObject var securityManager: SecurityManager
+    
     @State private var messageInput = ""
     @State private var messages: [GatewayMessage] = []
     @State private var gatewayURL = "ws://localhost:8080"
     @State private var showSettings = false
     @State private var showSessionPicker = false
+    @State private var showUpgradePrompt = false
     
     var body: some View {
         NavigationStack {
@@ -127,21 +132,65 @@ struct ContentView: View {
                     }
                 }
                 
+                // Subscription & Quota info
+                VStack(spacing: 4) {
+                    HStack(spacing: 12) {
+                        // Plan badge
+                        Label(subscriptionManager.currentSubscription?.plan.name ?? "Free", systemImage: subscriptionManager.currentSubscription?.plan.id == "free" ? "star" : "star.fill")
+                            .font(.caption)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(subscriptionManager.currentSubscription?.plan.id == "free" ? Color.blue.opacity(0.1) : Color.purple.opacity(0.1))
+                            .cornerRadius(4)
+                        
+                        // Quota display (only for free tier)
+                        if subscriptionManager.currentSubscription?.plan.id == "free" {
+                            Text("\(featureManager.messageQuotaRemaining())/\(featureManager.messageCount + featureManager.messageQuotaRemaining()) messages")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        
+                        Spacer()
+                    }
+                    .padding(.horizontal)
+                    .padding(.top, 8)
+                }
+                .background(Color(.systemGray6))
+                
                 // Message input
                 VStack(spacing: 8) {
                     HStack(spacing: 8) {
                         TextField("Send a message...", text: $messageInput)
                             .textFieldStyle(.roundedBorder)
-                            .disabled(!gateway.isConnected)
+                            .disabled(!gateway.isConnected || !featureManager.canSendMessage())
                         
                         Button(action: sendMessage) {
                             Image(systemName: "arrow.up.circle.fill")
                                 .font(.system(size: 20))
-                                .foregroundStyle(gateway.isConnected ? .blue : .gray)
+                                .foregroundStyle((gateway.isConnected && featureManager.canSendMessage()) ? .blue : .gray)
                         }
-                        .disabled(!gateway.isConnected || messageInput.isEmpty)
+                        .disabled(!gateway.isConnected || messageInput.isEmpty || !featureManager.canSendMessage())
                     }
                     .padding()
+                    
+                    // Quota warning for free tier
+                    if !featureManager.canSendMessage() && subscriptionManager.currentSubscription?.plan.id == "free" {
+                        HStack(spacing: 8) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundStyle(.orange)
+                            Text("Message quota reached. Upgrade to Pro for unlimited messages.")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            Spacer()
+                            Button("Upgrade") {
+                                showUpgradePrompt = true
+                            }
+                            .font(.caption)
+                            .foregroundStyle(.blue)
+                        }
+                        .padding(.horizontal)
+                        .padding(.bottom, 8)
+                    }
                 }
                 .background(Color(.systemGray6))
             }
@@ -165,6 +214,17 @@ struct ContentView: View {
     
     private func sendMessage() {
         guard !messageInput.isEmpty, gateway.isConnected else { return }
+        
+        // Check quota before sending
+        do {
+            try featureManager.incrementMessageCount()
+        } catch FeatureError.messageLimitReached {
+            showUpgradePrompt = true
+            return
+        } catch {
+            return
+        }
+        
         gateway.sendCommand(messageInput)
         messageInput = ""
     }
