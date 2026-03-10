@@ -81,23 +81,40 @@
 
 ## 🚀 Getting Started
 
-### Prerequisites
-- Xcode 26.3 or later
-- iOS 17.0 deployment target
-- Valid Apple Developer account (for device testing)
-- Tuist for project generation
+### 📖 Documentation
 
-### Installation
+Choose your starting point:
+
+- **[⚡ QUICKSTART.md](QUICKSTART.md)** — 5-minute setup guide
+- **[📦 INSTALLATION.md](INSTALLATION.md)** — Complete installation with troubleshooting
+- **[📱 OPERATIONS.md](OPERATIONS.md)** — User guide and feature reference
+- **[🧪 TESTING.md](TESTING.md)** — Test suite and code quality
+
+### Quick Setup (2 minutes)
+
 ```bash
+# Clone repository
 git clone https://github.com/rdreilly58/momotaro-ios.git
 cd momotaro-ios
 
-# Generate Xcode project from Tuist configuration
+# Generate Xcode project
+brew install tuist
 tuist generate
 
-# Open workspace
+# Open and run
 open Momotaro.xcworkspace
+# Select Momotaro scheme, press ▶ (Play)
 ```
+
+### Full Setup with Details
+
+For detailed step-by-step instructions including:
+- System requirements verification
+- Troubleshooting common issues
+- Configuration & setup
+- Test suite validation
+
+→ **See [INSTALLATION.md](INSTALLATION.md)**
 
 ### Configuration
 1. Update your team identifier in project settings
