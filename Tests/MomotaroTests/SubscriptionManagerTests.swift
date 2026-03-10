@@ -364,16 +364,17 @@ final class SubscriptionManagerTests: XCTestCase {
     
     func testSubscriptionComparison() {
         let freePlan = SubscriptionManager.plans[0]
+        let now = Date()
         let sub1 = Subscription(
             plan: freePlan,
-            purchaseDate: Date(),
+            purchaseDate: now,
             expiresAt: nil,
             autoRenews: false,
             transactionId: nil
         )
         let sub2 = Subscription(
             plan: freePlan,
-            purchaseDate: Date(),
+            purchaseDate: now,
             expiresAt: nil,
             autoRenews: false,
             transactionId: nil
