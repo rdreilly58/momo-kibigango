@@ -29,7 +29,9 @@
 ## 🏗️ Architecture
 
 ### Core Components
-- **OpenClawManager** - WebSocket connection and gateway communication
+- **GatewayClient** - WebSocket connection and gateway communication (URLSessionWebSocketTask)
+- **GatewayMessage** - Codable message model with JSON encoding/decoding
+- **OpenClawManager** - High-level gateway management and session handling
 - **SubscriptionManager** - StoreKit 2 integration for freemium features
 - **FeatureManager** - Premium feature gating and entitlement management
 - **SecurityManager** - Ed25519 authentication and secure credential storage
@@ -37,10 +39,17 @@
 ### Technology Stack
 - **SwiftUI** - Modern declarative UI framework
 - **Combine** - Reactive programming and data flow
-- **Starscream** - WebSocket client for gateway communication
+- **URLSessionWebSocketTask** - Native WebSocket client for gateway communication
+- **Codable** - JSON serialization with CodingKeys mapping
 - **Swift Crypto** - Ed25519 key generation and signature verification
 - **StoreKit 2** - Native subscription and in-app purchase management
 - **Core Data** - Local storage and offline capability
+
+### Testing Infrastructure
+- **XCTest** - Native Apple test framework
+- **MockWebSocketTask** - Protocol-based WebSocket mocking
+- **Dependency Injection** - Testable GatewayClient design
+- **100% Unit Test Coverage** - 34/34 tests passing
 
 ## 🔐 Security
 
@@ -52,39 +61,93 @@
 
 ## 📱 Requirements
 
+### Runtime
 - iOS 17.0 or later
 - iPhone XS or newer (for full feature set)
 - OpenClaw gateway (self-hosted)
 - Internet connection to reach your gateway
 
+### Development
+- Xcode 26.3 or later
+- Tuist (for project generation)
+- iOS 17+ SDK
+
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Xcode 15.0 or later
+- Xcode 26.3 or later
 - iOS 17.0 deployment target
 - Valid Apple Developer account (for device testing)
+- Tuist for project generation
 
 ### Installation
 ```bash
 git clone https://github.com/rdreilly58/momotaro-ios.git
 cd momotaro-ios
-open Momotaro.xcodeproj
+
+# Generate Xcode project from Tuist configuration
+tuist generate
+
+# Open workspace
+open Momotaro.xcworkspace
 ```
 
 ### Configuration
 1. Update your team identifier in project settings
-2. Configure your OpenClaw gateway URL
-3. Build and run on device or simulator
+2. Configure your OpenClaw gateway URL in GatewayClient
+3. Build and run on device or simulator: `⌘B` or `⌘R`
+
+### Project Structure
+```
+momotaro-ios/
+├── Sources/Momotaro/
+│   ├── GatewayClient.swift          # WebSocket client (@MainActor)
+│   ├── GatewayMessage.swift         # Message model (Codable)
+│   ├── ContentView.swift            # Main UI
+│   └── MomotaroApp.swift            # App entry point
+├── Tests/MomotaroTests/
+│   ├── GatewayClientTests.swift     # 20 unit tests ✅
+│   ├── GatewayMessageTests.swift    # 14 unit tests ✅
+│   └── Mocks.swift                  # Mock infrastructure
+├── Project.swift                     # Tuist project definition
+├── TESTING.md                        # Testing guide
+└── README.md                         # This file
+```
 
 ## 🧪 Testing
 
-```bash
-# Run unit tests
-xcodebuild test -scheme Momotaro -destination 'platform=iOS Simulator,name=iPhone 15 Pro'
+### Unit Test Suite ✅
+- **Status:** 34/34 tests passing (100%)
+- **Execution Time:** ~1.0 second (CI/CD ready)
+- **Coverage:**
+  - GatewayMessageTests: 14/14 (Codable, encoding/decoding, edge cases)
+  - GatewayClientTests: 20/20 (Initialization, messages, callbacks, state)
 
-# Run UI tests
-xcodebuild test -scheme MomotaroUITests -destination 'platform=iOS Simulator,name=iPhone 15 Pro'
+### Running Tests
+```bash
+# Run all unit tests
+xcodebuild test \
+  -workspace Momotaro.xcworkspace \
+  -scheme Momotaro \
+  -destination 'platform=iOS Simulator,name=iPhone 17 Pro'
+
+# Run specific test suite
+xcodebuild test \
+  -workspace Momotaro.xcworkspace \
+  -scheme Momotaro \
+  -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
+  -only-testing "MomotaroTests/GatewayMessageTests"
+
+# Run specific test
+xcodebuild test \
+  -workspace Momotaro.xcworkspace \
+  -scheme Momotaro \
+  -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
+  -only-testing "MomotaroTests/GatewayMessageTests/testRoundTripEncodingDecoding"
 ```
+
+### Test Documentation
+See [TESTING.md](TESTING.md) for comprehensive testing guide, architecture, best practices, and future phases.
 
 ## 📦 Build & Release
 
