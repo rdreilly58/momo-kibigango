@@ -11,6 +11,7 @@ class GatewayClient: NSObject, ObservableObject {
     @Published var lastMessage: String = ""
     @Published var error: String?
     @Published var sessionManager: SessionManager?
+    @Published var isAuthenticated = false
     
     // MARK: - Private Properties
     private var webSocket: URLSessionWebSocketTask?
@@ -21,15 +22,26 @@ class GatewayClient: NSObject, ObservableObject {
     private let maxReconnectAttempts = 5
     private var receiveTask: Task<Void, Never>?
     private var urlSession: URLSession
+    private var securityManager: SecurityManager
+    private var messagePersistence: MessagePersistence
+    private var deviceId: String
+    private var tokenRefreshTimer: Timer?
     
     // MARK: - Callbacks
     var onMessageReceived: ((GatewayMessage) -> Void)?
     var onConnectionStatusChanged: ((Bool) -> Void)?
+    var onAuthenticationStatusChanged: ((Bool) -> Void)?
     
     // MARK: - Initialization
-    init(gatewayURL: String = "ws://localhost:8080", urlSession: URLSession? = nil) {
+    init(gatewayURL: String = "ws://localhost:8080", 
+         urlSession: URLSession? = nil,
+         securityManager: SecurityManager? = nil,
+         messagePersistence: MessagePersistence? = nil) {
         self.gatewayURL = gatewayURL
         self.urlSession = urlSession ?? URLSession(configuration: .default)
+        self.securityManager = securityManager ?? SecurityManager()
+        self.messagePersistence = messagePersistence ?? MessagePersistence()
+        self.deviceId = UUID().uuidString
         super.init()
     }
     
@@ -93,10 +105,12 @@ class GatewayClient: NSObject, ObservableObject {
         webSocket = nil
         receiveTask?.cancel()
         reconnectTimer?.invalidate()
+        stopTokenRefresh()
         
         DispatchQueue.main.async {
             self.isConnected = false
             self.connectionStatus = "Disconnected"
+            self.isAuthenticated = false
         }
     }
     
@@ -120,15 +134,53 @@ class GatewayClient: NSObject, ObservableObject {
         }
     }
     
-    /// Send text command
-    func sendCommand(_ text: String) {
+    /// Send authenticated text command
+    func sendCommand(_ text: String) async throws {
         let message = GatewayMessage(
             type: "message",
             content: text,
             sessionId: nil,
             timestamp: ISO8601DateFormatter().string(from: Date())
         )
-        sendMessage(message)
+        
+        // Sign and send
+        try await sendAuthenticatedMessage(message)
+        
+        // Persist to MessagePersistence
+        try messagePersistence.saveMessage(message, sessionId: deviceId)
+    }
+    
+    /// Send authenticated message
+    private func sendAuthenticatedMessage(_ message: GatewayMessage) async throws {
+        // Get signature from SecurityManager
+        let messageContent = message.content
+        let signature = try await securityManager.signMessage(messageContent)
+        let publicKey = try securityManager.retrievePublicKey()
+        
+        // Create AuthenticatedMessage
+        let authenticatedMessage = AuthenticatedMessage(
+            deviceId: deviceId,
+            publicKey: publicKey.base64EncodedString(),
+            message: message,
+            signature: signature.base64EncodedString(),
+            timestamp: ISO8601DateFormatter().string(from: Date()),
+            nonce: UUID().uuidString
+        )
+        
+        // Send over WebSocket
+        guard let jsonData = try? JSONEncoder().encode(authenticatedMessage),
+              let jsonString = String(data: jsonData, encoding: .utf8) else {
+            throw NSError(domain: "GatewayClient", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to encode authenticated message"])
+        }
+        
+        let wsMessage = URLSessionWebSocketTask.Message.string(jsonString)
+        webSocket?.send(wsMessage) { [weak self] error in
+            if let error = error {
+                DispatchQueue.main.async {
+                    self?.error = "Send failed: \(error.localizedDescription)"
+                }
+            }
+        }
     }
     
 
@@ -177,6 +229,15 @@ class GatewayClient: NSObject, ObservableObject {
             return
         }
         
+        // Persist received message
+        do {
+            try messagePersistence.saveMessage(message, sessionId: deviceId)
+        } catch {
+            DispatchQueue.main.async {
+                self.error = "Failed to persist message: \(error.localizedDescription)"
+            }
+        }
+        
         DispatchQueue.main.async {
             self.lastMessage = message.content
             self.onMessageReceived?(message)
@@ -202,6 +263,56 @@ class GatewayClient: NSObject, ObservableObject {
                 self.connect(sessionToken: self.sessionToken)
             }
         }
+    }
+    
+    // MARK: - Session Token Management
+    
+    /// Attempt to retrieve or refresh session token
+    func ensureValidSessionToken() async throws {
+        // Check if we have a valid token
+        if let currentToken = try securityManager.retrieveSessionToken(),
+           securityManager.isTokenValid(currentToken) {
+            self.sessionToken = currentToken.token
+            self.isAuthenticated = true
+            return
+        }
+        
+        // Token expired or missing - request new one
+        try await requestSessionToken()
+    }
+    
+    /// Request new session token from Gateway
+    private func requestSessionToken() async throws {
+        let message = GatewayMessage(
+            type: "auth",
+            content: "request_token",
+            sessionId: nil,
+            timestamp: ISO8601DateFormatter().string(from: Date())
+        )
+        
+        try await sendAuthenticatedMessage(message)
+    }
+    
+    /// Start automatic token refresh (24h)
+    func startTokenRefresh() {
+        tokenRefreshTimer?.invalidate()
+        tokenRefreshTimer = Timer.scheduledTimer(withTimeInterval: 24 * 60 * 60, repeats: true) { [weak self] _ in
+            Task {
+                do {
+                    try await self?.ensureValidSessionToken()
+                } catch {
+                    DispatchQueue.main.async {
+                        self?.error = "Token refresh failed: \(error.localizedDescription)"
+                    }
+                }
+            }
+        }
+    }
+    
+    /// Stop automatic token refresh
+    func stopTokenRefresh() {
+        tokenRefreshTimer?.invalidate()
+        tokenRefreshTimer = nil
     }
 }
 
