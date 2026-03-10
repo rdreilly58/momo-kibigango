@@ -3,11 +3,21 @@
 ## Active Projects
 
 ### ReillyDesignStudio (Next.js + AWS Amplify)
-- **Status:** Deployed and live at https://dev.d24p2wkrfuex3c.amplifyapp.com
-- **Tech Stack:** Next.js, AWS Amplify, AWS AppConfig
-- **Deployed:** March 9, 2026
-- **TODO:** Custom domain setup, Environment variables, Git CI/CD automation
+- **Status:** ✅ Rebuilt & deployed (March 10, 5:45 AM)
+- **URL:** https://dev.d24p2wkrfuex3c.amplifyapp.com
+- **Tech Stack:** Next.js, AWS Amplify, Stripe, NextAuth, Google Analytics
+- **Build Status:** ✅ Successful (static + dynamic pages)
+- **Stripe Integration:** Ready (env vars pending)
+- **Features:** Invoice payment, shop checkout, portfolio, blog
+- **TODO:**
+  - Set Stripe environment variables (STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET)
+  - Configure OAuth (GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET)
+  - Set analytics IDs
+  - Configure SMTP for email
+  - Custom domain setup
+  - Monitor webhook logs
 - **GitHub:** https://github.com/rdreilly58/reillydesignstudio
+- **Setup Guide:** STRIPE_ENV_GUIDE.md
 
 ### Momotaro-iOS (Swift/SwiftUI)
 - **Status:** ✓ Build successful, Xcode project ready
