@@ -10,6 +10,7 @@ class GatewayClient: NSObject, ObservableObject {
     @Published var connectionStatus = "Disconnected"
     @Published var lastMessage: String = ""
     @Published var error: String?
+    @Published var sessionManager: SessionManager?
     
     // MARK: - Private Properties
     private var webSocket: URLSessionWebSocketTask?
@@ -70,6 +71,16 @@ class GatewayClient: NSObject, ObservableObject {
             self.connectionStatus = "Connected"
             self.reconnectAttempts = 0
             self.onConnectionStatusChanged?(true)
+            
+            // Initialize session manager if not already done
+            if self.sessionManager == nil {
+                self.sessionManager = SessionManager(gateway: self)
+            }
+            
+            // Fetch available sessions
+            Task {
+                await self.sessionManager?.fetchSessions()
+            }
         }
         
         // Start receiving messages

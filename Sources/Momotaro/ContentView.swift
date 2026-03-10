@@ -6,6 +6,7 @@ struct ContentView: View {
     @State private var messages: [GatewayMessage] = []
     @State private var gatewayURL = "ws://localhost:8080"
     @State private var showSettings = false
+    @State private var showSessionPicker = false
     
     var body: some View {
         NavigationStack {
@@ -19,11 +20,29 @@ struct ContentView: View {
                             Text(gateway.connectionStatus)
                                 .font(.caption)
                                 .foregroundStyle(gateway.isConnected ? .green : .red)
+                            
+                            // Current session display
+                            if let currentSession = gateway.sessionManager?.currentSession {
+                                Text("\(currentSession.icon) \(currentSession.name)")
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                            }
                         }
                         Spacer()
-                        Button(action: { showSettings = true }) {
-                            Image(systemName: "gear")
-                                .foregroundStyle(.blue)
+                        
+                        HStack(spacing: 12) {
+                            // Session switcher button
+                            if gateway.sessionManager?.availableSessions.count ?? 0 > 0 {
+                                Button(action: { showSessionPicker = true }) {
+                                    Image(systemName: "person.2")
+                                        .foregroundStyle(.blue)
+                                }
+                            }
+                            
+                            Button(action: { showSettings = true }) {
+                                Image(systemName: "gear")
+                                    .foregroundStyle(.blue)
+                            }
                         }
                     }
                     .padding()
@@ -130,6 +149,12 @@ struct ContentView: View {
             .sheet(isPresented: $showSettings) {
                 SettingsView(gatewayURL: $gatewayURL, gateway: gateway)
             }
+            .sheet(isPresented: $showSessionPicker) {
+                SessionPickerView(
+                    sessionManager: gateway.sessionManager,
+                    isPresented: $showSessionPicker
+                )
+            }
             .onAppear {
                 gateway.onMessageReceived = { message in
                     messages.append(message)
@@ -191,6 +216,59 @@ struct SettingsView: View {
                 }
             }
             .navigationTitle("Settings")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Session Picker View
+
+struct SessionPickerView: View {
+    let sessionManager: SessionManager?
+    @Binding var isPresented: Bool
+    @Environment(\.dismiss) var dismiss
+    
+    var body: some View {
+        NavigationStack {
+            List {
+                if let manager = sessionManager, !manager.availableSessions.isEmpty {
+                    ForEach(manager.availableSessions) { session in
+                        Button(action: {
+                            Task {
+                                await manager.switchSession(to: session)
+                                dismiss()
+                            }
+                        }) {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    HStack {
+                                        Text(session.icon)
+                                        Text(session.name)
+                                            .font(.headline)
+                                    }
+                                    Text(session.description)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                                Spacer()
+                                if session.isActive {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .foregroundStyle(.green)
+                                }
+                            }
+                        }
+                        .foregroundStyle(.primary)
+                    }
+                }
+            }
+            .navigationTitle("Switch Session")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
