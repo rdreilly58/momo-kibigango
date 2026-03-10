@@ -84,3 +84,22 @@ enum SubscriptionError: Error, Equatable {
         }
     }
 }
+
+// MARK: - FeatureStatus
+/// Status of a feature (available, quota exceeded, requires pro, or disabled)
+enum FeatureStatus: String, CaseIterable {
+    case available
+    case quotaExceeded
+    case requiresPro
+    case disabled
+}
+
+// MARK: - FeatureError
+/// Errors related to feature access and quotas
+enum FeatureError: Error, Equatable {
+    case quotaExceeded(String)
+    case requiresProSubscription
+    case sessionLimitReached
+    case messageLimitReached
+    case unauthorized
+}
