@@ -88,7 +88,8 @@ Choose your starting point:
 - **[⚡ QUICKSTART.md](QUICKSTART.md)** — 5-minute setup guide
 - **[📦 INSTALLATION.md](INSTALLATION.md)** — Complete installation with troubleshooting
 - **[📱 OPERATIONS.md](OPERATIONS.md)** — User guide and feature reference
-- **[🧪 TESTING.md](TESTING.md)** — Test suite and code quality
+- **[🧪 TESTING_PLAN.md](TESTING_PLAN.md)** — Comprehensive testing (simulator + device)
+- **[📊 TESTING.md](TESTING.md)** — Unit tests and code quality
 
 ### Quick Setup (2 minutes)
 
