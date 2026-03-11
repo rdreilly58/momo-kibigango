@@ -11,14 +11,27 @@
 ## Decision Summary
 
 **Bob:** "Let's do it! Onigashima will be a product suite and business area for ReillyDesignStudio LLC."  
-**Timestamp:** March 11, 2026, 2:11 PM EDT + 2:17 PM EDT (organizational clarification)  
+**Timestamp:** March 11, 2026, 2:11 PM EDT + 2:17 PM EDT (organizational clarification) + 2:24 PM EDT (MVP track approved)  
 **Authority:** Bob Reilly, founder ReillyDesignStudio LLC
+
+**Additional Decision (2:24 PM):**
+"I want to start immediate technical development for one use case:
+- Non-technical customer with iPhone + Mac
+- Turnkey OpenClaw + Momotaro iOS installation
+- Automatic updates + support through RDS
+- Remote support via Tailscale"
 
 **Organizational Structure:**
 - **Parent Company:** ReillyDesignStudio LLC (existing legal entity)
 - **Product Line:** Onigashima (new business area)
 - **Reporting:** Separate P&L under parent company
 - **Leadership:** Bob Reilly (CEO), Momotaro (Product Lead)
+
+**Development Strategy:**
+- **Phase 0 (Marketing Track):** Market validation, design, architecture planning (3 weeks)
+- **MVP Technical Track:** Parallel development of working MVP (4-9 weeks)
+- **Goal:** Have MVP ready for 100 users by April 28, 2026
+- **Approach:** Design this week, develop weeks 2-9, launch week 10
 
 ---
 
