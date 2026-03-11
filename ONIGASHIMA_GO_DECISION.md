@@ -2,15 +2,23 @@
 
 **Date:** Wednesday, March 11, 2026, 2:11 PM EDT  
 **Decision:** 🟢 **APPROVED FOR FULL EXECUTION**  
+**Parent Company:** ReillyDesignStudio LLC  
+**Product Line:** Onigashima (Personal AI Suite)  
 **Status:** Phase 0 — Foundation (Weeks 1-3) — STARTING NOW
 
 ---
 
 ## Decision Summary
 
-**Bob:** "Let's do it!"  
-**Timestamp:** March 11, 2026, 2:11 PM EDT  
-**Authority:** Project Lead approval
+**Bob:** "Let's do it! Onigashima will be a product suite and business area for ReillyDesignStudio LLC."  
+**Timestamp:** March 11, 2026, 2:11 PM EDT + 2:17 PM EDT (organizational clarification)  
+**Authority:** Bob Reilly, founder ReillyDesignStudio LLC
+
+**Organizational Structure:**
+- **Parent Company:** ReillyDesignStudio LLC (existing legal entity)
+- **Product Line:** Onigashima (new business area)
+- **Reporting:** Separate P&L under parent company
+- **Leadership:** Bob Reilly (CEO), Momotaro (Product Lead)
 
 ---
 
