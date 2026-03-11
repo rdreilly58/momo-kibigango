@@ -2,14 +2,22 @@
 
 **Project Name:** Onigashima (鬼ヶ島 — "Demon Island" from Momotaro folklore)
 **Tagline:** "Your Personal AI That Actually Knows You"
-**Status:** Inception Phase
+**Business Unit:** ReillyDesignStudio LLC
+**Status:** Phase 0 (Foundation)
 **Created:** Wednesday, March 11, 2026
+**Decision:** GO (March 11, 2026)
 
 ---
 
 ## 🎯 Mission
 
 Enable non-technical consumers to run their own personal AI assistant backed by OpenClaw, with optional preconfigured hardware. Create a complete, privacy-first alternative to cloud-based AI services.
+
+**Organizational Structure:**
+- Parent company: ReillyDesignStudio LLC
+- Product line: Onigashima (personal AI suite + distribution platform)
+- Revenue stream: Separate P&L under parent company
+- Management: Bob Reilly (founder) + Momotaro (product lead)
 
 ---
 
