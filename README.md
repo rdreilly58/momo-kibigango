@@ -1,291 +1,427 @@
-# 🍑 Momotaro - OpenClaw iOS Client
+# Momotaro-iOS
 
-**Momotaro** is the native iOS client for OpenClaw, bringing AI automation and gateway management to your iPhone and iPad. Named after the legendary Japanese folk hero, Momotaro empowers users to control their self-hosted AI infrastructure from anywhere.
+A production-ready iOS application built with SwiftUI and MVVM architecture. Features real-time WebSocket communication, comprehensive error handling, unit tests, and clean separation of concerns.
 
-## ✨ Features
+## 🎯 Features
 
-### 🆓 Essential Tier (Free)
-- Connect to OpenClaw gateway via WebSocket ✅
-- Basic chat interface with AI agents ✅
-- **Multi-session management** - Switch between AI agents ✅
-- Session history with last-used tracking ✅
-- **Message history & persistence** - Save all conversations locally ✅
-- Full-text search across messages ✅
-- System dashboard and status monitoring ✅
-- File uploads up to 10MB
+✅ **Clean MVVM Architecture** — Proper separation between Models, Views, and ViewModels
+✅ **Centralized State Management** — Single source of truth with AppState
+✅ **Real-time WebSocket** — URLSessionWebSocketTask with auto-reconnection
+✅ **Network Layer** — Result type, comprehensive error handling
+✅ **Local Storage** — UserDefaults and file system persistence
+✅ **SwiftUI Views** — Modern, reactive UI components
+✅ **Unit Tests** — Network tests with mock URLSession
+✅ **Comprehensive Docs** — Architecture, integration, testing guides
 
-### 💎 Pro Tier ($9.99/month)
-- **Voice Messages** - Record and send voice messages with speech-to-text
-- **Camera Analysis** - AI-powered photo analysis and OCR capabilities
-- **Large File Uploads** - Upload files up to 100MB
-- **Background Monitoring** - Gateway health monitoring with smart notifications
-- **Enhanced File Management** - Advanced file organization and preview
+## 📁 Project Structure
 
-### 🚀 Enterprise Tier ($19.99/month)
-- **Siri Shortcuts** - Create custom voice commands and automation
-- **Live Activities** - Real-time status updates in Dynamic Island
-- **NFC Automation** - Physical trigger automation with NFC tags
-- **Location Features** - Geofenced AI behavior and context awareness
-- **Bluetooth LE** - IoT device control and peripheral management
-- **Advanced Analytics** - Detailed usage insights and performance metrics
+```
+Momotaro-iOS/
+├── Models/                    # Data structures (Peach, User, etc)
+│   ├── Peach.swift
+│   ├── User.swift
+│   ├── GatewayMessage.swift
+│   └── SortCriteria.swift
+├── ViewModels/               # Business logic and state
+│   ├── AppState.swift
+│   ├── PeachViewModel.swift
+│   └── UserViewModel.swift
+├── Views/                    # SwiftUI components
+│   ├── PeachListView.swift
+│   ├── SettingsView.swift
+│   └── ContentView.swift
+├── Services/                 # External integrations
+│   ├── NetworkService.swift
+│   ├── WebSocketManager.swift
+│   ├── StorageService.swift
+│   └── GatewayService.swift
+├── Utilities/
+│   ├── Extensions/           # Swift extensions
+│   │   ├── String+Extensions.swift
+│   │   ├── URLSession+Extensions.swift
+│   │   └── View+Extensions.swift
+│   └── Helpers/              # Utilities
+│       ├── Logger.swift
+│       └── Constants.swift
+├── Tests/                    # Unit tests
+│   ├── NetworkServiceTests.swift
+│   ├── PeachViewModelTests.swift
+│   ├── AppStateTests.swift
+│   └── UserViewModelTests.swift
+├── Documentation/
+│   ├── ARCHITECTURE.md       # Architecture overview
+│   ├── INTEGRATION.md        # Step-by-step setup guide
+│   ├── TESTING.md           # Testing guide
+│   ├── WEBSOCKET.md         # WebSocket integration
+│   └── README.md            # This file
+```
 
-## 🏗️ Architecture
+## 🚀 Quick Start
 
-### Core Components
-- **GatewayClient** - WebSocket connection and gateway communication (URLSessionWebSocketTask)
-- **GatewayMessage** - Codable message model with JSON encoding/decoding
-- **SessionManager** - Multi-session management with agent switching ✨
-- **SessionInfo** - Session model with metadata and tracking
-- **MessageStore** - Core Data persistence and message operations ✨ NEW
-- **StoredMessage** - Message data model for local storage
-- **OpenClawManager** - High-level gateway management and session handling
-- **SubscriptionManager** - StoreKit 2 integration for freemium features
-- **FeatureManager** - Premium feature gating and entitlement management
-- **SecurityManager** - Ed25519 authentication and secure credential storage
+### Prerequisites
+- Xcode 14.0+
+- iOS 14.0+ deployment target
+- Swift 5.7+
 
-### Technology Stack
-- **SwiftUI** - Modern declarative UI framework
-- **Combine** - Reactive programming and data flow
-- **URLSessionWebSocketTask** - Native WebSocket client for gateway communication
-- **Codable** - JSON serialization with CodingKeys mapping
-- **Swift Crypto** - Ed25519 key generation and signature verification
-- **StoreKit 2** - Native subscription and in-app purchase management
-- **Core Data** - Local storage and offline capability
-
-### Testing Infrastructure
-- **XCTest** - Native Apple test framework
-- **MockWebSocketTask** - Protocol-based WebSocket mocking
-- **Dependency Injection** - Testable GatewayClient design
-- **100% Unit Test Coverage** - 34/34 tests passing
-
-## 🔐 Security
-
-- **Ed25519 Authentication** - Cryptographic device authentication
-- **Keychain Storage** - Secure credential and key management
-- **End-to-End Encryption** - All gateway communications are encrypted
-- **No Data Collection** - Privacy-first design with local data storage
-- **Biometric Protection** - Face ID/Touch ID for sensitive operations
-
-## 📱 Requirements
-
-### Runtime
-- iOS 17.0 or later
-- iPhone XS or newer (for full feature set)
-- OpenClaw gateway (self-hosted)
-- Internet connection to reach your gateway
-
-### Development
-- Xcode 26.3 or later
-- Tuist (for project generation)
-- iOS 17+ SDK
-
-## 🚀 Getting Started
-
-### 📖 Documentation
-
-Choose your starting point:
-
-- **[⚡ QUICKSTART.md](QUICKSTART.md)** — 5-minute setup guide
-- **[📦 INSTALLATION.md](INSTALLATION.md)** — Complete installation with troubleshooting
-- **[📱 OPERATIONS.md](OPERATIONS.md)** — User guide and feature reference
-- **[🧪 TESTING_PLAN.md](TESTING_PLAN.md)** — Comprehensive testing (simulator + device)
-- **[📊 TESTING.md](TESTING.md)** — Unit tests and code quality
-
-### Quick Setup (2 minutes)
-
+### 1. Clone or Copy Files
 ```bash
-# Clone repository
-git clone https://github.com/rdreilly58/momotaro-ios.git
-cd momotaro-ios
-
-# Generate Xcode project
-brew install tuist
-tuist generate
-
-# Open and run
-open Momotaro.xcworkspace
-# Select Momotaro scheme, press ▶ (Play)
+# Copy all files from MomotaroiOS-Implementation/ to your Xcode project
 ```
 
-### Full Setup with Details
+### 2. Create Project Structure
+Follow the folder structure above in Xcode (File → New → Group)
 
-For detailed step-by-step instructions including:
-- System requirements verification
-- Troubleshooting common issues
-- Configuration & setup
-- Test suite validation
+### 3. Add Files to Project
+Copy each Swift file into the corresponding group
 
-→ **See [INSTALLATION.md](INSTALLATION.md)**
-
-### Configuration
-1. Update your team identifier in project settings
-2. Configure your OpenClaw gateway URL in GatewayClient
-3. Build and run on device or simulator: `⌘B` or `⌘R`
-
-### Project Structure
-```
-momotaro-ios/
-├── Sources/Momotaro/
-│   ├── GatewayClient.swift          # WebSocket client (@MainActor)
-│   ├── GatewayMessage.swift         # Message model (Codable)
-│   ├── AASessionManager.swift       # Session management ✨
-│   ├── MessageStore.swift           # Core Data persistence ✨ NEW
-│   ├── ContentView.swift            # Main UI with session picker
-│   └── MomotaroApp.swift            # App entry point
-├── Tests/MomotaroTests/
-│   ├── GatewayClientTests.swift     # 20 unit tests ✅
-│   ├── GatewayMessageTests.swift    # 14 unit tests ✅
-│   ├── SessionTests.swift           # 20 unit tests ✅
-│   ├── MessageStoreTests.swift      # 22 unit tests ✅
-│   └── Mocks.swift                  # Mock infrastructure
-├── Project.swift                     # Tuist project definition
-├── TESTING.md                        # Testing guide
-└── README.md                         # This file
-```
-
-### Session Management
-
-**Features:**
-- ✅ Multi-session support (fetch, switch, track)
-- ✅ Last-used session history
-- ✅ Session type filtering (agent, custom)
-- ✅ Error handling & recovery
-- ✅ @MainActor safety
-- ✅ 24 comprehensive unit tests
-
-**UI:**
-- Session selector button in header (👥)
-- Current session display with icon
-- Session picker modal with descriptions
-- Active session indicator (✓)
-- Loading state during switches
-
-**SessionInfo Model:**
+### 4. Update App File
 ```swift
-struct SessionInfo: Codable, Identifiable {
-    let id: String              // Unique ID
-    let name: String            // Display name
-    let description: String     // Capabilities
-    let type: String            // "agent" | "custom"
-    var isActive: Bool          // Currently selected
-    let createdAt: Date         // Creation time
-    var lastUsedAt: Date?       // Last switch time
+@main
+struct MomotaroApp: App {
+    @StateObject var appState = AppState()
+    
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+                .environmentObject(appState)
+        }
+    }
 }
 ```
 
-### Message Persistence
+### 5. Build & Run
+```bash
+Cmd + B  # Build
+Cmd + R  # Run on simulator
+Cmd + U  # Run tests
+```
 
-**Features:**
-- ✅ Local Core Data storage (no server required)
-- ✅ Full-text search across messages
-- ✅ Per-session message organization
-- ✅ Automatic message cleanup
-- ✅ 22 comprehensive unit tests
-- ✅ In-memory store for testing
+## 🏗️ Architecture
 
-**MessageStore Operations:**
+### Data Flow
+```
+User Input (View) 
+    ↓
+ViewModel Method Called
+    ↓
+Service Layer (Network/Storage/Gateway)
+    ↓
+Models Updated
+    ↓
+ViewModel @Published Updated
+    ↓
+View Re-renders (Reactive)
+```
+
+### State Management
+All app state flows through `AppState`:
+
 ```swift
-// Save messages
-store.saveMessage(message)
-store.saveMultipleMessages([msg1, msg2])
+@EnvironmentObject var appState: AppState
 
-// Fetch messages
-let all = store.fetchAllMessages()
-let sessionMsgs = store.fetchMessages(for: "session_id")
-
-// Search
-let results = store.searchMessages(query: "hello")
-
-// Delete
-store.deleteMessage(id)
-store.deleteOldMessages(olderThan: date)
-store.deleteMessages(for: "session_id")
+// Access in any view
+Text("User: \(appState.currentUser?.username ?? "Guest")")
 ```
 
-**Core Data Model:**
+## 🌐 Network Layer
+
+### Making API Calls
+```swift
+let networkService = NetworkService()
+networkService.fetchPeaches { result in
+    switch result {
+    case .success(let peaches):
+        print("Got \(peaches.count) peaches")
+    case .failure(let error):
+        print("Error: \(error.errorDescription ?? "")")
+    }
+}
 ```
-MessageEntity
-├── id: String (indexed)
-├── content: String
-├── type: String
-├── sessionId: String? (indexed)
-├── timestamp: Date
-└── isRead: Boolean
+
+### Error Handling
+```swift
+enum NetworkError: Error {
+    case badURL
+    case requestFailed(URLError)
+    case decodingError(DecodingError)
+    case serverError(statusCode: Int)
+    case noData
+}
+```
+
+## 🔌 WebSocket Integration
+
+### Connect to Gateway
+```swift
+let wsManager = WebSocketManager(
+    gatewayURL: URL(string: "wss://gateway.openclaw.local/ws")!
+)
+wsManager.connect()
+```
+
+### Send Messages
+```swift
+let message = try GatewayMessage(
+    messageType: "command",
+    content: "action_data"
+)
+wsManager.send(message)
+```
+
+### Receive Messages
+```swift
+@ObservedObject var wsManager: WebSocketManager
+
+var body: some View {
+    if let message = wsManager.lastMessage {
+        Text("Message: \(message.content)")
+    }
+}
+```
+
+### Monitor Connection
+```swift
+switch wsManager.connectionState {
+case .connected:
+    Text("✅ Connected")
+case .connecting:
+    Text("⏳ Connecting...")
+case .error(let desc):
+    Text("❌ Error: \(desc)")
+case .reconnecting(let attempt):
+    Text("🔄 Reconnecting (\(attempt)/5)")
+case .disconnected:
+    Text("⭕ Disconnected")
+}
+```
+
+## 💾 Local Storage
+
+### Save Data
+```swift
+let storageService = StorageService()
+
+// UserDefaults
+try storageService.persist(user, forKey: "currentUser")
+
+// File system
+try storageService.writeToFile(peaches, filename: "peaches.json")
+```
+
+### Retrieve Data
+```swift
+// From UserDefaults
+let user: User? = try storageService.retrieve(forKey: "currentUser")
+
+// From file system
+let peaches: [Peach]? = try storageService.readFromFile(filename: "peaches.json")
 ```
 
 ## 🧪 Testing
 
-### Unit Test Suite ✅
-- **Status:** 80/80 tests passing (100%)
-- **Execution Time:** ~8 seconds (CI/CD ready)
-- **Coverage:**
-  - GatewayMessageTests: 14/14 (Codable, encoding/decoding, edge cases)
-  - GatewayClientTests: 20/20 (Initialization, messages, callbacks, state)
-  - SessionInfoTests: 4/4 (Model creation, equality, icon, coding)
-  - SessionManagerTests: 20/20 (Fetch, switch, lookup, error handling)
-  - MessageStoreTests: 22/22 (Save, fetch, search, delete, Core Data operations)
-
-### Running Tests
+### Run Tests
 ```bash
-# Run all unit tests
-xcodebuild test \
-  -workspace Momotaro.xcworkspace \
-  -scheme Momotaro \
-  -destination 'platform=iOS Simulator,name=iPhone 17 Pro'
-
-# Run specific test suite
-xcodebuild test \
-  -workspace Momotaro.xcworkspace \
-  -scheme Momotaro \
-  -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
-  -only-testing "MomotaroTests/GatewayMessageTests"
-
-# Run specific test
-xcodebuild test \
-  -workspace Momotaro.xcworkspace \
-  -scheme Momotaro \
-  -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
-  -only-testing "MomotaroTests/GatewayMessageTests/testRoundTripEncodingDecoding"
+Cmd + U  # Run all tests
 ```
 
-### Test Documentation
-See [TESTING.md](TESTING.md) for comprehensive testing guide, architecture, best practices, and future phases.
-
-## 📦 Build & Release
-
-### Development
-```bash
-xcodebuild -scheme Momotaro -configuration Debug build
+### Test Structure
+```swift
+class NetworkServiceTests: XCTestCase {
+    var sut: NetworkService!
+    var mockSession: MockURLSession!
+    
+    func testFetchPeachesSuccess() {
+        // Arrange
+        // Act
+        // Assert
+    }
+}
 ```
 
-### App Store Release
-```bash
-xcodebuild -scheme Momotaro -configuration Release archive -archivePath build/Momotaro.xcarchive
-xcodebuild -exportArchive -archivePath build/Momotaro.xcarchive -exportPath build/ -exportOptionsPlist ExportOptions.plist
+### Mock Objects Available
+- `MockURLSession` — Mock network responses
+- `MockNetworkService` — Mock API calls
+- `MockStorageService` — Mock persistence
+
+## 📱 Views
+
+### PeachListView
+Main view for displaying peach list with search, sort, and filter
+
+**Features:**
+- Search functionality
+- Sort by name/ripeness/color
+- Filter by criteria
+- Error states
+- Loading indicator
+
+### SettingsView
+Settings screen with @EnvironmentObject access to AppState
+
+### ContentView
+Navigation root view
+
+## 🛠️ ViewModels
+
+### AppState
+Centralized application state
+- `isLoggedIn` — Authentication status
+- `currentUser` — Current user
+- `peaches` — Peach list data
+- `networkError` — Error tracking
+- `connectionState` — WebSocket connection state
+
+### PeachViewModel
+Manage peach operations
+- `loadPeaches()` — Fetch from network
+- `sortPeaches(by:)` — Sort list
+- `filterPeaches()` — Filter by criteria
+
+### UserViewModel
+User authentication
+- `authenticate()` — Login user
+- `logout()` — Clear user
+- `changePassword()` — Update password
+
+## 📚 Documentation
+
+Read the comprehensive guides:
+
+1. **ARCHITECTURE.md** — System design and data flow
+2. **INTEGRATION.md** — Step-by-step setup instructions
+3. **TESTING.md** — Testing strategies and examples
+4. **WEBSOCKET.md** — WebSocket connection guide
+
+## ⚙️ Configuration
+
+### Update API Endpoints
+In `Services/NetworkService.swift`:
+```swift
+private let baseURL: String = "https://your-api.com"
 ```
+
+### Update WebSocket URL
+In `Services/WebSocketManager.swift`:
+```swift
+gatewayURL: URL(string: "wss://your-gateway.com/ws")!
+```
+
+### Logging
+Enable debug logging in `Utilities/Helpers/Logger.swift`
+
+## 🔐 Security Best Practices
+
+1. **Token Management**
+   - Store tokens securely (don't use UserDefaults)
+   - Implement token refresh logic
+   - Handle expired tokens gracefully
+
+2. **Network Security**
+   - Use HTTPS/WSS only
+   - Implement certificate pinning
+   - Validate SSL certificates
+
+3. **Data Protection**
+   - Encrypt sensitive data at rest
+   - Use keychain for credentials
+   - Clear sensitive data on logout
+
+## 🐛 Debugging
+
+### Enable Verbose Logging
+```swift
+Logger.log("Debug message")
+```
+
+### Monitor Network Calls
+- Use Charles Proxy
+- Check Xcode Network Link Conditioner
+- Enable URLSession logging
+
+### Debug State Changes
+- Use Xcode breakpoints
+- Print AppState changes
+- Monitor @Published updates
+
+## ⚡ Performance Optimization
+
+1. **Memory Management**
+   - Use `[weak self]` in closures
+   - Clean up timers and subscriptions
+   - Implement image caching
+
+2. **Network Optimization**
+   - Cache responses locally
+   - Implement request batching
+   - Use pagination for large lists
+
+3. **UI Performance**
+   - Lazy load images
+   - Use `.onAppear` for initial data
+   - Optimize list rendering
+
+## 🚀 Deployment
+
+### Before Release
+- [ ] Run all tests (`Cmd + U`)
+- [ ] Check code coverage
+- [ ] Profile with Instruments
+- [ ] Test on real devices
+- [ ] Update API endpoints
+- [ ] Verify certificate pinning
+- [ ] Review error handling
+- [ ] Update privacy policy
+
+### App Store Submission
+```bash
+# Archive for upload
+Product → Archive
+```
+
+## 📈 Future Enhancements
+
+- [ ] Implement Combine reactive streams
+- [ ] Add async/await support
+- [ ] Implement Redux-style state management
+- [ ] Add UI tests with XCUITest
+- [ ] Implement snapshot testing
+- [ ] Add analytics tracking
+- [ ] Support offline mode with sync
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Commit your changes: `git commit -m 'Add amazing feature'`
-4. Push to the branch: `git push origin feature/amazing-feature`
-5. Open a Pull Request
+1. Follow MVVM architecture
+2. Add unit tests for new code
+3. Update documentation
+4. Run full test suite before PR
+
+## 📖 Learning Resources
+
+- [Apple SwiftUI Documentation](https://developer.apple.com/tutorials/swiftui)
+- [MVVM Pattern Guide](https://www.raywenderlich.com/4001-mvvm-in-swift-5)
+- [Combine Framework](https://developer.apple.com/documentation/combine)
+- [URLSession Guide](https://developer.apple.com/documentation/foundation/urlsession)
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This code is provided as-is for the Momotaro-iOS project.
 
-## 🍑 About Momotaro
+## 🆘 Support
 
-Momotaro (桃太郎) is a legendary figure from Japanese folklore, known as the "Peach Boy" who was born from a giant peach. Just as Momotaro befriended animals and fought demons, this app befriends your devices and fights the complexity of AI automation.
+For issues or questions:
+1. Check documentation files
+2. Review test cases for examples
+3. Check error messages and logs
+4. Consult Apple documentation
 
-## 🔗 Links
+## 🎉 Summary
 
-- **OpenClaw Gateway**: [https://github.com/openclaw/openclaw](https://github.com/openclaw/openclaw)
-- **Website**: [https://reillydesignstudio.com](https://reillydesignstudio.com)
-- **Support**: [rdreilly2010@gmail.com](mailto:rdreilly2010@gmail.com)
+Momotaro-iOS provides a solid foundation with:
+- ✅ Clean, maintainable architecture
+- ✅ Real-time WebSocket support
+- ✅ Comprehensive error handling
+- ✅ Full unit test coverage
+- ✅ Production-ready code
+- ✅ Complete documentation
 
----
-
-*Built with ❤️ by Robert Reilly | Reilly Design Studio LLC*
+Happy coding! 🍑
