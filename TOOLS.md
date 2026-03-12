@@ -38,6 +38,43 @@ gog gmail search 'QUERY' --json | jq '.threads[] | ...'
 
 ---
 
+## PDF Extraction from Emails
+
+**Complete pipeline to read email with PDF attachment:**
+
+```bash
+# Step 1: Search for email and get thread ID
+THREAD_ID=$(gog gmail search 'subject:"YOUR_SUBJECT"' --json | jq -r '.threads[0].id')
+
+# Step 2: Read email content
+gog gmail thread get $THREAD_ID
+
+# Step 3: Download PDF attachment
+cd /tmp && gog gmail thread attachments $THREAD_ID --download --out-dir /tmp
+
+# Step 4: Extract PDF text
+pdftotext /tmp/*_*.pdf - | less
+```
+
+**Quick commands:**
+```bash
+# Get thread ID for a search
+gog gmail search 'subject:"App Store"' --json | jq -r '.threads[0].id'
+
+# Download all attachments from thread
+gog gmail thread attachments THREAD_ID --download --out-dir /tmp
+
+# Extract and read PDF
+pdftotext /tmp/FILE.pdf - | head -200
+```
+
+**Requirements:**
+- `gog` (Google CLI) — already configured
+- `jq` — for JSON parsing
+- `pdftotext` — for PDF extraction (part of poppler-utils)
+
+---
+
 ## What Goes Here
 
 Things like:
