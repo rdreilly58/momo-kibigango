@@ -300,26 +300,47 @@ This happened in Week 4:
 7. **Report to Bob:** Success summary with file list + line counts + GitHub commit link
 8. **Fallback:** If failed, retry with `model="gpt-4-turbo"`
 
-### For Large Builds (16+ files)
+### For Large Builds (16+ files) - Sequential Batching with Active Monitoring
 
-**Use Incremental Batch Approach:**
+**NEW: Sequential approach with 60-second status updates**
 
-1. **Batch 1:** Spawn Claude Code with first 4 files
-   - Monitor, verify, commit
-   - **IMPORTANT:** After each batch, momotaro (main session) must manually push to GitHub
-   - Report progress to Bob
+1. **Spawn Batch N:** Claude Code with 4-8 files
+   ```
+   sessions_spawn(runtime="subagent", model="anthropic/claude-opus-4-0", task="...")
+   ```
+   - Capture `childSessionKey` from response
+   - Report to Bob: "Batch N spawned"
+
+2. **Active 60-Second Monitoring Loop:**
+   - Every 60 seconds, send status update to Bob:
+     ```
+     ⏱️ MM:SS - BATCH N IN PROGRESS
+     Files: Checking... (would poll here if needed)
+     Status: Building [████░░░░░░]
+     ```
+   - Continue loop until subagent completes
+   - **IMPORTANT:** Send message to user every 60s even if no change
+
+3. **Completion Event Arrival:**
+   - When subagent announces completion, immediately:
+     - Push to GitHub: `git push origin main -v`
+     - Verify on GitHub
+     - Report to Bob: "✅ BATCH N COMPLETE (X files, Y lines)"
+     - Move to next batch
+
+4. **Sequential Flow:**
+   - Batch 1: Spawn → Wait complete → Push → Report
+   - Batch 2: Spawn → Wait complete → Push → Report
+   - Batch 3-N: Repeat pattern
    
-2. **Batch 2-4:** Spawn Claude Code with next batches
-   - Same monitoring/verify/commit process
-   - **After all batches complete:** Push final commits to GitHub
-   
-3. **Final Step:** Post-build cleanup
-   - Create/update README.md with feature summary
-   - Commit README: `git add README.md && git commit -m "..."`
-   - **Manual push to GitHub:** `git push origin main`
-   - **Verify on GitHub:** Visit https://github.com/rdreilly58/onigashima (check commits + files)
-   - Total time: 60-80 min (vs. 45-60 min risky single spawn)
-   - Success rate: 95%+ (vs. 50% for single large spawn)
+5. **Final Step:** Post-build cleanup
+   - Update README.md
+   - Commit + push
+   - **Update MEMORY.md with improved process**
+   - Total time: 60-80 min
+   - Success rate: 95%+
+
+**Key Improvement:** 60-second status messages keep Bob informed. Do NOT wait silently.
 
 ### Post-Build Verification Checklist
 
