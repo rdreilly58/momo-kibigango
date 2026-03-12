@@ -296,8 +296,8 @@ This happened in Week 4:
 3. **Minute 1 Check:** Has it started? Any file activity?
 4. **Minute 2-5:** Monitor file creation + line counts
 5. **Minute 5-8:** Check git status + commit message
-6. **Minute 8-10:** Verify GitHub push successful
-7. **Report to Bob:** Success summary with file list + line counts
+6. **Minute 8-10:** Verify GitHub push successful (see GitHub verification below)
+7. **Report to Bob:** Success summary with file list + line counts + GitHub commit link
 8. **Fallback:** If failed, retry with `model="gpt-4-turbo"`
 
 ### For Large Builds (16+ files)
@@ -306,12 +306,18 @@ This happened in Week 4:
 
 1. **Batch 1:** Spawn Claude Code with first 4 files
    - Monitor, verify, commit
+   - **IMPORTANT:** After each batch, momotaro (main session) must manually push to GitHub
    - Report progress to Bob
    
-2. **Batch 2:** Spawn Claude Code with next 4 files
+2. **Batch 2-4:** Spawn Claude Code with next batches
    - Same monitoring/verify/commit process
+   - **After all batches complete:** Push final commits to GitHub
    
-3. **Batch 3 & 4:** Continue batch pattern
+3. **Final Step:** Post-build cleanup
+   - Create/update README.md with feature summary
+   - Commit README: `git add README.md && git commit -m "..."`
+   - **Manual push to GitHub:** `git push origin main`
+   - **Verify on GitHub:** Visit https://github.com/rdreilly58/onigashima (check commits + files)
    - Total time: 60-80 min (vs. 45-60 min risky single spawn)
    - Success rate: 95%+ (vs. 50% for single large spawn)
 
@@ -321,9 +327,16 @@ This happened in Week 4:
 - [ ] No empty or stub files (wc -l > 50 for each)
 - [ ] Git status shows changes committed
 - [ ] git log -1 shows actual commit
-- [ ] git push origin main succeeds
-- [ ] GitHub.com reflects new commit
+- [ ] git push origin main succeeds (shows "Updating XXX...XXX")
+- [ ] Verify GitHub push succeeded:
+  ```bash
+  # Check if commit is on GitHub (wait 10-15s for GitHub caching)
+  git log -1 --format="%H %s"  # Get local commit hash
+  # Visit: https://github.com/rdreilly58/onigashima/commits/main
+  # Or check specific file: https://github.com/rdreilly58/onigashima/raw/main/FILE
+  ```
 - [ ] Spot-check 2-3 large files for real code (not stubs)
+- [ ] Report to Bob: Files confirmed on GitHub
 
 ### Model Selection Strategy
 
@@ -336,6 +349,35 @@ This happened in Week 4:
 
 ---
 
+## Critical: GitHub Push Requirement for Subagents
+
+**⚠️ Important:** Claude Code subagents may claim files are "committed and pushed" but NOT actually push to GitHub.
+
+**Solution:** Subagents commit locally, but **MOMOTARO (main session) handles all GitHub pushes.**
+
+**For each build:**
+1. Claude Code spawned: Creates files, commits locally
+2. Subagent completes: Reports "committed" status
+3. **Momotaro must manually:**
+   ```bash
+   cd /Users/rreilly/.openclaw/workspace/onigashima
+   git push origin main -v
+   # Verify: "POST git-receive-pack" and "updating..." message
+   ```
+4. **Verify on GitHub:**
+   - Wait 10-15 seconds for GitHub caching
+   - Visit: https://github.com/rdreilly58/onigashima/commits/main
+   - Look for latest commit
+   - Check specific files are visible
+
+**Why this matters:**
+- Subagents can't reliably push (auth/network issues)
+- Commits can be local-only (not on GitHub)
+- Bob needs confirmation files are actually on GitHub
+- Manual push is faster + more reliable than delegating
+
+---
+
 ## Summary: Standards Locked In
 
 ✅ **Claude Code is the default for all coding tasks**
@@ -343,5 +385,7 @@ This happened in Week 4:
 ✅ **Large tasks use incremental batching (4 files per spawn)**
 ✅ **Verification is mandatory (shell output required, not summaries)**
 ✅ **No empty stub files accepted (minimum 50 lines per file)**
+✅ **Subagents commit locally, MOMOTARO pushes to GitHub + verifies**
+✅ **After push, verify on GitHub before reporting complete**
 
 **This is now the standard process for all Claude Code builds.** 🍑
