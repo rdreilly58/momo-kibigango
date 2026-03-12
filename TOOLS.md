@@ -75,6 +75,14 @@ pdftotext /tmp/FILE.pdf - | head -200
 
 ---
 
+## Location
+
+**Default location:** Reston, VA
+
+## Email
+
+**Default email:** rdreilly2010@gmail.com
+
 ## What Goes Here
 
 Things like:
