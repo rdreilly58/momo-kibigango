@@ -110,4 +110,37 @@ Skills are shared. Your setup is yours. Keeping them apart means you can update 
 
 ---
 
+## AA Meetings
+
+**Bob's regular AA meetings:**
+
+| Meeting | Day/Time | Notes |
+|---------|----------|-------|
+| **GMG AA Meeting** | Daily, 8:00 AM EDT | Calendar: "GMG AA Meeting" (recurring daily) |
+| **Tech host** | Thu 8:00 AM EDT | Bob hosts tech for GMG AA |
+| **Life is Beautiful AA** | Sat 10:00 AM EDT | Calendar: "Life is Beautiful AA Meeting" |
+| **St Annes AA** | Sun 7:00 PM EDT | Calendar: "St Annes AA meeting" |
+
+**When Bob says "start my AA meeting":**
+1. Search calendar for entries with "AA" in title
+2. Find today's upcoming AA meeting (use `gog calendar list`)
+3. Extract Zoom link from event description (gog calendar get EVENT_ID)
+4. Open Zoom link in browser
+5. Remember: This is a recurring pattern, repeat for future requests
+
+**Zoom Links (extract from calendar event description):**
+- GMG AA Meeting: [need to extract from event]
+- Life is Beautiful: [need to extract from event]
+- St Annes AA: [need to extract from event]
+
+---
+
 Add whatever helps you do your job. This is your cheat sheet.
+
+## Zoom Meeting Links (Extracted from Calendar)
+
+### GMG AA Meeting
+- **Zoom Link:** https://us06web.zoom.us/j/89378046012?pwd=UmRzSDZKREQ4bTcrb2ZSUHVBK2trUT09
+- **Meeting ID:** 893 7804 6012
+- **Time:** Daily 8:00-9:00 AM EDT
+- **When requested:** Open this link automatically
