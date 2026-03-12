@@ -1,0 +1,5 @@
+Subject: Stripe Environment Setup Guide
+
+To: rdreilly2010@gmail.com
+
+Attached is your Stripe Environment Setup Guide with all the configuration details for ReillyDesignStudio. The PDF includes step-by-step instructions for setting up STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, Google OAuth, Analytics, and Email configuration in AWS Amplify.

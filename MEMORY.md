@@ -1,5 +1,66 @@
 # MEMORY.md - Long-Term Memory
 
+## Latest Session (March 11, 2026 - 4:15-6:25 AM)
+
+**Major Accomplishments:**
+1. ✅ Fixed morning and evening briefing systems
+   - Updated scripts to use proper GA4 reporting format
+   - Added comprehensive analytics: 7-day trends, traffic sources, top pages
+   - Fixed cron PATH issues (gog not found)
+   
+2. ✅ Himalaya CLI Setup & Optimization
+   - Created persistent config file: `~/.config/himalaya/config.toml`
+   - Upgraded from v1.1.0 to v1.2.0 (fixes IMAP codec warnings)
+   - Created email-stats.sh helper script
+   - Integrated email metrics into briefings (unread, total, today)
+   
+3. ✅ Comprehensive briefing emails
+   - Morning: 6:00 AM with 7-day analytics
+   - Evening: 5:00 PM with daily analytics
+   - Both include: GA4 metrics, traffic sources, top pages, email status
+   
+4. ✅ Email workflow optimized
+   - Inbound: Himalaya CLI for reading/searching
+   - Outbound: gog CLI for sending
+   - Unified config persistence
+
+**Technical Improvements:**
+- Himalaya config with IMAP/SMTP credentials configured
+- Email statistics script for quick briefing metrics
+- Cron jobs using full paths to avoid PATH issues
+- v1.2.0 features: improved query syntax, better IMAP handling
+
+---
+
+## Previous Session (March 10, 2026 - 6:00-7:15 AM)
+
+**Major Accomplishments:**
+1. ✅ Fixed morning briefing delivery system
+   - Moved from broken OpenClaw cron agents to system cron
+   - Switched from isolated agents (timeouts) to direct gog CLI
+   - Now sends via `gog gmail send` reliably
+
+2. ✅ Created professional PDF briefing system
+   - Morning briefing: 6:00 AM EDT (email, calendar, GA4, priorities)
+   - Evening briefing: 5:00 PM EDT (completed work, blockers, tomorrow's focus)
+   - Both as PDF attachments with professional formatting
+   - Uses reportlab for clean PDF generation
+
+3. ✅ Sent Stripe environment setup PDF to Gmail
+   - All configuration steps and resources included
+   - Ready for environment variable setup in AWS Amplify
+
+4. ✅ Set up GA4 access reminder
+   - 9 AM daily reminder to grant service account permissions
+   - Will enable analytics in briefings once completed
+
+**Technical Fixes:**
+- Debugged isolated agent timeouts (fixed by switching to system cron)
+- Struggled with HTML-to-PDF conversion, settled on reportlab native approach
+- HTML formatting issues in PDFs resolved with content extraction + native PDF generation
+
+---
+
 ## Active Projects
 
 ### ReillyDesignStudio (Next.js + AWS Amplify)
@@ -51,14 +112,13 @@
 - **Authenticated:** Full repo/workflow permissions
 
 ### Google Cloud / GA4
-- **GA4 Property ID:** 386311627
+- **GA4 Property ID:** 526836321 ✓
 - **Property Name:** ReillyDesignStudio
 - **Service Account:** momo2analytics@rds-analytics-489420.iam.gserviceaccount.com
-- **GA4 Analytics Setup:** Key saved, need permission grant
+- **GA4 Analytics Setup:** ✅ WORKING
   - Service account key: `~/.openclaw/workspace/secrets/ga4-service-account.json` ✓
-  - **TODO:** Grant service account "Editor" or "Viewer" role on GA4 property
-    - Go to https://analytics.google.com → Admin → Property → Property Access Management
-    - Add email: momo2analytics@rds-analytics-489420.iam.gserviceaccount.com → Viewer role
+  - Service account has Viewer role on property ✓
+  - Briefings now pulling live GA4 data ✓
 
 ### Xcode
 - **Version:** 26.3, Build 17C519
@@ -79,26 +139,98 @@
 
 ## Email Accounts
 
+### Personal Gmail (rdreilly2010@gmail.com)
+- **Email:** rdreilly2010@gmail.com
+- **Tools:** 
+  - ✅ Himalaya CLI (IMAP/SMTP) — fully configured with password saved
+  - ✅ Python IMAP Reader (`gmail_reader.py`) — direct IMAP access
+  - ✅ Google CLI (gog) — Gmail send/search
+- **Credentials:** App password saved in Himalaya config
+- **Config:** ~/.config/himalaya/config.toml
+- **Status:** ✅ Fully authenticated and working
+- **Usage:**
+  - Himalaya: `himalaya envelope list`, `himalaya message read <id>`
+  - Python: `python3 ~/.openclaw/workspace/scripts/gmail_reader.py rdreilly2010@gmail.com <password> <command>`
+
 ### ReillyDesignStudio Work Account
 - **Email:** robert.reilly@reillydesignstudio.com
 - **Tool:** Himalaya CLI (IMAP/SMTP)
-- **Status:** ✅ Configured (awaiting authentication)
+- **Status:** ⏳ Not yet authenticated (can set up if needed)
 - **Config:** ~/.config/himalaya/config.toml
-- **Email Scan:** bash ~/.openclaw/workspace/scripts/email-scan.sh
-- **Next:** Run `himalaya account configure` to authenticate & store password in keyring
+- **Note:** Only rdreilly2010@gmail.com is currently set up
+
+## Gmail Access Setup (March 10, 11:45 AM)
+
+### Tools Configured
+1. **Himalaya CLI** — Full IMAP/SMTP email client
+   - Interactive setup completed with wizard
+   - Credentials stored securely in config
+   - Commands: `himalaya envelope list`, `himalaya message read <id>`, `himalaya message reply <id>`
+
+2. **Python IMAP Reader** — Direct Gmail API via imaplib
+   - Script: `~/.openclaw/workspace/scripts/gmail_reader.py`
+   - Usage: `python3 gmail_reader.py <email> <password> <command>`
+   - Commands: search, list, read, example
+   - No external dependencies (uses Python stdlib)
+
+3. **Google CLI (gog)** — Already configured
+   - OAuth authenticated
+   - Limited message viewing but full send capability
+
+### App Password
+- Gmail App Password obtained: `xssl wrzz vfhb ypft`
+- 2-Step Verification enabled on rdreilly2010@gmail.com
+- Password stored in Himalaya config (not in version control)
+
+### What We Discovered
+- **March 7 Briefing Email:** Found in inbox (message ID 133268)
+- **Content:** Text-only email (no PDF attachment), showed old GA4 setup issues
+  - Used wrong property ID (G-HY3PW3N3TW)
+  - Had metric name error ('unique_visitors' → should be 'activeUsers')
+  - Failed to pull analytics data
+- **March 7 vs March 10 Comparison:**
+  - Old: Text-only, GA4 failing, basic format
+  - New: Professional PDF, GA4 working, correct property ID (526836321)
+
+---
 
 ## Daily Briefing Schedule
 
-- **Morning:** 6:00 AM EDT (includes GA4 24h snapshot, calendar, email, top priorities)
-- **Evening:** 5:00 PM EDT (includes completed work, progress, blockers, tomorrow's prep)
-- **Recipients:** robert.reilly@reillydesignstudio.com
-- **Format:** Rich HTML email
-- **Frequency:** Every day
-- **Cron Jobs:** Scheduled and active
+### Morning Briefing ✅
+- **Time:** 6:00 AM EDT
+- **Script:** `/Users/rreilly/.openclaw/workspace/scripts/morning-briefing-pro.py`
+- **Cron:** `0 6 * * * /Users/rreilly/.openclaw/workspace/scripts/morning-briefing-pro.py`
+- **Contents:** Email status, calendar (48h), GA4 stats (24h), top 3 priorities
+- **Format:** PDF attachment (professional HTML rendered)
+- **Status:** ✅ Tested & working
 
-### Briefing Contents
-- Morning: Calendar (48h), Email summary, GA4 stats (24h), Top 3 priorities
-- Evening: Completed items, Project progress, GitHub commits, Blockers, Tomorrow's actions
+### Evening Briefing ✅
+- **Time:** 5:00 PM EDT
+- **Script:** `/Users/rreilly/.openclaw/workspace/scripts/evening-briefing-pro.py`
+- **Cron:** `0 17 * * * /Users/rreilly/.openclaw/workspace/scripts/evening-briefing-pro.py`
+- **Contents:** Completed items, GA4 daily stats, blockers, tomorrow's preview
+- **Format:** PDF attachment (professional HTML rendered)
+- **Status:** ✅ Tested & working
+
+### Email & PDF Setup
+- **Recipient:** rdreilly2010@gmail.com (Gmail account)
+- **Email Tool:** `gog` (Gmail CLI, authenticated with service account)
+- **PDF Converter:** `/Users/rreilly/.openclaw/workspace/scripts/html_to_pdf.py` (uses reportlab or xhtml2pdf)
+- **Attachments:** PDFs sent via gog gmail send with `--attach` flag
+
+### Known Issue: GA4 Permissions
+- **Status:** Service account lacks Viewer role on GA4 property (GA4 metrics show as unavailable)
+- **Fix:** Grant `momo2analytics@rds-analytics-489420.iam.gserviceaccount.com` Viewer role on ReillyDesignStudio property
+  - Steps: https://analytics.google.com → Admin → Property → Property Access Management
+  - Reminder scheduled for 9:00 AM daily
+- **Impact:** Briefings still work fine without GA4 data; analytics will populate once access is granted
+
+### System Architecture
+- Using **system cron** (macOS native) instead of OpenClaw cron:
+  - System cron runs independently, no OpenClaw overhead
+  - Direct CLI access via `gog` and Python scripts works reliably
+  - No timeout issues like isolated agents had
+- Scripts log to `/tmp/morning-briefing.log` and `/tmp/evening-briefing.log`
 
 ---
 

@@ -1,0 +1,143 @@
+<h1 id="stripe-integration-setup-guide">Stripe Integration Setup
+Guide</h1>
+<h2 id="deployment-status">Deployment Status ✅</h2>
+<p><strong>Website:</strong> https://dev.d24p2wkrfuex3c.amplifyapp.com
+<strong>Status:</strong> Rebuilt and deployed to AWS Amplify
+<strong>Last Deploy:</strong> March 10, 2026</p>
+<h2 id="environment-variables-needed">Environment Variables Needed</h2>
+<h3 id="stripe-configuration-critical">1. Stripe Configuration ⭐
+CRITICAL</h3>
+<p>These enable payment processing and webhooks.</p>
+<pre><code>STRIPE_SECRET_KEY
+  └─ Get from: https://dashboard.stripe.com/apikeys
+  └─ Label: &quot;Restricted API Keys&quot; or &quot;Secret Key&quot;
+  └─ Format: sk_live_... (production) or sk_test_... (testing)
+  └─ Permissions: Needs read/write on payment intents, customers, invoices
+
+STRIPE_WEBHOOK_SECRET
+  └─ Get from: https://dashboard.stripe.com/webhooks
+  └─ Create endpoint: https://yourdomain.com/api/stripe/webhook
+  └─ Format: whsec_... 
+  └─ Events: payment_intent.succeeded, charge.refunded, invoice.*</code></pre>
+<h3 id="authentication-google-oauth">2. Authentication (Google
+OAuth)</h3>
+<pre><code>GOOGLE_CLIENT_ID
+  └─ Get from: https://console.cloud.google.com/
+  └─ Project: ReillyDesignStudio or similar
+  └─ OAuth 2.0 Client ID (Web Application)
+
+GOOGLE_CLIENT_SECRET
+  └─ From same OAuth credential
+
+NEXTAUTH_URL
+  └─ Set to: https://dev.d24p2wkrfuex3c.amplifyapp.com
+  └─ Or custom domain when ready</code></pre>
+<h3 id="analytics-tracking">3. Analytics &amp; Tracking</h3>
+<pre><code>NEXT_PUBLIC_GA_MEASUREMENT_ID
+  └─ Get from: https://analytics.google.com
+  └─ Property: ReillyDesignStudio (526836321)
+  └─ Format: G-XXXXXXXXXX
+
+NEXT_PUBLIC_CF_BEACON_TOKEN
+  └─ Cloudflare Web Analytics token
+  └─ Get from: Cloudflare dashboard
+  └─ (Optional, remove if not used)
+
+NEXT_PUBLIC_SITE_URL
+  └─ Set to: https://dev.d24p2wkrfuex3c.amplifyapp.com
+  └─ Or your production domain</code></pre>
+<h3 id="email-configuration-smtp">4. Email Configuration (SMTP)</h3>
+<pre><code>SMTP_HOST
+  └─ Your email server (e.g., smtp.gmail.com)
+
+SMTP_PORT
+  └─ Usually 587 (TLS) or 465 (SSL)
+
+SMTP_USER
+  └─ Your email address
+
+SMTP_PASS
+  └─ Email password or app-specific password</code></pre>
+<h2 id="how-to-set-these-in-aws-amplify">How to Set These in AWS
+Amplify</h2>
+<h3 id="step-1-open-aws-amplify-console">Step 1: Open AWS Amplify
+Console</h3>
+<p>https://console.aws.amazon.com/amplifyui</p>
+<h3 id="step-2-select-your-app">Step 2: Select Your App</h3>
+<ul>
+<li>Find “reillydesignstudio”</li>
+<li>Click to open</li>
+</ul>
+<h3 id="step-3-navigate-to-environment-variables">Step 3: Navigate to
+Environment Variables</h3>
+<ul>
+<li>Left sidebar → <strong>Deployment settings</strong></li>
+<li>Under “Environment variables”</li>
+<li>Click <strong>Add environment variable</strong></li>
+</ul>
+<h3 id="step-4-add-variables">Step 4: Add Variables</h3>
+<p>For each variable above: 1. Enter <strong>Key</strong> (e.g.,
+STRIPE_SECRET_KEY) 2. Enter <strong>Value</strong> (your actual key) 3.
+Choose scope: <strong>All branches</strong> or specific branch 4. Click
+<strong>Save</strong></p>
+<p><strong>Important:</strong> Variables starting with
+<code>NEXT_PUBLIC_</code> are visible in frontend code (safe for public
+values like IDs). Others are backend-only (safe for secrets like
+keys).</p>
+<h2 id="testing-stripe-integration">Testing Stripe Integration</h2>
+<h3 id="verify-webhook-endpoint">1. Verify Webhook Endpoint</h3>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check if /api/stripe/webhook is accessible</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> https://dev.d24p2wkrfuex3c.amplifyapp.com/api/stripe/webhook</span></code></pre></div>
+<h3 id="test-with-stripe-test-mode">2. Test with Stripe Test Mode</h3>
+<ul>
+<li>Go to: https://dashboard.stripe.com/test/dashboard</li>
+<li>Use test card: 4242 4242 4242 4242</li>
+<li>Expiry: Any future date</li>
+<li>CVC: Any 3 digits</li>
+</ul>
+<h3 id="monitor-logs">3. Monitor Logs</h3>
+<p>AWS CloudWatch → Amplify logs → Look for Stripe webhook calls</p>
+<h2 id="deployment-checklist">Deployment Checklist</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" />STRIPE_SECRET_KEY set in
+Amplify</label></li>
+<li><label><input type="checkbox" />STRIPE_WEBHOOK_SECRET configured in
+Amplify</label></li>
+<li><label><input type="checkbox" />Stripe webhook endpoint pointing to
+/api/stripe/webhook</label></li>
+<li><label><input type="checkbox" />GOOGLE_CLIENT_ID and SECRET
+set</label></li>
+<li><label><input type="checkbox" />NEXTAUTH_URL set</label></li>
+<li><label><input type="checkbox" />GA4 measurement ID set</label></li>
+<li><label><input type="checkbox" />SMTP credentials set (if email
+enabled)</label></li>
+<li><label><input type="checkbox" />Test payment with Stripe test
+card</label></li>
+<li><label><input type="checkbox" />Verify webhook logs in Stripe
+dashboard</label></li>
+<li><label><input type="checkbox" />Deploy to production with live
+Stripe keys</label></li>
+</ul>
+<h2 id="files-using-stripe">Files Using Stripe</h2>
+<pre><code>src/app/api/invoices/[id]/pdf/route.ts      — PDF generation
+src/app/api/invoices/[id]/void/route.ts     — Invoice voiding
+src/app/api/invoices/[id]/remind/route.ts   — Payment reminders
+src/app/api/stripe/webhook/route.ts         — Webhook handler
+src/app/shop/checkout/page.tsx              — Checkout flow
+src/app/pay/[invoiceId]/page.tsx            — Payment page</code></pre>
+<h2 id="custom-domain-setup-when-ready">Custom Domain Setup (When
+Ready)</h2>
+<ol type="1">
+<li>Go to Amplify → Domain management</li>
+<li>Connect your custom domain</li>
+<li>Update NEXTAUTH_URL and NEXT_PUBLIC_SITE_URL</li>
+<li>Update Stripe webhook URL</li>
+<li>Redeploy</li>
+</ol>
+<h2 id="support">Support</h2>
+<ul>
+<li>Stripe docs: https://stripe.com/docs</li>
+<li>NextAuth docs: https://next-auth.js.org</li>
+<li>AWS Amplify docs: https://docs.amplify.aws</li>
+</ul>

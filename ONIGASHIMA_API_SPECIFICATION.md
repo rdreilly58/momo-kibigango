@@ -1,7 +1,14 @@
 # ONIGASHIMA API SPECIFICATION
 
+## REVISED: Bootstrap Solo Development (6 Core Endpoints)
+
+**Phase 1 (Weeks 1-4):** Minimal API for MVP  
+**Phase 2 (Weeks 5-12):** Add backups, updates, support endpoints  
+
+---
+
 ## Overview
-This document outlines the API endpoints for the Onigashima project, defined according to the OpenAPI 3.0 specification.
+This document outlines the MINIMAL API endpoints for the Onigashima MVP (Phase 1), focused on core messaging and pairing functionality.
 
 ### Authentication Endpoints
 - **POST** /register

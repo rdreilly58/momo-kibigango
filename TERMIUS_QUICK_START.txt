@@ -1,0 +1,66 @@
+================================================================================
+TERMIUS SETUP - QUICK START
+================================================================================
+
+✅ COMPLETED ON MAC MINI:
+- SSH key generated: id_ed25519_termius
+- Public key added to ~/.ssh/authorized_keys
+- Username: rreilly
+- Tailscale IP: 100.114.47.70
+
+================================================================================
+
+📱 YOUR NEXT STEPS (on iPhone):
+
+1. Install Termius from App Store ($4.99)
+
+2. Open Termius and create new host:
+   - Label: "Mac mini"
+   - Hostname: 100.114.47.70
+   - Username: rreilly
+   - Port: 22
+   - Authentication: KEY (not password)
+
+3. Create new SSH key in Termius:
+   - Name: "termius"
+   - PASTE THIS PRIVATE KEY BELOW:
+
+================================================================================
+SSH PRIVATE KEY (Copy everything between the lines)
+================================================================================
+-----BEGIN OPENSSH PRIVATE KEY-----
+b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtzc2gtZW
+QyNTUxOQAAACAOomMyf4yWP0DZErJB6Xy2rQ6FrSaXgO18SIx2VBb2lAAAAJA/gyFxP4Mh
+cQAAAAtzc2gtZWQyNTUxOQAAACAOomMyf4yWP0DZErJB6Xy2rQ6FrSaXgO18SIx2VBb2lA
+AAAEDv4CREEWOt0/kuxcCYJGZKDFMypT6qOJ/p+An0Y35ccA6iYzJ/jJY/QNkSskHpfLat
+DoWtJpeA7XxIjHZUFvaUAAAAB3Rlcm1pdXMBAgMEBQY=
+-----END OPENSSH PRIVATE KEY-----
+
+================================================================================
+
+4. Save the host and select the SSH key
+
+5. Tap "Mac mini" host and connect
+
+6. You should see:
+   rreilly@bobs-m4-mac-mini ~ %
+
+THAT'S IT! You're connected! 🎉
+
+================================================================================
+TROUBLESHOOTING
+================================================================================
+
+"Connection refused":
+- Check: tailscale status (on Mac)
+- Check: Tailscale app on iPhone shows "Connected"
+
+"Permission denied":
+- Verify SSH key was pasted completely
+- No extra spaces or missing lines
+
+"Host not found":
+- Check IP: tailscale ip -4 (should be 100.114.47.70)
+- Check iPhone Tailscale is connected
+
+================================================================================
