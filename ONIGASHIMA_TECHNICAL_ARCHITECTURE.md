@@ -1,9 +1,20 @@
 # ONIGASHIMA TECHNICAL ARCHITECTURE
 
+## REVISED: Bootstrap Solo Development
+
+**Timeline:** 4 weeks solo build → 8-12 weeks contractor acceleration → public launch  
+**Philosophy:** Lean MVP first (prove it works) → contractors polish (scale and features)
+
+---
+
 ## System Design
 
 ### Overview
 The Onigashima system is designed to enable seamless communication between an iPhone and a Mac, with secure cloud functionalities for authentication, backup, updates, and support. It prioritizes ease of use for non-technical users while ensuring robust security and scalability.
+
+**Phase 1 (Solo, Weeks 1-4):** Core messaging only (6 API endpoints, 4 installer screens, QR pairing)  
+**Phase 2 (Contractors, Weeks 5-12):** Backups, updates, cloud infrastructure, professional polish  
+**Phase 3 (Growth):** Hardware, advanced features, market expansion
 
 ```
 ┌─────────────┐                          ┌──────────────┐
