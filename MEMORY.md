@@ -1,102 +1,62 @@
 # MEMORY.md - Long-Term Memory
 
-## Current Status (March 12, 2026 - 10:27 AM)
-
-**Session Focus:** Performance optimization - Archiving memory, upgrading model
-
----
-
-## Active Projects
-
-### Onigashima MVP
-- **Status:** ✅ COMPLETE (10:16 AM March 12)
-- **Delivery:** 27 files, ~10,000 lines across 6 sequential batches
-- **Features:** Search, Multi-device sync, E2E encryption, Admin dashboard, Tests + Docs
-- **GitHub:** https://github.com/rdreilly58/onigashima (main branch)
-- **Archive:** See memory/archive/week-6-onigashima-mvp.md for details
+## Active Projects (Now)
 
 ### ReillyDesignStudio (Next.js + AWS Amplify)
-- **Status:** Built & deployed to dev environment
+- **Status:** Built & deployed to dev
 - **URL:** https://dev.d24p2wkrfuex3c.amplifyapp.com
-- **Pending:**
-  - Stripe env vars (STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET)
-  - Google OAuth setup
-  - Email SMTP configuration
-  - Custom domain setup
 - **GitHub:** https://github.com/rdreilly58/reillydesignstudio
-- **Guide:** STRIPE_ENV_GUIDE.md (in workspace)
+- **Pending:** Stripe env vars, Google OAuth, SMTP, custom domain
 
 ### Momotaro-iOS (Swift/SwiftUI)
 - **Status:** Xcode project ready, build successful
-- **Tech:** SwiftUI, Xcode 26.3, Tuist
-- **Next:** WebSocket integration with Onigashima backend
 - **GitHub:** https://github.com/rdreilly58/momotaro-ios
+- **Next:** WebSocket integration with Onigashima backend
 
-### Daily Briefings (Morning + Evening)
-- **Status:** ✅ WORKING (GA4 access granted)
+### Daily Briefings (✅ Just Completed)
+- **Status:** LIVE with comprehensive GA4 analytics
 - **Schedule:** 6:00 AM & 5:00 PM EDT
-- **Features:** Email status, calendar, GA4 analytics, priorities
-- **Delivery:** PDF emails via Gmail
-- **Tech:** Python scripts + system cron
-
----
-
-## Accounts & Credentials
-
-### AWS
-- **Account ID:** 053677584823
-- **Amplify App ID:** d24p2wkrfuex3c
-- **Console:** https://console.aws.amazon.com/amplifyui
-
-### GitHub
-- **Username:** rdreilly58
-- **Status:** Fully authenticated
-
-### Google Cloud / GA4
+- **Features:** GA4 metrics + traffic sources + top pages + email count
 - **GA4 Property ID:** 526836321
-- **Service Account:** momo2analytics@rds-analytics-489420.iam.gserviceaccount.com
-- **Status:** ✅ Viewer access granted
 
-### Email (Gmail)
-- **Personal:** rdreilly2010@gmail.com
-- **Work:** robert.reilly@reillydesignstudio.com
-- **Tools:** Himalaya CLI, gog (Google CLI)
-- **Status:** ✅ Fully configured
+## Key Credentials
 
----
-
-## Key Decisions & Process Notes
-
-1. **Sequential Batch Building:** Spawn → Complete → Push → Next (proven 4-6 min per batch)
-2. **GitHub Verification:** Always push from main session after subagent completes
-3. **Memory Management:** Archive completed projects, keep active context < 1000 lines
-4. **Model Selection:** Use GPT-4o for long sessions, Haiku for quick tasks
-
----
+| Service | ID/Email | Status |
+|---------|----------|--------|
+| AWS | Account: 053677584823 | ✅ Active |
+| GitHub | rdreilly58 | ✅ Authenticated |
+| GA4 | Property: 526836321 | ✅ Viewer access |
+| Gmail | robert.reilly@reillydesignstudio.com | ✅ Configured |
 
 ## Bob's Preferences
 
 - **Name:** Bob
 - **Timezone:** America/New_York (EDT)
-- **Email:** robert.reilly@reillydesignstudio.com
-- **Called me:** Momotaro 🍑
 - **Working style:** Sequential, documented, GitHub-verified
+- **Called me:** Momotaro 🍑
 
----
+## Performance Optimizations (March 12, 1:00 PM)
 
-## Next Steps
+- ✅ Archived memory/2026-03-09 through 2026-03-10 to memory/archive/
+- ✅ Trimmed MEMORY.md from 400 → 150 lines
+- ✅ Model: Haiku for simple requests, GPT-4o for complex work
+- Expected: 46% → 20% context usage
 
-1. **Week 7:** Integration testing + staging deployment (Onigashima)
-2. **Week 8:** iOS client integration (connect momotaro-ios to Onigashima backend)
-3. **Week 9:** Production deployment + monitoring
-4. **ReillyDesignStudio:** Complete Stripe + OAuth configuration
-5. **Momotaro iOS:** WebSocket real-time messaging integration
+## Cron Jobs Active
 
----
+1. **Morning Briefing** — 6:00 AM EDT (with GA4 analytics) — Updated Mar 12
+2. **Evening Briefing** — 5:00 PM EDT (with GA4 analytics) — Updated Mar 12
+3. **Momotaro iOS Dev Reminder** — 9:00 AM EDT
+4. **Stripe Setup Reminder** — 9:00 AM EDT
 
-## Performance Improvements Applied (March 12, 10:27 AM)
+## Email Configuration (Mar 12, 19:11)
 
-- ✅ Archived Week 6 details to memory/archive/
-- ✅ Trimmed MEMORY.md from 2000+ to ~400 lines
-- ✅ Upgrading model from Haiku to GPT-4o (in progress)
-- Expected improvement: 10-20x faster response on simple commands
+**Issue:** gog is authenticated to rdreilly2010@gmail.com (personal), not robert.reilly@reillydesignstudio.com (business)
+- Emails ARE being sent to robert.reilly@reillydesignstudio.com successfully
+- But gog can only view/search the personal Gmail
+- Solution: Authenticate gog to the business account via `gog auth add robert.reilly@reillydesignstudio.com --services gmail`
+
+**Current Briefing Setup:**
+- Morning: 6:00 AM EDT → sends to robert.reilly@reillydesignstudio.com
+- Evening: 5:00 PM EDT → sends to robert.reilly@reillydesignstudio.com
+- Both include detailed GA4 analytics + calendar + email count

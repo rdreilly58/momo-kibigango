@@ -15,8 +15,19 @@ source ~/.openclaw/workspace/config/briefing.env 2>/dev/null || {
   exit 1
 }
 
+# Fetch live data
+BRIEFING_DATA=$(python3 "$SCRIPT_DIR/scripts/populate-briefing.py" 2>/dev/null || echo '{"ga4":{"sessions":"--","users":"--","bounce":"--","html":"","sources_html":"","pages_html":""},"gmail":{"unread":"--","flagged":"--"}}')
+GA4_SESSIONS=$(echo "$BRIEFING_DATA" | jq -r '.ga4.sessions // "--"')
+GA4_USERS=$(echo "$BRIEFING_DATA" | jq -r '.ga4.users // "--"')
+GA4_BOUNCE=$(echo "$BRIEFING_DATA" | jq -r '.ga4.bounce // "--"')
+GA4_HTML=$(echo "$BRIEFING_DATA" | jq -r '.ga4.html // ""')
+GA4_SOURCES_HTML=$(echo "$BRIEFING_DATA" | jq -r '.ga4.sources_html // ""')
+GA4_PAGES_HTML=$(echo "$BRIEFING_DATA" | jq -r '.ga4.pages_html // ""')
+GMAIL_UNREAD=$(echo "$BRIEFING_DATA" | jq -r '.gmail.unread // "--"')
+GMAIL_FLAGGED=$(echo "$BRIEFING_DATA" | jq -r '.gmail.flagged // "--"')
+
 # Create HTML content
-cat > /tmp/morning-briefing.html << 'EOF'
+cat > /tmp/morning-briefing.html << EOF
 <!DOCTYPE html>
 <html>
 <head>
@@ -31,6 +42,15 @@ cat > /tmp/morning-briefing.html << 'EOF'
         .time { color: #999; font-size: 12px; }
         .stat { display: inline-block; background: white; padding: 10px 15px; margin: 5px 5px 5px 0; border-radius: 4px; font-weight: bold; }
         .priority { background: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; margin-bottom: 15px; border-radius: 4px; }
+        .metric-item { padding: 8px 0; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        .metric-item:last-child { border-bottom: none; }
+        .metric-label { flex: 1; }
+        .metric-value { font-weight: bold; color: #667eea; min-width: 60px; text-align: right; }
+        .metric-change { color: #28a745; font-size: 12px; min-width: 80px; text-align: right; }
+        .source-item { padding: 8px 0; border-bottom: 1px solid #eee; font-size: 13px; }
+        .source-item:last-child { border-bottom: none; }
+        .page-item { padding: 8px 0; border-bottom: 1px solid #eee; font-size: 13px; }
+        .page-item:last-child { border-bottom: none; }
         .footer { text-align: center; color: #999; font-size: 12px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; }
     </style>
 </head>
@@ -56,16 +76,15 @@ cat > /tmp/morning-briefing.html << 'EOF'
 
         <div class="section">
             <h2>📧 Email Activity</h2>
-            <div class="stat" id="unread">Loading...</div>
-            <div class="stat" id="flagged">Loading...</div>
+            <div class="stat">Unread: <strong>$GMAIL_UNREAD</strong></div>
+            <div class="stat">Flagged: <strong>$GMAIL_FLAGGED</strong></div>
         </div>
 
-        <div class="section">
-            <h2>📈 GA4 Analytics (Last 24h)</h2>
-            <div class="stat">Sessions: <strong id="ga4-sessions">--</strong></div>
-            <div class="stat">Users: <strong id="ga4-users">--</strong></div>
-            <div class="stat">Bounce Rate: <strong id="ga4-bounce">--</strong>%</div>
-        </div>
+        $GA4_HTML
+        
+        $GA4_SOURCES_HTML
+        
+        $GA4_PAGES_HTML
 
         <div class="section">
             <h2>🎯 Top Priorities</h2>
@@ -76,14 +95,9 @@ cat > /tmp/morning-briefing.html << 'EOF'
 
         <div class="footer">
             <p>🍑 Momotaro Daily Briefing System</p>
-            <p><small>Generated at <span id="time"></span> EDT</small></p>
+            <p><small>Generated at $(date +"%I:%M %p") EDT</small></p>
         </div>
     </div>
-
-    <script>
-        document.getElementById('date').textContent = new Date().toLocaleDateString('en-US', {weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'});
-        document.getElementById('time').textContent = new Date().toLocaleTimeString('en-US', {hour: 'numeric', minute: '2-digit'});
-    </script>
 </body>
 </html>
 EOF
