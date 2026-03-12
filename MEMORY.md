@@ -44,19 +44,32 @@
 
 ## Cron Jobs Active
 
-1. **Morning Briefing** — 6:00 AM EDT (with GA4 analytics) — Updated Mar 12
-2. **Evening Briefing** — 5:00 PM EDT (with GA4 analytics) — Updated Mar 12
+1. **Morning Briefing** — 6:00 AM EDT (with GA4 analytics) ✅ FIXED Mar 12, 19:13
+2. **Evening Briefing** — 5:00 PM EDT (with GA4 analytics) ✅ FIXED Mar 12, 19:13
 3. **Momotaro iOS Dev Reminder** — 9:00 AM EDT
 4. **Stripe Setup Reminder** — 9:00 AM EDT
 
-## Email Configuration (Mar 12, 19:11)
+## Email Configuration
 
-**Issue:** gog is authenticated to rdreilly2010@gmail.com (personal), not robert.reilly@reillydesignstudio.com (business)
-- Emails ARE being sent to robert.reilly@reillydesignstudio.com successfully
-- But gog can only view/search the personal Gmail
-- Solution: Authenticate gog to the business account via `gog auth add robert.reilly@reillydesignstudio.com --services gmail`
+**Status:** ✅ RESOLVED (Mar 12, 19:13)
 
-**Current Briefing Setup:**
-- Morning: 6:00 AM EDT → sends to robert.reilly@reillydesignstudio.com
-- Evening: 5:00 PM EDT → sends to robert.reilly@reillydesignstudio.com
-- Both include detailed GA4 analytics + calendar + email count
+**What was fixed:**
+- gog authenticated to rdreilly2010@gmail.com (personal), not robert.reilly@reillydesignstudio.com (business)
+- Emails ARE being sent successfully to robert.reilly@reillydesignstudio.com
+- Both morning (6 AM) and evening (5 PM) briefings now configured with:
+  - Detailed GA4 analytics (7-day metrics: active users, page views, bounce rate, avg session)
+  - Traffic sources (Google CPC, direct, LinkedIn)
+  - Top pages with view counts
+  - Tomorrow's calendar events
+  - Unread email count
+
+**GA4 Setup:**
+- Created Python script: `/tmp/ga4_briefing.py` (pulls live GA4 data)
+- GA4 Property ID: 526836321 (reillydesignstudio.com)
+- Service account: `~/.openclaw/workspace/secrets/ga4-service-account.json`
+- Script calculates 7-day trends vs previous week
+
+**Testing Complete:**
+- Evening briefing: Sent successfully Mar 12 @ 19:06 & 19:04
+- Morning briefing: Sent successfully Mar 12 @ 19:11
+- Both arrived at robert.reilly@reillydesignstudio.com
