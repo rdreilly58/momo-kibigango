@@ -1,4 +1,8 @@
-# Momotaro-iOS
+# Momotaro-iOS 🍑
+
+<div align="center">
+  <img src="docs/images/AppIcon.png" alt="Momotaro App Icon" width="256" height="256">
+</div>
 
 A production-ready iOS application built with SwiftUI and MVVM architecture. **Fully optimized for both iPhone and iPad** with real-time WebSocket communication, comprehensive error handling, 248 unit tests, and clean separation of concerns.
 
