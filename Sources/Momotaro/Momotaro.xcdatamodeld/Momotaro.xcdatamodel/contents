@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="23505" systemVersion="14.3" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithSwiftData="NO">
+    <entity name="MessageData" representedClassName="MessageData" syncable="YES" codeGenerationType="class">
+        <attribute name="content" attributeType="String" required="YES"/>
+        <attribute name="id" attributeType="String" indexed="YES" required="YES"/>
+        <attribute name="isReceived" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="metadata" attributeType="String" optional="YES"/>
+        <attribute name="sessionId" attributeType="String" indexed="YES" required="YES"/>
+        <attribute name="timestamp" attributeType="Date" indexed="YES" usesScalarValueType="NO" required="YES"/>
+        <attribute name="type" attributeType="String" required="YES"/>
+        <uniquenessConstraints>
+            <uniquenessConstraint>
+                <constraint value="id"/>
+            </uniquenessConstraint>
+        </uniquenessConstraints>
+    </entity>
+</model>
