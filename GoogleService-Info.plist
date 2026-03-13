@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plist version="1.0">
+<dict>
+    <key>GA_MEASUREMENT_ID</key>
+    <string>G-XXXXXXXXXX</string>
+    <key>GA_API_SECRET</key>
+    <string>your_api_secret</string>
+</dict>
+</plist>
