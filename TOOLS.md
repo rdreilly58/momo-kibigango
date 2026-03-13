@@ -75,6 +75,12 @@ pdftotext /tmp/FILE.pdf - | head -200
 
 ---
 
+## Current Date & Time (Updated via session_status)
+
+**Always run `session_status` to get the current date and time from the computer. Never infer or hardcode.**
+
+Current: Friday, March 13th, 2026 — 5:18 AM (America/New_York)
+
 ## Location
 
 **Default location:** Reston, VA

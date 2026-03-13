@@ -1,0 +1,577 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 55;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		025AE1DD5F5DF48535E94324 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F1938B9CD5BAD292CCE809A /* ContentView.swift */; };
+		1A9D3F63C896EB5BA22B3F1B /* GatewayMessageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 683EA53B5706665B6ECEBDA1 /* GatewayMessageTests.swift */; };
+		28B39B752155702231734896 /* TuistAssets+MomotaroIOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 559F05DB67BFB2910DAB09C8 /* TuistAssets+MomotaroIOS.swift */; };
+		38AB3E111AEEAFC714395B90 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2EA3E301584F9847630B6EE6 /* Assets.xcassets */; };
+		3987402EC62DFF3EAA97C733 /* GatewayMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24B54ED47FBBAB3DC4F68EBA /* GatewayMessage.swift */; };
+		3E02345C7C262AE62973D988 /* MockWebSocketTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8662A379911E42A0066F0670 /* MockWebSocketTask.swift */; };
+		4BD986B91F7BDB820C64CF05 /* GatewayClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6255B603B9AFCA8E87A654C0 /* GatewayClientTests.swift */; };
+		753A38647DBC10C152AA1882 /* MomotaroApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D7DD8F6CC2311CAD4B050EB /* MomotaroApp.swift */; };
+		7F8C68522BAAC5822769C56B /* GatewayClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1170B8D2AC6218A3CBD95E2A /* GatewayClient.swift */; };
+		E7E033B482FB9A847E8D9D41 /* TuistBundle+MomotaroIOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECA7A1750376B8F25701B635 /* TuistBundle+MomotaroIOS.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		DB87867DD5AAF6178BCEF5BB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 14F1699BDDCEC349283DF044 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AFAC5B21B6BDC868D7CE336D;
+			remoteInfo = "Momotaro-iOS";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		C446F2A2EB80024139E79C0C /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FE5CC456698F424085DE4625 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		1170B8D2AC6218A3CBD95E2A /* GatewayClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GatewayClient.swift; sourceTree = "<group>"; };
+		1253E77BDB092040233F591C /* Momotaro_iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Momotaro_iOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		24B54ED47FBBAB3DC4F68EBA /* GatewayMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GatewayMessage.swift; sourceTree = "<group>"; };
+		2EA3E301584F9847630B6EE6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		32D33711FBD68CE9B85A8A3E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		4D7DD8F6CC2311CAD4B050EB /* MomotaroApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MomotaroApp.swift; sourceTree = "<group>"; };
+		559F05DB67BFB2910DAB09C8 /* TuistAssets+MomotaroIOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TuistAssets+MomotaroIOS.swift"; sourceTree = "<group>"; };
+		6255B603B9AFCA8E87A654C0 /* GatewayClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GatewayClientTests.swift; sourceTree = "<group>"; };
+		683EA53B5706665B6ECEBDA1 /* GatewayMessageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GatewayMessageTests.swift; sourceTree = "<group>"; };
+		6F1938B9CD5BAD292CCE809A /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		7D960EFD7B8E605035E0A06E /* Momotaro_iOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Momotaro_iOSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		8662A379911E42A0066F0670 /* MockWebSocketTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockWebSocketTask.swift; sourceTree = "<group>"; };
+		973C795F55AA0496B8688052 /* Momotaro-iOSTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Momotaro-iOSTests-Info.plist"; sourceTree = "<group>"; };
+		ECA7A1750376B8F25701B635 /* TuistBundle+MomotaroIOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TuistBundle+MomotaroIOS.swift"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		7FF1E0CA19DA0320A2D0D22C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CE401A0707D7DFC4E241F272 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		038255A72DDCF3501DFA4019 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				559F05DB67BFB2910DAB09C8 /* TuistAssets+MomotaroIOS.swift */,
+				ECA7A1750376B8F25701B635 /* TuistBundle+MomotaroIOS.swift */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		11B59229C9B57CF8E54E2C00 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1253E77BDB092040233F591C /* Momotaro_iOS.app */,
+				7D960EFD7B8E605035E0A06E /* Momotaro_iOSTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		237D7CC269B7B96942713B0E /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				6F1938B9CD5BAD292CCE809A /* ContentView.swift */,
+				1170B8D2AC6218A3CBD95E2A /* GatewayClient.swift */,
+				24B54ED47FBBAB3DC4F68EBA /* GatewayMessage.swift */,
+				4D7DD8F6CC2311CAD4B050EB /* MomotaroApp.swift */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		4B18365FD43A4CF47D6B397F /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				F92F24C7F5C18B5B578BFC26 /* Mocks */,
+				6255B603B9AFCA8E87A654C0 /* GatewayClientTests.swift */,
+				683EA53B5706665B6ECEBDA1 /* GatewayMessageTests.swift */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
+		84C2CBB0E1675367D24475F2 /* Project */ = {
+			isa = PBXGroup;
+			children = (
+				C9AEA07331078CB6A39B1517 /* Derived */,
+				237D7CC269B7B96942713B0E /* Sources */,
+				4B18365FD43A4CF47D6B397F /* Tests */,
+				2EA3E301584F9847630B6EE6 /* Assets.xcassets */,
+				32D33711FBD68CE9B85A8A3E /* Info.plist */,
+			);
+			name = Project;
+			sourceTree = "<group>";
+		};
+		919B942B910ACAC20153CAEB = {
+			isa = PBXGroup;
+			children = (
+				11B59229C9B57CF8E54E2C00 /* Products */,
+				84C2CBB0E1675367D24475F2 /* Project */,
+			);
+			sourceTree = "<group>";
+		};
+		C9AEA07331078CB6A39B1517 /* Derived */ = {
+			isa = PBXGroup;
+			children = (
+				F6BF8951DE238B71440FED05 /* InfoPlists */,
+				038255A72DDCF3501DFA4019 /* Sources */,
+			);
+			path = Derived;
+			sourceTree = "<group>";
+		};
+		F6BF8951DE238B71440FED05 /* InfoPlists */ = {
+			isa = PBXGroup;
+			children = (
+				973C795F55AA0496B8688052 /* Momotaro-iOSTests-Info.plist */,
+			);
+			path = InfoPlists;
+			sourceTree = "<group>";
+		};
+		F92F24C7F5C18B5B578BFC26 /* Mocks */ = {
+			isa = PBXGroup;
+			children = (
+				8662A379911E42A0066F0670 /* MockWebSocketTask.swift */,
+			);
+			path = Mocks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		93A731A141F6AE6C03A483DE /* Momotaro-iOSTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B7614E9538E32309E33675FC /* Build configuration list for PBXNativeTarget "Momotaro-iOSTests" */;
+			buildPhases = (
+				EA467E8C9312FAB785565130 /* Sources */,
+				190126BBDAAF0F27C8D26800 /* Resources */,
+				CE401A0707D7DFC4E241F272 /* Frameworks */,
+				C446F2A2EB80024139E79C0C /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				780CC3C7CDBF8676F4D13C69 /* PBXTargetDependency */,
+			);
+			name = "Momotaro-iOSTests";
+			packageProductDependencies = (
+			);
+			productName = Momotaro_iOSTests;
+			productReference = 7D960EFD7B8E605035E0A06E /* Momotaro_iOSTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		AFAC5B21B6BDC868D7CE336D /* Momotaro-iOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7DD6C1809EE14536D45867A1 /* Build configuration list for PBXNativeTarget "Momotaro-iOS" */;
+			buildPhases = (
+				8A115FBCEA01C7D5C7A3A28C /* Sources */,
+				3EE614376873432AB83F79EF /* Resources */,
+				7FF1E0CA19DA0320A2D0D22C /* Frameworks */,
+				FE5CC456698F424085DE4625 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Momotaro-iOS";
+			packageProductDependencies = (
+			);
+			productName = Momotaro_iOS;
+			productReference = 1253E77BDB092040233F591C /* Momotaro_iOS.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		14F1699BDDCEC349283DF044 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				TargetAttributes = {
+					93A731A141F6AE6C03A483DE = {
+						TestTargetID = AFAC5B21B6BDC868D7CE336D;
+					};
+				};
+			};
+			buildConfigurationList = E670839DC2D6D74F3F67B7CC /* Build configuration list for PBXProject "Momotaro-iOS" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 919B942B910ACAC20153CAEB;
+			productRefGroup = 11B59229C9B57CF8E54E2C00 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				AFAC5B21B6BDC868D7CE336D /* Momotaro-iOS */,
+				93A731A141F6AE6C03A483DE /* Momotaro-iOSTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		190126BBDAAF0F27C8D26800 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3EE614376873432AB83F79EF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				38AB3E111AEEAFC714395B90 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		8A115FBCEA01C7D5C7A3A28C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				28B39B752155702231734896 /* TuistAssets+MomotaroIOS.swift in Sources */,
+				E7E033B482FB9A847E8D9D41 /* TuistBundle+MomotaroIOS.swift in Sources */,
+				025AE1DD5F5DF48535E94324 /* ContentView.swift in Sources */,
+				7F8C68522BAAC5822769C56B /* GatewayClient.swift in Sources */,
+				3987402EC62DFF3EAA97C733 /* GatewayMessage.swift in Sources */,
+				753A38647DBC10C152AA1882 /* MomotaroApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EA467E8C9312FAB785565130 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4BD986B91F7BDB820C64CF05 /* GatewayClientTests.swift in Sources */,
+				1A9D3F63C896EB5BA22B3F1B /* GatewayMessageTests.swift in Sources */,
+				3E02345C7C262AE62973D988 /* MockWebSocketTask.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		780CC3C7CDBF8676F4D13C69 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "Momotaro-iOS";
+			target = AFAC5B21B6BDC868D7CE336D /* Momotaro-iOS */;
+			targetProxy = DB87867DD5AAF6178BCEF5BB /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		17EF98B2A160E2B33CCB9BE9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = "Derived/InfoPlists/Momotaro-iOSTests-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-L$(DT_TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME)",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.momotaro.ios.tests;
+				PRODUCT_NAME = Momotaro_iOSTests;
+				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = (
+					"$(inherited)",
+					DEBUG,
+				);
+				SWIFT_COMPILATION_MODE = singlefile;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Momotaro_iOS.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Momotaro_iOS";
+				TEST_TARGET_NAME = "Momotaro-iOS";
+			};
+			name = Debug;
+		};
+		4A6FE08CB8386F41DF77A968 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-L$(DT_TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME)",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.momotaro.ios;
+				PRODUCT_NAME = Momotaro_iOS;
+				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = (
+					"$(inherited)",
+					DEBUG,
+				);
+				SWIFT_COMPILATION_MODE = singlefile;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		71F36B053DA7AE08308293B0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = "Derived/InfoPlists/Momotaro-iOSTests-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-L$(DT_TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME)",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.momotaro.ios.tests;
+				PRODUCT_NAME = Momotaro_iOSTests;
+				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Momotaro_iOS.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Momotaro_iOS";
+				TEST_TARGET_NAME = "Momotaro-iOS";
+			};
+			name = Release;
+		};
+		9AE7376C63C5CA3ADBF19269 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-L$(DT_TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME)",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.momotaro.ios;
+				PRODUCT_NAME = Momotaro_iOS;
+				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		9E248CAD49F8AA4C55DE9E1D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		F1A9E4E27E414DC59E25795D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		7DD6C1809EE14536D45867A1 /* Build configuration list for PBXNativeTarget "Momotaro-iOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4A6FE08CB8386F41DF77A968 /* Debug */,
+				9AE7376C63C5CA3ADBF19269 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B7614E9538E32309E33675FC /* Build configuration list for PBXNativeTarget "Momotaro-iOSTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				17EF98B2A160E2B33CCB9BE9 /* Debug */,
+				71F36B053DA7AE08308293B0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E670839DC2D6D74F3F67B7CC /* Build configuration list for PBXProject "Momotaro-iOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F1A9E4E27E414DC59E25795D /* Debug */,
+				9E248CAD49F8AA4C55DE9E1D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 14F1699BDDCEC349283DF044 /* Project object */;
+}
