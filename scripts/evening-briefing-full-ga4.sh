@@ -28,15 +28,15 @@ try:
     
     today = datetime.now()
     
-    # ===== 1. TODAY'S KEY METRICS =====
+    # ===== 1. KEY METRICS (7 days) - SAME AS MORNING =====
     print("✅ Connected to Google Analytics API")
-    print("✅ Fetching today's comprehensive GA4 data\n")
+    print("✅ Fetching comprehensive GA4 data\n")
     
-    today_request = RunReportRequest(
+    current_7d_request = RunReportRequest(
         property=f"properties/{GA4_PROPERTY_ID}",
-        date_ranges=[DateRange(start_date="today", end_date="today")],
+        date_ranges=[DateRange(start_date="6daysAgo", end_date="today")],
         metrics=[
-            Metric(name="sessions"),
+            Metric(name="activeUsers"),
             Metric(name="totalUsers"),
             Metric(name="screenPageViews"),
             Metric(name="bounceRate"),
@@ -44,70 +44,70 @@ try:
         ],
     )
     
-    yesterday_request = RunReportRequest(
+    previous_7d_request = RunReportRequest(
         property=f"properties/{GA4_PROPERTY_ID}",
-        date_ranges=[DateRange(start_date="yesterday", end_date="yesterday")],
+        date_ranges=[DateRange(start_date="13daysAgo", end_date="7daysAgo")],
         metrics=[
-            Metric(name="sessions"),
+            Metric(name="activeUsers"),
             Metric(name="totalUsers"),
             Metric(name="screenPageViews"),
             Metric(name="bounceRate"),
         ],
     )
     
-    today_response = client.run_report(today_request)
-    yesterday_response = client.run_report(yesterday_request)
+    current_7d = client.run_report(current_7d_request)
+    previous_7d = client.run_report(previous_7d_request)
     
     print("============================================================")
-    print("📊 RDS Daily Analytics Report - " + today.strftime("%A, %B %d, %Y"))
+    print("📊 RDS Analytics Report - " + today.strftime("%A, %B %d, %Y"))
     print("============================================================\n")
     
-    if today_response.rows:
-        today_row = today_response.rows[0]
-        today_sessions = float(today_row.metric_values[0].value)
-        today_users = float(today_row.metric_values[1].value)
-        today_pageviews = float(today_row.metric_values[2].value)
-        today_bounce = float(today_row.metric_values[3].value)
-        today_duration = float(today_row.metric_values[4].value)
+    if current_7d.rows:
+        curr_row = current_7d.rows[0]
+        curr_active = float(curr_row.metric_values[0].value)
+        curr_total = float(curr_row.metric_values[1].value)
+        curr_pageviews = float(curr_row.metric_values[2].value)
+        curr_bounce = float(curr_row.metric_values[3].value)
+        curr_duration = float(curr_row.metric_values[4].value)
         
-        # Calculate day-over-day comparisons
-        if yesterday_response.rows:
-            yesterday_row = yesterday_response.rows[0]
-            yesterday_sessions = float(yesterday_row.metric_values[0].value)
-            yesterday_users = float(yesterday_row.metric_values[1].value)
-            yesterday_pageviews = float(yesterday_row.metric_values[2].value)
-            yesterday_bounce = float(yesterday_row.metric_values[3].value)
+        # Calculate comparisons
+        if previous_7d.rows:
+            prev_row = previous_7d.rows[0]
+            prev_active = float(prev_row.metric_values[0].value)
+            prev_total = float(prev_row.metric_values[1].value)
+            prev_pageviews = float(prev_row.metric_values[2].value)
+            prev_bounce = float(prev_row.metric_values[3].value)
             
-            sessions_pct = ((today_sessions - yesterday_sessions) / yesterday_sessions * 100) if yesterday_sessions > 0 else 0
-            users_pct = ((today_users - yesterday_users) / yesterday_users * 100) if yesterday_users > 0 else 0
-            pageviews_pct = ((today_pageviews - yesterday_pageviews) / yesterday_pageviews * 100) if yesterday_pageviews > 0 else 0
-            bounce_pct = ((today_bounce - yesterday_bounce) / yesterday_bounce * 100) if yesterday_bounce > 0 else 0
+            active_pct = ((curr_active - prev_active) / prev_active * 100) if prev_active > 0 else 0
+            total_pct = ((curr_total - prev_total) / prev_total * 100) if prev_total > 0 else 0
+            pageviews_pct = ((curr_pageviews - prev_pageviews) / prev_pageviews * 100) if prev_pageviews > 0 else 0
+            bounce_pct = ((curr_bounce - prev_bounce) / prev_bounce * 100) if prev_bounce > 0 else 0
             
-            sessions_arrow = "📈" if sessions_pct > 0 else "📉" if sessions_pct < 0 else "➡️"
-            users_arrow = "📈" if users_pct > 0 else "📉" if users_pct < 0 else "➡️"
+            active_arrow = "📈" if active_pct > 0 else "📉" if active_pct < 0 else "➡️"
+            total_arrow = "📈" if total_pct > 0 else "📉" if total_pct < 0 else "➡️"
             pageviews_arrow = "📈" if pageviews_pct > 0 else "📉" if pageviews_pct < 0 else "➡️"
             bounce_arrow = "📉" if bounce_pct < 0 else "📈" if bounce_pct > 0 else "➡️"
             
-            print("🎯 TODAY'S PERFORMANCE")
-            print(f"• Sessions: {int(today_sessions)} {sessions_arrow} ({sessions_pct:+.1f}% vs yesterday)")
-            print(f"• Users: {int(today_users)} {users_arrow} ({users_pct:+.1f}% vs yesterday)")
-            print(f"• Page Views: {int(today_pageviews)} {pageviews_arrow} ({pageviews_pct:+.1f}% vs yesterday)")
-            print(f"• Bounce Rate: {today_bounce:.1f}% {bounce_arrow} ({bounce_pct:+.1f}% vs yesterday)")
-            print(f"• Avg Session: {today_duration:.1f} seconds")
+            print("🎯 KEY METRICS (last 7 days)")
+            print(f"• Active Users: {int(curr_active)} {active_arrow} ({active_pct:+.1f}% vs prev week)")
+            print(f"• Total Users: {int(curr_total)} {total_arrow} ({total_pct:+.1f}% vs prev week)")
+            print(f"• Page Views: {int(curr_pageviews)} {pageviews_arrow} ({pageviews_pct:+.1f}% vs prev week)")
+            print(f"• Bounce Rate: {curr_bounce:.1f}% {bounce_arrow} ({bounce_pct:+.1f}% vs prev week)")
+            print(f"• Avg Session: {curr_duration:.1f} seconds")
         else:
-            print("🎯 TODAY'S PERFORMANCE")
-            print(f"• Sessions: {int(today_sessions)}")
-            print(f"• Users: {int(today_users)}")
-            print(f"• Page Views: {int(today_pageviews)}")
-            print(f"• Bounce Rate: {today_bounce:.1f}%")
-            print(f"• Avg Session: {today_duration:.1f} seconds")
+            print("🎯 KEY METRICS (last 7 days)")
+            print(f"• Active Users: {int(curr_active)}")
+            print(f"• Total Users: {int(curr_total)}")
+            print(f"• Page Views: {int(curr_pageviews)}")
+            print(f"• Bounce Rate: {curr_bounce:.1f}%")
+            print(f"• Avg Session: {curr_duration:.1f} seconds")
     
-    # ===== 2. TODAY'S TRAFFIC SOURCES =====
+    # ===== 2. TRAFFIC SOURCES (7 days) =====
     print("\n📈 TRAFFIC SOURCES")
     
     traffic_request = RunReportRequest(
         property=f"properties/{GA4_PROPERTY_ID}",
-        date_ranges=[DateRange(start_date="today", end_date="today")],
+        date_ranges=[DateRange(start_date="6daysAgo", end_date="today")],
         dimensions=[
             Dimension(name="sessionSource"),
             Dimension(name="sessionMedium"),
@@ -139,12 +139,12 @@ try:
     except Exception as e:
         print(f"• Error fetching traffic sources: {str(e)[:50]}")
     
-    # ===== 3. TOP PAGES TODAY =====
-    print("\n🔥 TOP PAGES (today)")
+    # ===== 3. TOP PAGES (7 days) =====
+    print("\n🔥 TOP PAGES (last 7 days)")
     
     pages_request = RunReportRequest(
         property=f"properties/{GA4_PROPERTY_ID}",
-        date_ranges=[DateRange(start_date="today", end_date="today")],
+        date_ranges=[DateRange(start_date="6daysAgo", end_date="today")],
         dimensions=[Dimension(name="pagePath")],
         metrics=[Metric(name="screenPageViews")],
     )
