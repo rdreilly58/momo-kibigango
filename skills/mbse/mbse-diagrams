@@ -1,0 +1,201 @@
+#!/usr/bin/env python3
+"""
+mbse-diagrams — Auto-generate Mermaid diagrams from MBSE models
+Creates architecture, behavior, and risk visualization diagrams
+"""
+
+import sys
+import json
+from pathlib import Path
+
+try:
+    import yaml
+except ImportError:
+    print("❌ PyYAML not installed")
+    sys.exit(1)
+
+def load_model(model_path):
+    """Load YAML model"""
+    path = Path(model_path)
+    if not path.exists():
+        print(f"❌ Model not found: {model_path}")
+        sys.exit(1)
+    
+    with open(path, 'r') as f:
+        return yaml.safe_load(f)
+
+def generate_component_diagram(model, output_file=None):
+    """Generate architecture component diagram"""
+    
+    components = model.get('architecture', {}).get('components', [])
+    interactions = model.get('architecture', {}).get('interactions', [])
+    
+    # Build Mermaid graph
+    lines = ['graph TB']
+    
+    # Add components
+    for comp in components:
+        comp_id = comp.get('id', '')
+        name = comp.get('name', '')
+        comp_type = comp.get('type', '')
+        
+        # Style based on type
+        if comp_type == 'External':
+            lines.append(f'    {comp_id}["{name}<br/>({comp_type})"]:::external')
+        elif comp_type == 'Database':
+            lines.append(f'    {comp_id}["{name}<br/>({comp_type})"]:::database')
+        elif comp_type in ['Service', 'API']:
+            lines.append(f'    {comp_id}["{name}<br/>({comp_type})"]:::service')
+        else:
+            lines.append(f'    {comp_id}["{name}<br/>({comp_type})"]')
+    
+    # Add interactions
+    for interaction in interactions:
+        from_comp = interaction.get('from', '')
+        to_comp = interaction.get('to', '')
+        protocol = interaction.get('protocol', '')
+        
+        lines.append(f'    {from_comp} -->|{protocol}| {to_comp}')
+    
+    # Add styling
+    lines.append('    classDef external fill:#e1f5ff,stroke:#01579b')
+    lines.append('    classDef database fill:#f3e5f5,stroke:#4a148c')
+    lines.append('    classDef service fill:#e8f5e9,stroke:#1b5e20')
+    
+    mermaid_code = '\n'.join(lines)
+    
+    if output_file:
+        with open(output_file, 'w') as f:
+            f.write(mermaid_code)
+        print(f"✅ Component diagram: {output_file}")
+    else:
+        print(mermaid_code)
+    
+    return mermaid_code
+
+def generate_risk_matrix(model, output_file=None):
+    """Generate risk probability × impact matrix"""
+    
+    risks = model.get('risks', [])
+    
+    # Build Mermaid diagram
+    lines = ['graph TB']
+    
+    # Create risk items with styling
+    for risk in risks:
+        risk_id = risk.get('id', '')
+        title = risk.get('title', '')
+        prob = risk.get('probability', 'MEDIUM')
+        impact = risk.get('impact', 'MEDIUM')
+        status = risk.get('status', 'identified')
+        
+        # Status colors
+        if status == 'mitigated':
+            style = ':::mitigated'
+        elif status == 'resolved':
+            style = ':::resolved'
+        else:
+            style = ':::identified'
+        
+        # Abbreviate title
+        short_title = title[:30] if len(title) > 30 else title
+        lines.append(f'    {risk_id}["{short_title}<br/>({prob}/{impact})"]' + style)
+    
+    # Add styling
+    lines.append('    classDef identified fill:#ffebee,stroke:#c62828')
+    lines.append('    classDef mitigated fill:#fff3e0,stroke:#e65100')
+    lines.append('    classDef resolved fill:#e8f5e9,stroke:#1b5e20')
+    
+    mermaid_code = '\n'.join(lines)
+    
+    if output_file:
+        with open(output_file, 'w') as f:
+            f.write(mermaid_code)
+        print(f"✅ Risk matrix: {output_file}")
+    else:
+        print(mermaid_code)
+    
+    return mermaid_code
+
+def generate_requirement_flow(model, output_file=None):
+    """Generate requirement status flow diagram"""
+    
+    requirements = model.get('requirements', [])
+    
+    # Count by status
+    status_counts = {}
+    for req in requirements:
+        status = req.get('status', 'unknown')
+        status_counts[status] = status_counts.get(status, 0) + 1
+    
+    # Build Mermaid pie chart
+    lines = ['pie title Requirement Status Distribution']
+    for status, count in sorted(status_counts.items()):
+        lines.append(f'    "{status}" : {count}')
+    
+    mermaid_code = '\n'.join(lines)
+    
+    if output_file:
+        with open(output_file, 'w') as f:
+            f.write(mermaid_code)
+        print(f"✅ Requirement flow: {output_file}")
+    else:
+        print(mermaid_code)
+    
+    return mermaid_code
+
+def main():
+    if len(sys.argv) < 2:
+        print("Usage: mbse-diagrams <model.yaml> [component|risk|flow|all] [--output dir]")
+        print("\nDiagrams:")
+        print("  component — Architecture component diagram")
+        print("  risk      — Risk probability × impact matrix")
+        print("  flow      — Requirement status distribution")
+        print("  all       — Generate all diagrams (default)")
+        sys.exit(1)
+    
+    model_path = sys.argv[1]
+    diagram_type = "all"
+    output_dir = None
+    
+    if len(sys.argv) > 2 and sys.argv[2] in ['component', 'risk', 'flow', 'all']:
+        diagram_type = sys.argv[2]
+    
+    if "--output" in sys.argv:
+        idx = sys.argv.index("--output")
+        if idx + 1 < len(sys.argv):
+            output_dir = Path(sys.argv[idx + 1])
+            output_dir.mkdir(parents=True, exist_ok=True)
+    
+    model = load_model(model_path)
+    system_name = model.get('system', {}).get('name', 'system')
+    
+    print(f"\n📊 Generating diagrams for {system_name}...\n")
+    
+    if diagram_type in ['component', 'all']:
+        output_file = None
+        if output_dir:
+            output_file = output_dir / f"{system_name.lower()}-architecture.mmd"
+        generate_component_diagram(model, output_file)
+    
+    if diagram_type in ['risk', 'all']:
+        output_file = None
+        if output_dir:
+            output_file = output_dir / f"{system_name.lower()}-risks.mmd"
+        generate_risk_matrix(model, output_file)
+    
+    if diagram_type in ['flow', 'all']:
+        output_file = None
+        if output_dir:
+            output_file = output_dir / f"{system_name.lower()}-status.mmd"
+        generate_requirement_flow(model, output_file)
+    
+    if output_dir:
+        print(f"\n✅ Diagrams exported to: {output_dir}")
+        print("\nTo render to SVG:")
+        print(f"  mermaid {output_dir}/*.mmd")
+    else:
+        print("\nTo save diagrams, use: --output /path/to/dir")
+
+if __name__ == '__main__':
+    main()

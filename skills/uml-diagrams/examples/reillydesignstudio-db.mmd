@@ -1,0 +1,61 @@
+erDiagram
+    USER ||--o{ PROJECT : owns
+    PROJECT ||--|{ DELIVERABLE : contains
+    DELIVERABLE }o--|| ASSET : "references"
+    PROJECT ||--o{ INVOICE : "billed as"
+    INVOICE ||--o{ PAYMENT : "receives"
+    
+    USER {
+        uuid id PK
+        string email UK
+        string name
+        string role
+        timestamp created_at
+        timestamp updated_at
+    }
+    
+    PROJECT {
+        uuid id PK
+        uuid user_id FK
+        string title
+        text description
+        enum status "active, completed, archived"
+        decimal budget
+        timestamp started_at
+        timestamp due_at
+    }
+    
+    DELIVERABLE {
+        uuid id PK
+        uuid project_id FK
+        string name
+        text description
+        enum type "design, development, consultation"
+        timestamp created_at
+    }
+    
+    ASSET {
+        uuid id PK
+        string url
+        string filename
+        string mime_type
+        int size_bytes
+        timestamp uploaded_at
+    }
+    
+    INVOICE {
+        uuid id PK
+        uuid project_id FK
+        decimal amount
+        enum status "draft, sent, paid, overdue"
+        date due_date
+        timestamp created_at
+    }
+    
+    PAYMENT {
+        uuid id PK
+        uuid invoice_id FK
+        decimal amount
+        enum method "stripe, check, wire"
+        timestamp received_at
+    }

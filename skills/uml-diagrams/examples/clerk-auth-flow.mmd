@@ -1,0 +1,17 @@
+stateDiagram-v2
+    [*] --> Unauthenticated
+    
+    Unauthenticated --> SignInPage: navigate /admin
+    SignInPage --> GoogleOAuth: click "Sign in with Google"
+    
+    GoogleOAuth --> GoogleConsent: user consent
+    GoogleConsent --> CallbackHandler: redirect to /sign-in/callback
+    
+    CallbackHandler --> CreateSession: validate OAuth token
+    CreateSession --> Authenticated: JWT created
+    
+    Authenticated --> AdminPanel: redirect /admin
+    AdminPanel --> [*]
+    
+    GoogleOAuth --> SignInPage: cancel
+    CreateSession --> SignInPage: invalid token

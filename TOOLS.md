@@ -2,6 +2,61 @@
 
 Skills define _how_ tools work. This file is for _your_ specifics — the stuff that's unique to your setup.
 
+## API Keys & Credentials
+
+**⚠️ Location:** Keep all API keys here in TOOLS.md (workspace file), NOT in ~/.openclaw/config.json (system file)
+
+**Why:** This workspace file is where you naturally look for your setup details. System config files get updated/reset by OpenClaw.
+
+### Brave Search API
+- **Key:** `REDACTED_BRAVE_API_TOKEN`
+- **Source:** ~/.openclaw/config.json (originally) → moved to TOOLS.md for reference
+- **Used for:** Web search via `web_search` tool (gas prices, news, research)
+- **Status:** ✅ Active
+- **Last validated:** March 15, 2026
+
+### Healthchecks.io (Cron Monitoring)
+- **Account:** https://healthchecks.io (free tier)
+- **Setup date:** March 16, 2026
+
+**Active Checks:**
+- **Morning Briefing:** `https://hc-ping.com/43edd8e8-e569-4bad-b044-90ab1546c271`
+  - Schedule: Daily, 6:00 AM EDT
+  - Grace time: 5 min
+  - Auto-pings on completion
+  
+- **Evening Briefing:** `https://hc-ping.com/d570cbc7-1164-492b-98f1-0443ce23482e`
+  - Schedule: Daily, 5:00 PM EDT
+  - Grace time: 5 min
+  - Auto-pings on completion
+
+**How it works:**
+- If briefing doesn't complete within grace period, Healthchecks alerts via Telegram
+- Each cron job is configured to ping URL automatically after success
+- Prevents silent failures in automation
+
+## Calendar Operations (gog)
+
+**Important:** Always use the `-a rdreilly2010@gmail.com` flag for calendar requests!
+
+```bash
+# Get calendar events
+gog calendar list -a rdreilly2010@gmail.com
+
+# Get specific date
+gog calendar list -a rdreilly2010@gmail.com [filter options]
+
+# JSON output for scripting
+gog calendar list -a rdreilly2010@gmail.com --json
+```
+
+**If authentication fails:**
+- Run: `gog login rdreilly2010@gmail.com`
+- Follow the browser OAuth flow
+- Token will be refreshed and stored
+
+---
+
 ## Email Operations (STANDARD METHOD)
 
 **Default method:** `gog gmail search` (Google CLI with Gmail API)
@@ -75,11 +130,189 @@ pdftotext /tmp/FILE.pdf - | head -200
 
 ---
 
+## Local LLM: Qwen 3.5 35B-A3B (MLX)
+
+**Setup:** Installed March 14, 2026 at 10:25 AM EDT
+- **Location:** `/Users/rreilly/models/qwen35b-4bit` (38GB)
+- **Framework:** MLX (Apple Silicon optimized)
+- **Python Environment:** `~/mlx-env` (venv)
+- **Hardware:** M4 Mac mini (optimized for Neural Engine)
+
+**Usage:**
+
+```bash
+# Activate MLX environment
+source ~/mlx-env/bin/activate
+
+# Interactive chat
+python3 << 'EOF'
+import os
+from mlx_lm import generate, load
+
+model_path = os.path.expanduser("~/models/qwen35b-4bit")
+model, tokenizer = load(model_path)
+
+# Chat loop
+while True:
+    prompt = input("You: ")
+    if prompt.lower() in ['quit', 'exit']: break
+    result = generate(model, tokenizer, prompt=prompt, max_tokens=512)
+    print(f"Qwen: {result}\n")
+EOF
+```
+
+**Performance Characteristics:**
+- Intelligence: Comparable to Claude Sonnet 3.5 (83rd percentile on benchmarks)
+- Speed: ~50-100 tokens/sec on M4 (sparse MoE, only 3B active params)
+- Context: 262K native, extensible to 1M tokens
+- Multimodal: Vision-language capable
+- Coding: Strong on Next.js, Three.js, Python (79th percentile)
+
+**Known Issues:**
+- First load: 2-5 minutes (initializes weights for Neural Engine)
+- Memory: Uses ~8-12GB active during inference
+- OpenClaw integration: Not yet native (local-only for now)
+
+**Next Steps:**
+- Spawn local inference sessions via subagent with MLX backend
+- Test on coding tasks vs. Claude/GPT-4 benchmarks
+- Consider Ollama integration if GGUF version is needed
+
 ## Current Date & Time (Updated via session_status)
 
 **Always run `session_status` to get the current date and time from the computer. Never infer or hardcode.**
 
-Current: Friday, March 13th, 2026 — 5:18 AM (America/New_York)
+Current: Saturday, March 14th, 2026 — 10:25 AM (America/New_York)
+
+## BigQuery + GA4 Integration
+
+**Setup Complete:** March 14, 2026, 11:35 AM EDT
+
+### Connection Details
+- **GCP Project ID:** `127601657025`
+- **GA4 Property ID:** `526836321` (ReillyDesignStudio)
+- **BigQuery Dataset:** `ga4_reillydesignstudio`
+- **Dataset Location:** US
+- **Export Type:** Real-time streaming (automatic)
+
+### Status
+✅ BigQuery API enabled
+✅ Dataset created
+⏳ Awaiting GA4 Admin linkage (manual step)
+
+### Link GA4 to BigQuery (Manual Step in UI)
+
+1. Go to: https://analytics.google.com
+2. Admin (bottom left) → **Property** → **BigQuery Links**
+3. Click **Link BigQuery Project**
+4. Select project: `127601657025`
+5. Choose dataset: `ga4_reillydesignstudio`
+6. Authorize & confirm
+
+**Note:** After linking, GA4 will take ~24 hours to begin streaming data.
+
+### Query Examples (BigQuery SQL)
+
+**Recent Events (Last 24h)**
+```sql
+SELECT
+  event_timestamp,
+  event_name,
+  user_pseudo_id,
+  page_location,
+  page_referrer,
+  device.category,
+  geo.country
+FROM `127601657025.ga4_reillydesignstudio.events_*`
+WHERE _TABLE_SUFFIX = FORMAT_DATE('%Y%m%d', CURRENT_DATE()-1)
+LIMIT 100
+```
+
+**Sessions by Device (Last 7 Days)**
+```sql
+SELECT
+  device.category AS device,
+  COUNT(DISTINCT user_pseudo_id) AS unique_users,
+  COUNT(DISTINCT (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'session_id')) AS sessions,
+  COUNT(*) AS events
+FROM `127601657025.ga4_reillydesignstudio.events_*`
+WHERE _TABLE_SUFFIX BETWEEN FORMAT_DATE('%Y%m%d', CURRENT_DATE()-7) 
+  AND FORMAT_DATE('%Y%m%d', CURRENT_DATE()-1)
+GROUP BY device
+ORDER BY sessions DESC
+```
+
+**Top Pages (Last 7 Days)**
+```sql
+SELECT
+  (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'page_location') AS page,
+  COUNT(*) AS pageviews,
+  COUNT(DISTINCT user_pseudo_id) AS users
+FROM `127601657025.ga4_reillydesignstudio.events_*`
+WHERE event_name = 'page_view'
+  AND _TABLE_SUFFIX BETWEEN FORMAT_DATE('%Y%m%d', CURRENT_DATE()-7)
+  AND FORMAT_DATE('%Y%m%d', CURRENT_DATE()-1)
+GROUP BY page
+ORDER BY pageviews DESC
+LIMIT 20
+```
+
+**Conversion Funnel (Custom Events)**
+```sql
+SELECT
+  event_name,
+  COUNT(*) AS count,
+  COUNT(DISTINCT user_pseudo_id) AS unique_users,
+  ROUND(100.0 * COUNT(DISTINCT user_pseudo_id) / 
+    (SELECT COUNT(DISTINCT user_pseudo_id) FROM 
+      `127601657025.ga4_reillydesignstudio.events_*` 
+     WHERE _TABLE_SUFFIX = FORMAT_DATE('%Y%m%d', CURRENT_DATE()-1)), 2) AS percent
+FROM `127601657025.ga4_reillydesignstudio.events_*`
+WHERE event_name IN ('page_view', 'click', 'form_submit', 'purchase')
+  AND _TABLE_SUFFIX = FORMAT_DATE('%Y%m%d', CURRENT_DATE()-1)
+GROUP BY event_name
+ORDER BY count DESC
+```
+
+**User Behavior (Bounce Rate, Session Duration)**
+```sql
+WITH sessions AS (
+  SELECT
+    user_pseudo_id,
+    (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'session_id') AS session_id,
+    COUNT(*) AS events,
+    MAX(event_timestamp) - MIN(event_timestamp) AS session_duration_ms
+  FROM `127601657025.ga4_reillydesignstudio.events_*`
+  WHERE _TABLE_SUFFIX = FORMAT_DATE('%Y%m%d', CURRENT_DATE()-1)
+  GROUP BY user_pseudo_id, session_id
+)
+SELECT
+  COUNT(*) AS total_sessions,
+  ROUND(100.0 * COUNTIF(events = 1) / COUNT(*), 2) AS bounce_rate_percent,
+  ROUND(AVG(session_duration_ms) / 1000, 2) AS avg_session_duration_seconds,
+  AVG(events) AS avg_events_per_session
+FROM sessions
+```
+
+### Streaming Real-Time Updates
+
+Once GA4 is linked, data flows into BigQuery automatically:
+- **Latency:** 10-30 minutes for real-time data
+- **Historic data:** Backfilled from GA4 property creation date
+- **Schema:** Auto-managed by GA4 (events_* tables)
+
+### Scheduled Queries (Optional)
+
+To export reports to GCS or email:
+
+```bash
+# Create scheduled query for daily report
+bq query \
+  --use_legacy_sql=false \
+  --schedule="every day 09:00" \
+  --destination_table=127601657025:ga4_reillydesignstudio.daily_summary \
+  'SELECT CURRENT_DATE() as date, COUNT(*) as events FROM `127601657025.ga4_reillydesignstudio.events_*` WHERE _TABLE_SUFFIX = FORMAT_DATE("%Y%m%d", CURRENT_DATE()-1)'
+```
 
 ## Location
 
@@ -88,6 +321,49 @@ Current: Friday, March 13th, 2026 — 5:18 AM (America/New_York)
 ## Email
 
 **Default email:** rdreilly2010@gmail.com
+
+## Sudo Access & Permissions (March 16, 2026)
+
+**Status:** ✅ ACTIVE - Momotaro has passwordless sudo for whitelisted commands
+
+**Configuration:** `/etc/sudoers.d/momotaro`
+
+**Whitelisted Commands (Passwordless):**
+- `sudo softwareupdate` — System updates
+- `sudo brew` / `sudo /opt/homebrew/bin/brew` — Package management & dev tools
+- `sudo xcode-select` — Xcode tools
+- `sudo launchctl` — Service management (launch agents, daemons)
+- `sudo systemctl` — System service control
+- `sudo dscacheutil` — DNS cache operations (debugging)
+- `sudo log` — System logging
+- `sudo diskutil` — Disk operations
+- `sudo lsof` — File descriptor diagnostics
+- `sudo clawhub` — Skill management
+
+**What This Enables:**
+- ✅ Automatic system updates + patching
+- ✅ Install dev tools (Xcode, libraries, SDKs)
+- ✅ Manage OpenClaw Gateway service
+- ✅ Debug DNS, network, and system issues
+- ✅ Install and manage skills from Clawhub
+
+**Security Notes:**
+- ✅ Whitelist-based (only these commands, nothing else)
+- ✅ No password required (safe because scoped)
+- ✅ Full audit trail in `/var/log/system.log`
+- ⚠️ Never used for modifications outside whitelist
+- ⚠️ Never used for file deletion or permission changes
+
+**Testing:**
+```bash
+# Verify whitelist is active
+sudo -l 2>/dev/null | grep NOPASSWD
+
+# Or try a safe command
+sudo dscacheutil -flushcache
+```
+
+---
 
 ## What Goes Here
 

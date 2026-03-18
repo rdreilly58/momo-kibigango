@@ -1,0 +1,49 @@
+@startuml ReillyDesignStudio Architecture
+
+!define AWSPUML https://raw.githubusercontent.com/awslabs/aws-icons-for-plantuml/v14.0/dist
+!include AWSPUML/ApplicationIntegration/APIGateway.puml
+!include AWSPUML/Compute/Lambda.puml
+!include AWSPUML/Database/RDS.puml
+!include AWSPUML/Frontend/CloudFront.puml
+!include AWSPUML/Storage/SimpleStorageService.puml
+
+package "Client Layer" {
+  [Web Browser] as browser
+  [Mobile App] as mobile
+}
+
+package "CDN & Hosting" {
+  [CloudFront] as cdn
+  [Vercel] as vercel
+}
+
+package "Application Layer" {
+  [Next.js Server] as app
+  [API Routes] as api
+}
+
+package "Services" {
+  [Stripe] as stripe
+  [Clerk Auth] as clerk
+  [SendGrid] as email
+}
+
+package "Data Layer" {
+  [PostgreSQL\n(Neon)] as db
+  [S3 Bucket] as s3
+}
+
+browser --> cdn: HTTPS
+mobile --> cdn: HTTPS
+cdn --> vercel: Cache
+vercel --> app: SSR
+app --> api: Routes
+api --> stripe: Payments
+api --> clerk: Auth
+api --> email: Notifications
+api --> db: Queries
+api --> s3: Assets
+clerk --> db: Sessions
+stripe --> db: Orders
+
+@enduml
