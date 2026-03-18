@@ -106,6 +106,78 @@ Created **direct process startup script** that bypasses launchctl:
 - **Security:** Only whitelisted commands work; full audit trail in system logs; no blanket sudo access
 - **Documented in:** TOOLS.md under "Sudo Access & Permissions"
 
+## March 18, 2026 — LOCAL LLM RESEARCH COMPLETE ✅
+
+### Research Conducted
+Comprehensive analysis of local model options for M4 Max Mac mini (24GB RAM) + OpenClaw
+
+**Sources:** 30+ web articles + GitHub analysis
+- insiderllm.com, like2byte.com, sitepoint.com, archy.net
+- GitHub: ml-explore/mlx, waybarrios/vllm-mlx, ollama/ollama
+- Reddit: r/LocalLLaMA, r/LocalLLM
+- Apple WWDC 2025 sessions
+
+### Key Findings
+
+**Hardware Capability:**
+- M4 Max is 27% faster than dual RTX 3090s for LLM inference
+- 22x more power-efficient than NVIDIA GPUs
+- Perfect for 14B parameter models (Q4 quantization)
+- 40GB/s memory bandwidth (key advantage)
+
+**Model Recommendation: Qwen 3 14B (Q4)**
+- Size: ~10GB VRAM
+- Speed: 15-18 tok/s (cached), 6-8s per 100-token response
+- Quality: Excellent for general use
+- License: Apache 2.0 (commercial OK)
+- Context: 64K tokens (supports long OpenClaw contexts)
+
+**Integration Options:**
+1. **vLLM-MLX** (RECOMMENDED) - OpenAI-compatible, MLX-accelerated
+2. **Ollama** - Simplest, but has OpenClaw hangs issue (#41871)
+3. **MLX-LM** - Direct Python, fastest, but needs wrapper
+
+**Critical Issue Found:**
+- Ollama causes indefinite hangs in OpenClaw 2026.3.8
+- GitHub: openclaw/openclaw#41871
+- Workaround: Reduce context window to 8-16K
+- Solution: Use vLLM-MLX instead
+
+**Cost Comparison (30 days):**
+- Cloud-only (Opus): $18-20/month
+- Hybrid (50% local): $9-10/month (50% savings)
+- Local-only: $0/month
+
+**Performance Tradeoff:**
+- Qwen 3 14B: 6-8s per query, 80-85% quality
+- Claude Opus: 1-2s per query, 95%+ quality
+
+### Recommendation: HYBRID APPROACH ⭐
+- Use local Qwen 3 14B for simple queries, drafts, research
+- Fall back to Claude Opus for complex code, strategic decisions
+- Expected savings: ~50% cost reduction
+- Setup time: ~2-3 hours
+
+### Implementation Plan (3 phases)
+- **Phase 1:** Proof of concept this week (install vLLM-MLX, benchmark)
+- **Phase 2:** OpenClaw integration (week 2)
+- **Phase 3:** Production setup with monitoring (week 3)
+
+### Documents Created
+1. **LOCAL_MODEL_RESEARCH_M4MAX.md** - Detailed technical analysis
+   - Hardware assessment, model options, integration paths
+   - Phase 1-3 roadmap, benchmarks, known issues
+   
+2. **LOCAL_MODEL_DECISION_TREE.md** - Decision guide for Bob
+   - 3 paths: Cloud-Only, Hybrid, Local-Only
+   - Performance expectations, cost analysis
+   - Week-by-week implementation plan
+
+### Next Steps
+- Bob reviews documents
+- Decides on implementation path (Cloud-only, Hybrid, or Local-only)
+- Phase 1 PoC begins if hybrid/local chosen
+
 ## March 15, 2026 — API KEY & CREDENTIAL ORGANIZATION
 - **Found Brave Search API key** in ~/.openclaw/config.json: `REDACTED_BRAVE_API_TOKEN`
 - **Decision:** Move API keys and important credentials to TOOLS.md instead of ~/.openclaw/config.json
