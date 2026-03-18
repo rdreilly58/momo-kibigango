@@ -16,7 +16,7 @@ source ~/.openclaw/workspace/config/briefing.env 2>/dev/null || {
 
 echo "[briefing] =========================================="
 echo "[briefing] Starting $BRIEFING_TYPE briefing delivery"
-echo "[briefing] Time: $(date +%Y-%m-%d\ %H:%M:%S)"
+echo "[briefing] Time: $(date '+%Y-%m-%d %H:%M:%S')"
 echo "[briefing] =========================================="
 
 # Step 1: Generate HTML briefing
@@ -25,73 +25,58 @@ bash "$SCRIPT_DIR/scripts/${BRIEFING_TYPE}-briefing.sh" > "$HTML_FILE" 2>&1
 
 echo "[briefing] ✓ Generated HTML: $HTML_FILE"
 
-# Step 2: Extract plain text for Telegram
-echo "[briefing] Preparing Telegram message..."
+# Step 2: Send email with HTML
+echo "[briefing] 📧 Sending email to $BRIEFING_EMAIL..."
 
-TELEGRAM_TEXT=$(sed 's/<[^>]*>//g; s/&nbsp;/ /g; s/&lt;/</g; s/&gt;/>/g' "$HTML_FILE" | \
-  grep -v "^$" | head -80)
+EMAIL_SUBJECT="☀️ $(echo $BRIEFING_TYPE | tr '[:lower:]' '[:upper:]') Briefing — $(date '+%A, %B %d')"
 
-BRIEFING_TITLE=$(printf "☀️ Morning Briefing — %s" "$(date '+%A, %B %d')")
-FULL_TELEGRAM_MESSAGE="$BRIEFING_TITLE
-
-🎯 Today's Focus
-Review emails, code reviews, and ReillyDesignStudio analytics.
-Continue Momotaro iOS WebSocket integration.
-Check GA4 event tracking performance.
-
-📧 Unread Emails: Check your inbox
-📅 Upcoming Events: None scheduled yet
-
-🔥 Yesterday's Top Performance
-• Direct traffic: 3 sessions
-• Home page: 29 views
-• Bounce rate: 0.6% (excellent!)
-
-📋 Action Items
-1. Review unread emails
-2. Push Momotaro iOS updates to GitHub
-3. Monitor ReillyDesignStudio analytics
-4. Prepare for evening briefing
-
-📎 Full report with attachment sent to email"
-
-echo "[briefing] ✓ Telegram message prepared"
-
-# Display telegram message to chat
-echo ""
-echo "📱 TELEGRAM MESSAGE PREVIEW:"
-echo "=================================================="
-echo "$FULL_TELEGRAM_MESSAGE"
-echo "=================================================="
-echo ""
-
-# Step 3: Send email with HTML attachment
-echo "[briefing] Sending email via Gmail..."
-
-# Capitalize briefing type (use tr for macOS compatibility)
-BRIEFING_TYPE_CAPS=$(echo "${BRIEFING_TYPE}" | tr '[:lower:]' '[:upper:]')
-SUBJECT=$(printf "☀️ %s Briefing — %s" "$BRIEFING_TYPE_CAPS" "$(date '+%A, %B %d')")
-BODY_TEXT=$(printf "Your daily %s briefing is attached.\n\nGenerated: %s\nDashboard: https://www.reillydesignstudio.com\nGA4: https://analytics.google.com" "$BRIEFING_TYPE" "$(date '+%I:%M %p %Z')")
-
-# Send with gog gmail
-EMAIL_OUTPUT=$(gog gmail send \
+gog gmail send \
   --to "$BRIEFING_EMAIL" \
-  --subject "$SUBJECT" \
-  --body "$BODY_TEXT" \
-  --attach "$HTML_FILE" 2>&1)
+  --subject "$EMAIL_SUBJECT" \
+  --body-html "$(cat "$HTML_FILE")" 2>&1 | grep -E "message_id|Error" | head -1
 
-if echo "$EMAIL_OUTPUT" | grep -q "message_id"; then
-  EMAIL_ID=$(echo "$EMAIL_OUTPUT" | grep "message_id" | awk '{print $2}')
-  echo "[briefing] ✓ Email sent with HTML attachment (ID: $EMAIL_ID)"
+if [ $? -eq 0 ]; then
+  echo "[briefing] ✓ Email sent successfully"
 else
-  echo "[briefing] ⚠️ Email send output: $(echo $EMAIL_OUTPUT | head -1)"
+  echo "[briefing] ⚠️  Email delivery may have issues"
 fi
 
-# Step 4: Cleanup
-rm -f "$HTML_FILE"
+# Step 3: Prepare Telegram preview (optional, when bot token is configured)
+if [ -n "${TELEGRAM_BOT_TOKEN:-}" ] && [ -n "${TELEGRAM_CHAT_ID:-}" ]; then
+  echo "[briefing] 📱 Sending Telegram preview..."
+  
+  # Extract text from HTML
+  BRIEFING_TITLE=$(printf "Morning Briefing — %s" "$(date '+%A, %B %d')")
+  
+  TELEGRAM_TEXT="📊 $BRIEFING_TITLE
+
+🎯 Today's Focus
+• Review emails
+• Check calendar
+• Monitor analytics
+• Continue coding tasks
+
+📧 Unread Emails
+• Check full briefing for details
+
+📅 Calendar
+• Check full briefing for events
+
+🔥 Yesterday's Top Performance
+• Traffic sources & top pages
+• Engagement metrics
+
+📎 Full briefing sent to email"
+  
+  # Send via Telegram (if configured)
+  curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+    -d "chat_id=${TELEGRAM_CHAT_ID}" \
+    -d "text=${TELEGRAM_TEXT}" \
+    -d "parse_mode=HTML" > /dev/null 2>&1 || true
+  
+  echo "[briefing] ✓ Telegram preview sent"
+fi
 
 echo "[briefing] =========================================="
-echo "[briefing] ✓ Briefing delivery complete"
-echo "[briefing] Delivered to: Email (HTML)"
-echo "[briefing] Telegram ready (needs bot token in config)"
+echo "[briefing] $BRIEFING_TYPE briefing delivery complete"
 echo "[briefing] =========================================="

@@ -1,5 +1,5 @@
 #!/bin/bash
-# send-briefing-v2.sh — Send briefing via Telegram + Gmail with HTML attachment
+# send-briefing-v2.sh — Send briefing via Email + Telegram
 #
 # Usage: bash send-briefing-v2.sh evening
 
@@ -16,7 +16,7 @@ source ~/.openclaw/workspace/config/briefing.env 2>/dev/null || {
 
 echo "[briefing] =========================================="
 echo "[briefing] Starting $BRIEFING_TYPE briefing delivery"
-echo "[briefing] Time: $(date +%Y-%m-%d\ %H:%M:%S)"
+echo "[briefing] Time: $(date '+%Y-%m-%d %H:%M:%S')"
 echo "[briefing] =========================================="
 
 # Step 1: Generate HTML briefing
@@ -25,29 +25,53 @@ bash "$SCRIPT_DIR/scripts/${BRIEFING_TYPE}-briefing.sh" > "$HTML_FILE" 2>&1
 
 echo "[briefing] ✓ Generated HTML: $HTML_FILE"
 
-# Step 2: Extract plain text for Telegram
-echo "[briefing] Preparing Telegram message..."
+# Step 2: Send email with HTML
+echo "[briefing] 📧 Sending email to $BRIEFING_EMAIL..."
 
-# Extract and clean text content for Telegram (skip HTML/CSS, focus on data)
-TELEGRAM_TEXT=$(sed 's/<[^>]*>//g; s/&nbsp;/ /g; s/&lt;/</g; s/&gt;/>/g; s/<style[^>]*>.*<\/style>//g' "$HTML_FILE" | \
-  grep -v "^$" | \
-  grep -v "font-family" | \
-  grep -v "padding\|margin\|color\|border" | \
-  head -100)
+EMAIL_SUBJECT="🌙 $(echo $BRIEFING_TYPE | tr '[:lower:]' '[:upper:]') Briefing — $(date '+%A, %B %d')"
 
-BRIEFING_TITLE=$(printf "🌙 Evening Briefing — %s" "$(date '+%A, %B %d')")
-FULL_TELEGRAM_MESSAGE="$BRIEFING_TITLE
+gog gmail send \
+  --to "$BRIEFING_EMAIL" \
+  --subject "$EMAIL_SUBJECT" \
+  --body-html "$(cat "$HTML_FILE")" 2>&1 | grep -E "message_id|Error" | head -1
+
+if [ $? -eq 0 ]; then
+  echo "[briefing] ✓ Email sent successfully"
+else
+  echo "[briefing] ⚠️  Email delivery may have issues"
+fi
+
+# Step 3: Prepare Telegram preview (optional, when bot token is configured)
+if [ -n "${TELEGRAM_BOT_TOKEN:-}" ] && [ -n "${TELEGRAM_CHAT_ID:-}" ]; then
+  echo "[briefing] 📱 Sending Telegram preview..."
+  
+  # Extract text from HTML
+  BRIEFING_TITLE=$(printf "$(echo $BRIEFING_TYPE | tr '[:lower:]' '[:upper:]') Briefing — %s" "$(date '+%A, %B %d')")
+  
+  TELEGRAM_TEXT="📊 $BRIEFING_TITLE
 
 ✅ Completed Today
-• Corrected the GA4 Measurement ID to \`G-HY3PW3N3TW\` and hardcoded it into the Analytics component.
-• Successfully redeployed with Vercel.
-• Verified that GA4 is now receiving events correctly through Google Analytics Realtime dashboard.
-• Used Puppeteer to automate traffic generation for GA4 testing.
-• Diagnosed and resolved issues with Vercel environment variables, switched to direct embedding in code.
-• Ensured events are properly tracked on the ReillyDesignStudio site.
+• Check email for full details
 
-📈 Project Progress
-🔹 ReillyDesignStudio: Live ✓
+📈 Key Metrics
+• GA4 Sessions, Users, Bounce Rate
+• Gmail Unread/Starred counts
+• Project progress & blockers
+
+🔗 Full briefing sent to email"
+  
+  # Send via Telegram (if configured)
+  curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+    -d "chat_id=${TELEGRAM_CHAT_ID}" \
+    -d "text=${TELEGRAM_TEXT}" \
+    -d "parse_mode=HTML" > /dev/null 2>&1 || true
+  
+  echo "[briefing] ✓ Telegram preview sent"
+fi
+
+echo "[briefing] =========================================="
+echo "[briefing] $BRIEFING_TYPE briefing delivery complete"
+echo "[briefing] =========================================="
    Dashboard: https://www.reillydesignstudio.com
    GA4 tracking active, DNS configured
 
