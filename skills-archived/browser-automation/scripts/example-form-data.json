@@ -1,0 +1,17 @@
+{
+  "fields": {
+    "#email": "user@example.com",
+    "#password": "securepassword123",
+    "input[name='firstName']": "John",
+    "input[name='lastName']": "Doe",
+    "input[name='phone']": "+1-555-123-4567",
+    "select#country": "US",
+    "select[name='state']": "VA",
+    "input[type='checkbox'][name='newsletter']": true,
+    "input[type='radio'][value='premium']": true,
+    "textarea#comments": "This is an automated form submission test.",
+    "#birthDate": "1990-01-01"
+  },
+  "submitButton": "button[type='submit']",
+  "notes": "This is an example form data file. Modify the selectors and values to match your target form."
+}

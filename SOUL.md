@@ -82,6 +82,31 @@ See **TASK_ROUTING.md** for detailed classification logic.
 - **Large build (16+ files):** Claude Code subagent with incremental batches (4 files per batch)
 - **Emergency/Direct:** Only if subagent repeatedly fails; direct generation as last resort
 
+### SUB-AGENT MODEL TIERING (Cost Optimization — March 18, 2026)
+
+**Subagent model selection hierarchy:**
+
+**Haiku (Fast, Cheap)**
+- **Use for:** Simple fixes (1 file, <100 lines), linting, formatting, syntax corrections
+- **Cost:** 10x cheaper than Opus
+- **Example:** "Add missing semicolons", "Fix import statements"
+
+**Opus (Capable, Balanced)**
+- **Use for:** Medium complexity (4-8 files), features, refactoring, architecture
+- **Cost:** Baseline (reference model)
+- **Example:** "Build a new feature", "Refactor this module"
+- **Default:** Use this unless task clearly fits Haiku or GPT-4
+
+**GPT-4 (Powerful, Premium)**
+- **Use for:** Large builds (16+ files), complex architecture, deep debugging
+- **Cost:** 2-3x more expensive than Opus
+- **Example:** "Redesign entire codebase", "Debug elusive concurrency bug"
+
+**Cost Savings Strategy:**
+- Estimate 40-50% cost reduction by using Haiku for simple tasks
+- Cascade pattern: Haiku first → Opus if needed → GPT-4 only for hard problems
+- Measure: Track subagent costs per task in memory for future optimization
+
 **NON-CODING COMPLEX TASKS** → Opus (see above)
 
 **SPECIALIZED TASKS** → Skill-based (no LLM needed)

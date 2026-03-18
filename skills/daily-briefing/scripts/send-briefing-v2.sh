@@ -1,9 +1,9 @@
 #!/bin/bash
-# send-briefing-v2.sh — Send briefing via Email + Telegram
+# send-briefing-v2.sh — Send briefing via Email + Telegram with health checks
 #
 # Usage: bash send-briefing-v2.sh evening
 
-set -euo pipefail
+set -uo pipefail  # Remove -e to prevent trap from killing script on warnings
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BRIEFING_TYPE="${1:-evening}"
@@ -13,6 +13,25 @@ source ~/.openclaw/workspace/config/briefing.env 2>/dev/null || {
   echo "[briefing] Error: briefing.env not found"
   exit 1
 }
+
+# Health check URLs (from TOOLS.md)
+HEALTHCHECK_EVENING="https://hc-ping.com/d570cbc7-1164-492b-98f1-0443ce23482e"
+HEALTHCHECK_MORNING="https://hc-ping.com/43edd8e8-e569-4bad-b044-90ab1546c271"
+
+# Determine which health check to use
+if [ "$BRIEFING_TYPE" = "evening" ]; then
+  HEALTHCHECK_URL="$HEALTHCHECK_EVENING"
+else
+  HEALTHCHECK_URL="$HEALTHCHECK_MORNING"
+fi
+
+# Error trap: alert on failure
+trap 'echo "[briefing] ❌ ERROR: $BRIEFING_TYPE briefing failed"; \
+      if [ -n "${TELEGRAM_BOT_TOKEN:-}" ] && [ -n "${TELEGRAM_CHAT_ID:-}" ]; then \
+        curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+          -d "chat_id=${TELEGRAM_CHAT_ID}" \
+          -d "text=⚠️ BRIEFING FAILED: ${BRIEFING_TYPE} briefing error at $(date '+%H:%M %Z')" > /dev/null 2>&1 || true; \
+      fi' ERR
 
 echo "[briefing] =========================================="
 echo "[briefing] Starting $BRIEFING_TYPE briefing delivery"
@@ -28,7 +47,7 @@ echo "[briefing] ✓ Generated HTML: $HTML_FILE"
 # Step 2: Send email with HTML
 echo "[briefing] 📧 Sending email to $BRIEFING_EMAIL..."
 
-EMAIL_SUBJECT="🌙 $(echo $BRIEFING_TYPE | tr '[:lower:]' '[:upper:]') Briefing — $(date '+%A, %B %d')"
+EMAIL_SUBJECT="$(echo $BRIEFING_TYPE | tr '[:lower:]' '[:upper:]') Briefing — $(date '+%A, %B %d')"
 
 gog gmail send \
   --to "$BRIEFING_EMAIL" \
@@ -50,15 +69,17 @@ if [ -n "${TELEGRAM_BOT_TOKEN:-}" ] && [ -n "${TELEGRAM_CHAT_ID:-}" ]; then
   
   TELEGRAM_TEXT="📊 $BRIEFING_TITLE
 
-✅ Completed Today
-• Check email for full details
+✅ Status
+• Email sent with full briefing
+• Check Gmail for complete report
 
 📈 Key Metrics
-• GA4 Sessions, Users, Bounce Rate
-• Gmail Unread/Starred counts
-• Project progress & blockers
+• GA4 analytics (7-day trend)
+• Gmail unread count
+• Project progress
+• Calendar events
 
-🔗 Full briefing sent to email"
+📎 Full briefing with metrics sent to email"
   
   # Send via Telegram (if configured)
   curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
@@ -72,74 +93,9 @@ fi
 echo "[briefing] =========================================="
 echo "[briefing] $BRIEFING_TYPE briefing delivery complete"
 echo "[briefing] =========================================="
-   Dashboard: https://www.reillydesignstudio.com
-   GA4 tracking active, DNS configured
 
-🔹 Momotaro: In Progress
-   iOS app development
-
-🎯 KEY METRICS (last 7 days)
-• Active Users: 41 (-93.8% ↘️)
-• Total Sessions: 49 (-93.4% ↘️)
-• Bounce Rate: 0.6%
-• Avg Session: 58.4s
-
-🔥 TOP PAGES
-1. / (29 views)
-2. /shop/services (5 views)
-3. /portfolio/gallery-44-print (2 views)
-4. /portfolio (9 views)
-5. /shop (2 views)
-
-📋 Tomorrow's Prep
-Follow up on AWS mac instance approval
-Review GA4 tracking performance
-Continue Momotaro iOS development
-
-📎 Full report with PDF sent to email"
-
-echo "[briefing] ✓ Telegram message prepared"
-
-# Display telegram message to chat
-echo ""
-echo "📱 TELEGRAM MESSAGE PREVIEW:"
-echo "=================================================="
-echo "$FULL_TELEGRAM_MESSAGE"
-echo "=================================================="
-echo ""
-
-# Step 3: Send email with HTML attachment
-echo "[briefing] Sending email via Gmail..."
-
-# Capitalize briefing type (use tr for macOS compatibility)
-BRIEFING_TYPE_CAPS=$(echo "${BRIEFING_TYPE}" | tr '[:lower:]' '[:upper:]')
-SUBJECT=$(printf "🌙 %s Briefing — %s" "$BRIEFING_TYPE_CAPS" "$(date '+%A, %B %d')")
-BODY_TEXT=$(printf "Your daily %s briefing is attached as HTML.\n\nGenerated: %s\nDashboard: https://www.reillydesignstudio.com\nGA4: https://analytics.google.com" "$BRIEFING_TYPE" "$(date '+%I:%M %p %Z')")
-
-# Send with gog gmail (supports --attach flag)
-EMAIL_OUTPUT=$(gog gmail send \
-  --to "$BRIEFING_EMAIL" \
-  --subject "$SUBJECT" \
-  --body "$BODY_TEXT" \
-  --attach "$HTML_FILE" 2>&1)
-
-if echo "$EMAIL_OUTPUT" | grep -q "message_id"; then
-  EMAIL_ID=$(echo "$EMAIL_OUTPUT" | grep "message_id" | awk '{print $2}')
-  echo "[briefing] ✓ Email sent with HTML attachment (ID: $EMAIL_ID)"
-else
-  echo "[briefing] ⚠️ Email send output: $(echo $EMAIL_OUTPUT | head -1)"
-fi
-
-# Step 4: For now, skip Telegram (would need bot token setup)
-# In production, we'd send via proper Telegram API
-echo "[briefing] ⚠️ Telegram delivery requires bot setup (skipping for now)"
-echo "[briefing]    → To enable: Set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID in briefing.env"
-
-# Step 5: Cleanup
-rm -f "$HTML_FILE"
-
-echo "[briefing] =========================================="
-echo "[briefing] ✓ Briefing delivery complete"
-echo "[briefing] Delivered to: Email (HTML)"
-echo "[briefing] Note: PDF conversion WIP, currently sending HTML"
-echo "[briefing] =========================================="
+# Ping health check on success
+echo "[briefing] 📍 Pinging health check..."
+curl -s -X POST "$HEALTHCHECK_URL" > /dev/null 2>&1 && \
+  echo "[briefing] ✓ Health check pinged" || \
+  echo "[briefing] ⚠️  Health check ping failed (non-fatal)"

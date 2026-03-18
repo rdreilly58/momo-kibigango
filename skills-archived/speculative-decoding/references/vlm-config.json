@@ -1,0 +1,56 @@
+{
+  "description": "vLLM speculative decoding configuration",
+  "version": "1.0.0",
+  "server": {
+    "host": "0.0.0.0",
+    "port": 8000,
+    "api_key": "optional-secret-key"
+  },
+  "models": {
+    "draft": {
+      "name": "meta-llama/Llama-2-7b-hf",
+      "source": "huggingface",
+      "quantization": "bfloat16",
+      "dtype": "bfloat16",
+      "max_model_len": 4096,
+      "gpu_memory_fraction": 0.3
+    },
+    "verifier": {
+      "name": "meta-llama/Llama-2-13b-hf",
+      "source": "huggingface",
+      "quantization": "bfloat16",
+      "dtype": "bfloat16",
+      "max_model_len": 4096,
+      "gpu_memory_fraction": 0.6
+    }
+  },
+  "speculative_decoding": {
+    "enabled": true,
+    "speculation_length": 5,
+    "draft_model_key": "draft",
+    "verifier_model_key": "verifier"
+  },
+  "inference": {
+    "max_tokens": 256,
+    "temperature": 0.7,
+    "top_p": 0.9,
+    "top_k": 40,
+    "repetition_penalty": 1.0
+  },
+  "performance": {
+    "batch_size": 32,
+    "gpu_memory_utilization": 0.9,
+    "enable_prefix_caching": true,
+    "max_num_batched_tokens": 4096
+  },
+  "logging": {
+    "level": "info",
+    "log_dir": "./logs",
+    "log_responses": false
+  },
+  "fallback": {
+    "enabled": true,
+    "fallback_to_api": "claude-opus-4-0",
+    "fallback_timeout_seconds": 5
+  }
+}
