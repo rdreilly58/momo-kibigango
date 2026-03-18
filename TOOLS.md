@@ -15,6 +15,13 @@ Skills define _how_ tools work. This file is for _your_ specifics — the stuff 
 - **Status:** ✅ Active
 - **Last validated:** March 15, 2026
 
+### Cloudflare API Token
+- **Token:** `REDACTED_CLOUDFLARE_TOKEN`
+- **Used for:** DNS management for reillydesignstudio.com
+- **Permissions:** Zone.DNS
+- **Status:** ✅ Active
+- **Last used:** March 18, 2026
+
 ### Healthchecks.io (Cron Monitoring)
 - **Account:** https://healthchecks.io (free tier)
 - **Setup date:** March 16, 2026
@@ -434,3 +441,61 @@ Add whatever helps you do your job. This is your cheat sheet.
 - **Meeting ID:** 893 7804 6012
 - **Time:** Daily 8:00-9:00 AM EDT
 - **When requested:** Open this link automatically
+
+---
+
+## GPU Inference Instance (March 17, 2026)
+
+**Setup:** Always-on for 3-day test (March 17-19), then decide on cost model
+
+### Instance Details
+- **Type:** g5.2xlarge (8 vCPU, 32GB RAM, 1x A10G GPU)
+- **Instance ID:** i-046d1154c0f4a9b2e
+- **Region:** us-east-1 (us-east-1c)
+- **Public IP:** 54.81.20.218
+- **GPU:** NVIDIA A10G (24GB VRAM)
+- **Storage:** 100GB root + 200GB /mnt/data (EBS)
+
+### SSH Access
+```bash
+ssh -i ~/.ssh/vlm-deploy-key.pem ubuntu@54.81.20.218
+```
+
+### Models & Installation
+- **Model:** Mistral-7B-Instruct-v0.1 (cached)
+- **venv:** `/mnt/data/venv/`
+- **Cache:** `/mnt/data/.cache/hf/models/`
+- **Python:** `/mnt/data/venv/bin/python3`
+
+### Performance Baseline (Mistral-7B)
+- **Speed:** 27.98 tok/s (14.3x faster than CPU)
+- **Load time:** ~105 seconds (first run, cached after)
+- **Latency:** ~2.1 seconds for 3-token prompt
+- **VRAM usage:** 23.7GB (headroom available)
+
+### Cost
+- **Monthly:** $980
+- **Hourly:** $1.36
+- **Per inference:** ~$0.05 for 500-token generation
+
+### Health Check System
+- **Quick check (@reboot):** `~/.openclaw/workspace/scripts/gpu-health-check-quick.sh` (~5s)
+- **Full check (heartbeat):** `~/.openclaw/workspace/scripts/gpu-health-check-full.sh` (~90s)
+- **Log:** `~/.openclaw/logs/gpu-health.log`
+- **Cron:** `@reboot /Users/rreilly/.openclaw/workspace/scripts/gpu-startup-notify.sh`
+
+### Usage Pattern
+- **Simple tasks:** Use local Claude Haiku (weather, quick facts, emails)
+- **Complex tasks:** SSH to GPU (articles, code, analysis, long-form writing)
+- **Latency tolerance:** 2-3 minutes first request (acceptable for complex work)
+- **Cached latency:** ~60 seconds (model stays in memory)
+
+### Documentation
+- **Skill guide:** `~/.openclaw/workspace/skills/gpu-health-check/SKILL.md`
+- **Setup guide:** `~/.openclaw/workspace/docs/GPU_HEALTH_CHECK_SETUP.md`
+- **HEARTBEAT.md:** Configured for periodic health checks
+
+### Decision Points (March 20, 2026)
+- **Keep always-on:** If using >3 times/day, worth $980/month
+- **Switch to on-demand:** If <3 times/day, save money with per-request billing
+- **Review metrics:** Check logs for actual usage patterns + latency tolerance

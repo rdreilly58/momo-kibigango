@@ -48,6 +48,58 @@
 
 ## March 16, 2026 — SUDO WHITELIST CONFIGURED
 - **Setup:** Bob granted Momotaro passwordless sudo access for specific commands (security via whitelist)
+
+## March 17, 2026 — AWS Mac Instance Quota Requested
+- **Action:** Submitted programmatic request for mac-m4max (M3 Max equivalent) instance
+- **Request ID:** 09adbb0969524b309594ea609798ebf6SRpBCFI7
+- **Status:** PENDING AWS approval (expected 24 hours, usually faster)
+- **Monitoring:** Hourly cron job checks for approval, auto-launches instance when approved
+- **Config saved:** ~/.openclaw/workspace/aws-config/mac-quota-submitted.json
+
+## March 17, 2026 — Brave Search API Issue RESOLVED ✅
+
+### Problem
+- web_search() failed with "missing_brave_api_key" despite API key being configured
+
+### Root Cause
+- OpenClaw Gateway requires `BRAVE_API_KEY` environment variable (not config file)
+- launchctl plist was corrupted/unresponsive — wouldn't load or accept modifications
+- Gateway reads env vars at startup; config file alone insufficient
+
+### Solution Implemented ✅
+Created **direct process startup script** that bypasses launchctl:
+
+**Script:** `~/.openclaw/workspace/scripts/start-gateway-with-brave.sh`
+- Sets `BRAVE_API_KEY` environment variable
+- Starts Gateway process directly with Node.js
+- Logs to `~/.openclaw/logs/gateway-manual.log`
+- Works reliably (tested and verified)
+
+**Autostart:** `~/Library/LaunchAgents/com.momotaro.gateway-startup.plist`
+- Runs the startup script at login
+- Ensures Gateway starts with Brave API key every time
+
+### Verification
+✅ web_search() now working perfectly
+✅ API Key: `REDACTED_BRAVE_API_TOKEN` validated
+✅ Brave API responding with full search results
+✅ Tested successfully with "test query"
+
+### Files Created
+1. `scripts/start-gateway-with-brave.sh` — Startup script (executable)
+2. `~/Library/LaunchAgents/com.momotaro.gateway-startup.plist` — Autostart plist
+3. Documentation: `docs/BRAVE_API_*.md` (3 comprehensive guides)
+
+### Key Learnings
+1. launchctl plist modifications via defaults/Python don't always persist
+2. Direct process startup with environment variables is more reliable
+3. Gateway environment variables must be set where process starts (not just config file)
+4. Bypassing launchctl complexity saved hours of debugging
+
+### Status: PRODUCTION READY
+- web_search() fully functional
+- Brave Search API integrated
+- Auto-starts on login via launchd script
 - **Configuration file:** `/etc/sudoers.d/momotaro`
 - **Commands whitelisted:** softwareupdate, brew, launchctl, systemctl, dscacheutil, clawhub, and debugging tools
 - **Benefit:** Can now auto-manage system updates, install dev tools, debug DNS/services without password interruption

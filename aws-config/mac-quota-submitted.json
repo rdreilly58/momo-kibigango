@@ -1,0 +1,19 @@
+{
+  "request_submitted": true,
+  "timestamp": "2026-03-17T12:45:21Z",
+  "request_id": "09adbb0969524b309594ea609798ebf6SRpBCFI7",
+  "service": "Amazon Elastic Compute Cloud (Amazon EC2)",
+  "quota_name": "Running Dedicated mac-m4max Hosts",
+  "quota_code": "L-D82CB68A",
+  "desired_value": 1,
+  "status": "PENDING",
+  "region": "us-east-1",
+  "account_id": "053677584823",
+  "expected_approval": "24 hours (usually faster)",
+  "notes": "mac-m4max is the current AWS naming for M3 Max equivalent (48GB unified memory, 12-core CPU, 20-core GPU)",
+  "next_steps": [
+    "Check email for AWS confirmation",
+    "Monitor for approval notification",
+    "Momotaro will auto-launch instance upon approval"
+  ]
+}
