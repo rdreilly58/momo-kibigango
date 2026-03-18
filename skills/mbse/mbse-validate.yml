@@ -1,0 +1,154 @@
+name: MBSE Validation
+
+on:
+  pull_request:
+    paths:
+      - '**/model.yaml'
+      - '.github/workflows/mbse-validate.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - '**/model.yaml'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    name: Validate MBSE Models
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      
+      - name: Install dependencies
+        run: |
+          pip install pyyaml
+      
+      - name: Find model files
+        id: models
+        run: |
+          MODEL_FILES=$(find . -name "model.yaml" -type f | grep -v node_modules | tr '\n' ' ')
+          echo "files=$MODEL_FILES" >> $GITHUB_OUTPUT
+          echo "Found models: $MODEL_FILES"
+      
+      - name: Validate models
+        if: steps.models.outputs.files != ''
+        run: |
+          python3 - << 'EOF'
+          import yaml
+          import sys
+          import os
+          
+          models = "${{ steps.models.outputs.files }}".split()
+          errors = []
+          
+          for model_file in models:
+              print(f"\n📋 Validating: {model_file}")
+              try:
+                  with open(model_file, 'r') as f:
+                      model = yaml.safe_load(f)
+                  
+                  # Check required sections
+                  required = ['system', 'requirements', 'architecture', 'tests']
+                  for section in required:
+                      if section not in model:
+                          errors.append(f"{model_file}: Missing section '{section}'")
+                      else:
+                          print(f"  ✓ {section}: OK")
+                  
+                  # Validate requirements have IDs and status
+                  for req in model.get('requirements', []):
+                      if 'id' not in req:
+                          errors.append(f"{model_file}: Requirement missing 'id'")
+                      if 'status' not in req:
+                          errors.append(f"{model_file}: Requirement {req.get('id')} missing 'status'")
+                  
+                  # Validate tests
+                  for test in model.get('tests', []):
+                      if 'id' not in test:
+                          errors.append(f"{model_file}: Test missing 'id'")
+                      if 'verifies' not in test or not test['verifies']:
+                          errors.append(f"{model_file}: Test {test.get('id')} missing 'verifies'")
+                  
+              except Exception as e:
+                  errors.append(f"{model_file}: {str(e)}")
+          
+          if errors:
+              print("\n❌ Validation failed:")
+              for error in errors:
+                  print(f"  • {error}")
+              sys.exit(1)
+          else:
+              print("\n✓ All models valid!")
+              sys.exit(0)
+          EOF
+      
+      - name: Generate coverage report
+        if: success()
+        run: |
+          python3 - << 'EOF'
+          import yaml
+          import os
+          
+          models = "${{ steps.models.outputs.files }}".split()
+          
+          for model_file in models:
+              with open(model_file, 'r') as f:
+                  model = yaml.safe_load(f)
+              
+              reqs = model.get('requirements', [])
+              tests = model.get('tests', [])
+              
+              # Count tested requirements
+              tested = 0
+              for req in reqs:
+                  req_id = req.get('id')
+                  for test in tests:
+                      if req_id in test.get('verifies', []):
+                          tested += 1
+                          break
+              
+              coverage = int(100 * tested / len(reqs)) if reqs else 0
+              
+              print(f"\n📊 Coverage Report: {model_file}")
+              print(f"  Total Requirements: {len(reqs)}")
+              print(f"  Covered by Tests: {tested}")
+              print(f"  Coverage: {coverage}%")
+              
+              # Check for critical untested items
+              critical_untested = []
+              for req in reqs:
+                  if req.get('priority') == 'CRITICAL':
+                      req_id = req.get('id')
+                      tested_flag = False
+                      for test in tests:
+                          if req_id in test.get('verifies', []):
+                              tested_flag = True
+                              break
+                      if not tested_flag:
+                          critical_untested.append(req_id)
+              
+              if critical_untested:
+                  print(f"  ⚠️  CRITICAL untested: {', '.join(critical_untested)}")
+          EOF
+      
+      - name: Post PR comment
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const yaml = require('js-yaml');
+            
+            // This is a simplified version - in practice you'd parse model files
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '✅ MBSE models validated successfully'
+            });

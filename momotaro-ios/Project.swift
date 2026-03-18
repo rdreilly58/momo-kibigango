@@ -11,7 +11,7 @@ let project = Project(
             deploymentTargets: .iOS("17.0"),
             infoPlist: .file(path: "Info.plist"),
             sources: ["Sources/**"],
-            resources: ["Resources/**", "Assets.xcassets/**"]
+            resources: ["Resources/**", "Assets.xcassets/**", "GoogleService-Info.plist"]
         ),
         .target(
             name: "Momotaro-iOSTests",

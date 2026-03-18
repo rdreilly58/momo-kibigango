@@ -71,15 +71,30 @@ def get_gmail_data():
         result = subprocess.run(cmd_unread, shell=True, capture_output=True, text=True, timeout=10)
         unread = result.stdout.strip() if result.returncode == 0 else "--"
         
-        # Get flagged count
-        cmd_flagged = "gog gmail search 'is:starred' --json 2>/dev/null | jq '.threads | length'"
-        result = subprocess.run(cmd_flagged, shell=True, capture_output=True, text=True, timeout=10)
-        flagged = result.stdout.strip() if result.returncode == 0 else "--"
+        # Get flagged/starred count
+        cmd_starred = "gog gmail search 'is:starred' --json 2>/dev/null | jq '.threads | length'"
+        result = subprocess.run(cmd_starred, shell=True, capture_output=True, text=True, timeout=10)
+        starred = result.stdout.strip() if result.returncode == 0 else "--"
         
-        return {"unread": unread, "flagged": flagged}
+        # Get today's email count
+        cmd_today = "gog gmail search 'after:" + datetime.now().strftime('%Y-%m-%d') + "' --json 2>/dev/null | jq '.threads | length'"
+        result = subprocess.run(cmd_today, shell=True, capture_output=True, text=True, timeout=10)
+        today = result.stdout.strip() if result.returncode == 0 else "--"
+        
+        # Get urgent/important count
+        cmd_urgent = "gog gmail search 'is:important OR is:starred after:" + datetime.now().strftime('%Y-%m-%d') + "' --json 2>/dev/null | jq '.threads | length'"
+        result = subprocess.run(cmd_urgent, shell=True, capture_output=True, text=True, timeout=10)
+        urgent = result.stdout.strip() if result.returncode == 0 else "--"
+        
+        return {
+            "unread": unread,
+            "starred": starred,
+            "today": today,
+            "urgent": urgent
+        }
     except Exception as e:
         print(f"[Gmail] Error: {e}", file=__import__('sys').stderr)
-        return {"unread": "--", "flagged": "--"}
+        return {"unread": "--", "starred": "--", "today": "--", "urgent": "--"}
 
 def main():
     ga4 = get_ga4_data()

@@ -1,0 +1,46 @@
+sequenceDiagram
+    actor User
+    participant App as Momotaro iOS
+    participant WS as WebSocket
+    participant Gateway as OpenClaw Gateway
+    participant Agent as Claude Agent
+    
+    User ->> App: Launch app
+    activate App
+    App ->> WS: Connect to gateway
+    activate WS
+    
+    WS ->> Gateway: WebSocket handshake
+    activate Gateway
+    Gateway ->> Agent: Authenticate connection
+    Agent -->> Gateway: Session token
+    Gateway -->> WS: Connected
+    deactivate Gateway
+    deactivate WS
+    
+    App -->> User: Ready
+    deactivate App
+    
+    User ->> App: Send command
+    activate App
+    App ->> WS: {"action": "search", "query": "..."}
+    activate WS
+    
+    WS ->> Gateway: Forward message
+    activate Gateway
+    Gateway ->> Agent: Execute action
+    activate Agent
+    
+    Agent ->> Agent: Process search
+    Agent -->> Gateway: Result JSON
+    deactivate Agent
+    
+    Gateway -->> WS: Send result
+    deactivate Gateway
+    deactivate WS
+    
+    WS -->> App: {"status": "success", "data": [...]}
+    App -->> User: Display results
+    deactivate App
+    
+    Note over App,Agent: Connection stays open<br/>for real-time updates

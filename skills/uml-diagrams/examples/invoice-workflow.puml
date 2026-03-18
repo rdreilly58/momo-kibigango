@@ -1,0 +1,30 @@
+@startuml Invoice Generation Workflow
+
+start
+:Admin clicks "Generate Invoice";
+:System fetches project data;
+:Validate project status;
+
+if (Project active?) then (yes)
+  :Calculate total hours;
+  :Apply rate structure;
+  :Create invoice object;
+  :Store in database;
+  
+  if (Send email?) then (yes)
+    :Generate PDF;
+    :Email to client;
+    :Log activity;
+  else (no)
+    :Log activity;
+  endif
+  
+  :Display confirmation;
+else (no)
+  :Show error message;
+  :Return to projects list;
+endif
+
+stop
+
+@enduml

@@ -1,0 +1,230 @@
+# MBSE System Model Schema (YAML)
+# Version 1.0
+# Purpose: Define system requirements, architecture, and tests with full traceability
+
+# ============================================================================
+# SYSTEM METADATA
+# ============================================================================
+system:
+  name: string                    # System name
+  version: string                 # Model version (e.g., "1.0")
+  description: string             # Brief system description
+  owner: string                   # Responsible person/team
+  created_date: date              # Model creation date
+  last_modified: date             # Last update date
+  status: enum                    # draft | active | deprecated
+    - draft
+    - active
+    - deprecated
+
+# ============================================================================
+# REQUIREMENTS
+# ============================================================================
+requirements:
+  - id: string                    # Unique identifier (e.g., REQ-001)
+    title: string                 # Requirement title
+    description: string           # Detailed requirement
+    category: enum                # Functional | Non-Functional | Safety | Performance
+      - Functional
+      - Non-Functional
+      - Safety
+      - Performance
+      - Security
+      - Usability
+    priority: enum                # CRITICAL | HIGH | MEDIUM | LOW
+      - CRITICAL
+      - HIGH
+      - MEDIUM
+      - LOW
+    status: enum                  # proposed | approved | implemented | verified | deprecated
+      - proposed
+      - approved
+      - implemented
+      - verified
+      - deprecated
+    owner: string                 # Person responsible
+    traces_to:                    # Architecture/Test IDs this requirement traces to
+      - ARCH-001
+      - TEST-001
+    related_requirements:         # Dependencies on other requirements
+      - REQ-002
+    acceptance_criteria:          # How to verify requirement is met
+      - string
+    risk_level: enum              # Associated risk
+      - LOW
+      - MEDIUM
+      - HIGH
+      - CRITICAL
+    notes: string                 # Additional notes
+
+# ============================================================================
+# ARCHITECTURE
+# ============================================================================
+architecture:
+  components:
+    - id: string                  # Component identifier (ARCH-001)
+      name: string                # Component name
+      type: enum                  # Service | Module | Database | API | UI | External
+        - Service
+        - Module
+        - Database
+        - API
+        - UI
+        - External
+        - Subsystem
+      description: string
+      realizes:                   # Which requirements this component satisfies
+        - REQ-001
+      depends_on:                 # Dependencies on other components
+        - ARCH-002
+      interfaces:                 # Exposed interfaces
+        - name: string
+          protocol: string        # HTTP | gRPC | WebSocket | MQTT | Direct
+          port: integer
+      responsibilities:           # What this component does
+        - string
+      technology_stack:           # Implementation tech
+        - string
+      owner: string               # Team/person owning this component
+      
+  interactions:                   # Component-to-component communication
+    - from: string                # Source component ID
+      to: string                  # Target component ID
+      protocol: string            # Communication protocol
+      frequency: enum             # sync | async | event-driven
+        - sync
+        - async
+        - event-driven
+      description: string
+
+# ============================================================================
+# BEHAVIOR
+# ============================================================================
+behaviors:
+  - id: string                    # Behavior identifier
+    name: string
+    description: string
+    type: enum                    # Use-Case | Workflow | State-Machine | Scenario
+      - Use-Case
+      - Workflow
+      - State-Machine
+      - Scenario
+    actors:                       # Who/what triggers this behavior
+      - string
+    steps:                        # Sequential steps or state transitions
+      - step: integer
+        description: string
+        component: string         # Which component executes
+        action: string
+        condition: string         # Optional: if/when condition
+    success_criteria:
+      - string
+    failure_handling: string      # What happens if this fails
+    related_requirements:
+      - REQ-001
+
+# ============================================================================
+# TESTS
+# ============================================================================
+tests:
+  - id: string                    # Test identifier (TEST-001)
+    name: string                  # Test name
+    description: string
+    type: enum                    # Unit | Integration | System | Acceptance
+      - Unit
+      - Integration
+      - System
+      - Acceptance
+      - Performance
+      - Security
+    verifies:                     # Which requirement(s) this test verifies
+      - REQ-001
+    exercises:                    # Which architecture component(s) this exercises
+      - ARCH-001
+    priority: enum
+      - CRITICAL
+      - HIGH
+      - MEDIUM
+      - LOW
+    status: enum                  # draft | ready | passed | failed | skipped
+      - draft
+      - ready
+      - passed
+      - failed
+      - skipped
+    coverage_percentage: float    # How much of requirement is covered (0-100)
+    test_procedure:               # How to run this test
+      - string
+    expected_result: string       # What success looks like
+    owner: string                 # Test owner
+    last_run: date
+    notes: string
+
+# ============================================================================
+# RISKS
+# ============================================================================
+risks:
+  - id: string                    # Risk identifier
+    title: string
+    description: string
+    probability: enum             # Likelihood
+      - LOW
+      - MEDIUM
+      - HIGH
+    impact: enum                  # Severity if occurs
+      - LOW
+      - MEDIUM
+      - HIGH
+      - CRITICAL
+    related_requirement: string   # Associated requirement
+    mitigation_strategy: string   # How to reduce risk
+    owner: string                 # Risk owner
+    status: enum                  # identified | mitigated | resolved | accepted
+      - identified
+      - mitigated
+      - resolved
+      - accepted
+
+# ============================================================================
+# DECISIONS (Architecture Decision Records)
+# ============================================================================
+decisions:
+  - id: string                    # Decision identifier (ADR-001)
+    title: string
+    date: date
+    status: enum                  # proposed | accepted | superseded | deprecated
+      - proposed
+      - accepted
+      - superseded
+      - deprecated
+    context: string               # Why this decision was needed
+    decision: string              # What was decided
+    rationale: string             # Why this choice
+    consequences: string          # Trade-offs and implications
+    alternatives_considered:
+      - string
+    related_requirements:
+      - REQ-001
+    owner: string
+
+# ============================================================================
+# TRACEABILITY MATRIX (AUTO-GENERATED)
+# ============================================================================
+# This section is generated automatically by the MBSE tool
+# Do not edit manually
+traceability:
+  requirement_to_architecture: {}  # Maps REQ -> ARCH components
+  requirement_to_tests: {}         # Maps REQ -> TEST cases
+  architecture_to_tests: {}        # Maps ARCH -> TEST cases
+  risk_coverage: {}                # Which requirements mitigate which risks
+
+# ============================================================================
+# METRICS & COVERAGE
+# ============================================================================
+metrics:
+  total_requirements: integer
+  implemented_requirements: integer
+  verified_requirements: integer
+  test_coverage_percentage: float
+  architecture_completeness: float
+  risk_mitigation_rate: float

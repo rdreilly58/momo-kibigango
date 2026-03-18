@@ -16,7 +16,7 @@ source ~/.openclaw/workspace/config/briefing.env 2>/dev/null || {
 }
 
 # Fetch live data
-BRIEFING_DATA=$(python3 "$SCRIPT_DIR/scripts/populate-briefing.py" 2>/dev/null || echo '{"ga4":{"sessions":"--","users":"--","bounce":"--","html":"","sources_html":"","pages_html":""},"gmail":{"unread":"--","flagged":"--"}}')
+BRIEFING_DATA=$(python3 "$SCRIPT_DIR/scripts/populate-briefing.py" 2>/dev/null || echo '{"ga4":{"sessions":"--","users":"--","bounce":"--","html":"","sources_html":"","pages_html":""},"gmail":{"unread":"--","starred":"--","today":"--","urgent":"--"}}')
 GA4_SESSIONS=$(echo "$BRIEFING_DATA" | jq -r '.ga4.sessions // "--"')
 GA4_USERS=$(echo "$BRIEFING_DATA" | jq -r '.ga4.users // "--"')
 GA4_BOUNCE=$(echo "$BRIEFING_DATA" | jq -r '.ga4.bounce // "--"')
@@ -24,7 +24,9 @@ GA4_HTML=$(echo "$BRIEFING_DATA" | jq -r '.ga4.html // ""')
 GA4_SOURCES_HTML=$(echo "$BRIEFING_DATA" | jq -r '.ga4.sources_html // ""')
 GA4_PAGES_HTML=$(echo "$BRIEFING_DATA" | jq -r '.ga4.pages_html // ""')
 GMAIL_UNREAD=$(echo "$BRIEFING_DATA" | jq -r '.gmail.unread // "--"')
-GMAIL_FLAGGED=$(echo "$BRIEFING_DATA" | jq -r '.gmail.flagged // "--"')
+GMAIL_STARRED=$(echo "$BRIEFING_DATA" | jq -r '.gmail.starred // "--"')
+GMAIL_TODAY=$(echo "$BRIEFING_DATA" | jq -r '.gmail.today // "--"')
+GMAIL_URGENT=$(echo "$BRIEFING_DATA" | jq -r '.gmail.urgent // "--"')
 
 # Create HTML content
 cat > /tmp/morning-briefing.html << EOF
@@ -76,8 +78,10 @@ cat > /tmp/morning-briefing.html << EOF
 
         <div class="section">
             <h2>📧 Email Activity</h2>
+            <div class="stat">Today: <strong>$GMAIL_TODAY</strong> emails</div>
             <div class="stat">Unread: <strong>$GMAIL_UNREAD</strong></div>
-            <div class="stat">Flagged: <strong>$GMAIL_FLAGGED</strong></div>
+            <div class="stat">Starred: <strong>$GMAIL_STARRED</strong></div>
+            <div class="stat">⚡ Urgent: <strong>$GMAIL_URGENT</strong></div>
         </div>
 
         $GA4_HTML

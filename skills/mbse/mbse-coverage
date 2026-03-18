@@ -1,0 +1,238 @@
+#!/usr/bin/env python3
+"""
+mbse-coverage — Test Coverage Analysis
+Shows which requirements are tested and identifies gaps
+"""
+
+import sys
+import json
+from pathlib import Path
+from collections import defaultdict
+
+try:
+    import yaml
+except ImportError:
+    print("❌ PyYAML not installed. Install with: pip3 install pyyaml")
+    sys.exit(1)
+
+def load_model(model_path):
+    """Load YAML model"""
+    path = Path(model_path)
+    if not path.exists():
+        print(f"❌ Model not found: {model_path}")
+        sys.exit(1)
+    
+    with open(path, 'r') as f:
+        return yaml.safe_load(f)
+
+def analyze_coverage(model, output_format="table"):
+    """Analyze test coverage"""
+    
+    requirements = {r['id']: r for r in model.get('requirements', [])}
+    tests = {t['id']: t for t in model.get('tests', [])}
+    
+    # Build coverage map
+    coverage_map = defaultdict(list)
+    for test_id, test in tests.items():
+        for req_id in test.get('verifies', []):
+            coverage_map[req_id].append(test_id)
+    
+    # Analyze by priority
+    by_priority = defaultdict(lambda: {'total': 0, 'tested': 0, 'requirements': []})
+    
+    for req_id, req in requirements.items():
+        priority = req.get('priority', 'UNKNOWN')
+        status = req.get('status', '')
+        
+        by_priority[priority]['total'] += 1
+        
+        if req_id in coverage_map:
+            by_priority[priority]['tested'] += 1
+            by_priority[priority]['requirements'].append((req_id, req, True))
+        else:
+            by_priority[priority]['requirements'].append((req_id, req, False))
+    
+    if output_format == "json":
+        output_json(requirements, coverage_map, by_priority, tests)
+    elif output_format == "csv":
+        output_csv(requirements, coverage_map, tests)
+    else:
+        output_table(requirements, coverage_map, by_priority, tests)
+
+def output_table(requirements, coverage_map, by_priority, tests):
+    """Output as formatted table"""
+    print("\n📈 Test Coverage Analysis")
+    print("=" * 100)
+    
+    # Overall stats
+    total_reqs = len(requirements)
+    tested_reqs = len(coverage_map)
+    coverage_pct = int(100 * tested_reqs / total_reqs) if total_reqs else 0
+    
+    print(f"\n📊 Overall Coverage: {tested_reqs}/{total_reqs} requirements ({coverage_pct}%)")
+    
+    # By priority
+    priority_order = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW']
+    print(f"\n📋 Coverage by Priority:")
+    print("-" * 50)
+    print(f"{'Priority':<12} {'Total':<8} {'Tested':<8} {'Coverage':<10}")
+    print("-" * 50)
+    
+    for priority in priority_order:
+        if priority in by_priority:
+            data = by_priority[priority]
+            total = data['total']
+            tested = data['tested']
+            cov = int(100 * tested / total) if total else 0
+            print(f"{priority:<12} {total:<8} {tested:<8} {cov}%")
+    
+    # Untested requirements
+    print(f"\n⚠️  Untested Requirements (Gaps):")
+    print("-" * 100)
+    
+    untested = [rid for rid in sorted(requirements.keys()) if rid not in coverage_map]
+    
+    if untested:
+        for req_id in untested:
+            req = requirements[req_id]
+            print(f"  • {req_id} ({req.get('priority', '?')}) — {req.get('title', '')}")
+            print(f"    Status: {req.get('status', '')} | Risk Level: {req.get('risk_level', '?')}")
+    else:
+        print("  ✅ All requirements have tests!")
+    
+    # Recommendations
+    print(f"\n💡 Recommendations:")
+    print("-" * 100)
+    
+    if untested:
+        critical_untested = [rid for rid in untested if requirements[rid].get('priority') == 'CRITICAL']
+        high_untested = [rid for rid in untested if requirements[rid].get('priority') == 'HIGH']
+        
+        if critical_untested:
+            print(f"  🔴 CRITICAL: {len(critical_untested)} CRITICAL requirements lack tests!")
+            print(f"     Action: Create tests for these immediately:")
+            for rid in critical_untested[:3]:
+                print(f"       - {rid}")
+            if len(critical_untested) > 3:
+                print(f"       ... and {len(critical_untested)-3} more")
+        
+        if high_untested:
+            print(f"\n  🟠 HIGH: {len(high_untested)} HIGH priority requirements lack tests")
+            print(f"     Action: Schedule tests for next sprint")
+        
+        if len(untested) > len(critical_untested) + len(high_untested):
+            print(f"\n  🟡 MEDIUM/LOW: {len(untested) - len(critical_untested) - len(high_untested)} lower-priority items need tests")
+    
+    # Test status breakdown
+    print(f"\n📝 Test Status Breakdown:")
+    print("-" * 100)
+    
+    test_status_count = defaultdict(int)
+    for test in tests.values():
+        status = test.get('status', 'unknown')
+        test_status_count[status] += 1
+    
+    for status in ['passed', 'in-progress', 'ready', 'failed', 'proposed']:
+        if status in test_status_count:
+            count = test_status_count[status]
+            print(f"  • {status}: {count}")
+    
+    # Low coverage requirements (tested but with low coverage %)
+    print(f"\n🎯 Low Coverage Requirements (tested but <100%):")
+    print("-" * 100)
+    
+    low_coverage = []
+    for req_id in sorted(coverage_map.keys()):
+        req = requirements[req_id]
+        coverage_pcts = []
+        for test_id in coverage_map[req_id]:
+            test = tests.get(test_id)
+            if test:
+                coverage_pcts.append(test.get('coverage_percentage', 0))
+        
+        if coverage_pcts:
+            avg_coverage = sum(coverage_pcts) / len(coverage_pcts)
+            if avg_coverage < 100:
+                low_coverage.append((req_id, req, avg_coverage))
+    
+    if low_coverage:
+        low_coverage.sort(key=lambda x: x[2])  # Sort by coverage %
+        for req_id, req, coverage in low_coverage[:5]:
+            print(f"  • {req_id}: {coverage:.0f}% — {req.get('title', '')}")
+    else:
+        print("  ✅ All tested requirements have 100% coverage!")
+    
+    print()
+
+def output_csv(requirements, coverage_map, tests):
+    """Output as CSV"""
+    print("REQ_ID,Title,Priority,Status,Tested,Test_Count,Test_IDs")
+    
+    for req_id in sorted(requirements.keys()):
+        req = requirements[req_id]
+        test_ids = coverage_map.get(req_id, [])
+        title = req.get('title', '').replace('"', '""')
+        
+        tested = "Yes" if test_ids else "No"
+        test_str = ';'.join(test_ids) if test_ids else ""
+        
+        print(f'"{req_id}","{title}","{req.get("priority", "")}","{req.get("status", "")}",{tested},{len(test_ids)},"{test_str}"')
+
+def output_json(requirements, coverage_map, by_priority, tests):
+    """Output as JSON"""
+    result = {
+        'summary': {
+            'total_requirements': len(requirements),
+            'tested_requirements': len(coverage_map),
+            'coverage_percentage': int(100 * len(coverage_map) / len(requirements)) if requirements else 0
+        },
+        'by_priority': {},
+        'untested': []
+    }
+    
+    # By priority
+    priority_order = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW']
+    for priority in priority_order:
+        if priority in by_priority:
+            data = by_priority[priority]
+            result['by_priority'][priority] = {
+                'total': data['total'],
+                'tested': data['tested'],
+                'coverage_percentage': int(100 * data['tested'] / data['total']) if data['total'] else 0
+            }
+    
+    # Untested
+    for req_id in sorted(requirements.keys()):
+        if req_id not in coverage_map:
+            req = requirements[req_id]
+            result['untested'].append({
+                'req_id': req_id,
+                'title': req.get('title'),
+                'priority': req.get('priority'),
+                'status': req.get('status')
+            })
+    
+    print(json.dumps(result, indent=2))
+
+def main():
+    if len(sys.argv) < 2:
+        print("Usage: mbse-coverage <model.yaml> [--format json|csv|table]")
+        print("\nFormats:")
+        print("  table (default) — Human-readable with recommendations")
+        print("  csv             — Comma-separated values")
+        print("  json            — JSON format")
+        sys.exit(1)
+    
+    model_path = sys.argv[1]
+    output_format = "table"
+    
+    if "--format" in sys.argv:
+        idx = sys.argv.index("--format")
+        if idx + 1 < len(sys.argv):
+            output_format = sys.argv[idx + 1]
+    
+    model = load_model(model_path)
+    analyze_coverage(model, output_format)
+
+if __name__ == '__main__':
+    main()
