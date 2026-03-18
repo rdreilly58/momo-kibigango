@@ -1,9 +1,9 @@
 #!/bin/bash
-# send-morning-briefing.sh — Send morning briefing via Email + Telegram
+# send-morning-briefing.sh — Send morning briefing via Email + Telegram with health checks
 #
 # Usage: bash send-morning-briefing.sh
 
-set -euo pipefail
+set -uo pipefail  # Remove -e to prevent trap from killing script on warnings
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BRIEFING_TYPE="morning"
@@ -13,6 +13,17 @@ source ~/.openclaw/workspace/config/briefing.env 2>/dev/null || {
   echo "[briefing] Error: briefing.env not found"
   exit 1
 }
+
+# Health check URL (from TOOLS.md)
+HEALTHCHECK_URL="https://hc-ping.com/43edd8e8-e569-4bad-b044-90ab1546c271"
+
+# Error trap: alert on failure
+trap 'echo "[briefing] ❌ ERROR: $BRIEFING_TYPE briefing failed"; \
+      if [ -n "${TELEGRAM_BOT_TOKEN:-}" ] && [ -n "${TELEGRAM_CHAT_ID:-}" ]; then \
+        curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+          -d "chat_id=${TELEGRAM_CHAT_ID}" \
+          -d "text=⚠️ BRIEFING FAILED: ${BRIEFING_TYPE} briefing error at $(date '\''%H:%M %Z'\'')" > /dev/null 2>&1 || true; \
+      fi' ERR
 
 echo "[briefing] =========================================="
 echo "[briefing] Starting $BRIEFING_TYPE briefing delivery"
@@ -80,3 +91,9 @@ fi
 echo "[briefing] =========================================="
 echo "[briefing] $BRIEFING_TYPE briefing delivery complete"
 echo "[briefing] =========================================="
+
+# Ping health check on success
+echo "[briefing] 📍 Pinging health check..."
+curl -s -X POST "$HEALTHCHECK_URL" > /dev/null 2>&1 && \
+  echo "[briefing] ✓ Health check pinged" || \
+  echo "[briefing] ⚠️  Health check ping failed (non-fatal)"
