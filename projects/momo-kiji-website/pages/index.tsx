@@ -161,6 +161,38 @@ output = model.predict(input_data)`}
         </div>
       </section>
 
+      {/* Research Foundation */}
+      <section className="py-20 bg-gray-50">
+        <div className="container-wide">
+          <h2 className="text-3xl font-bold text-gray-900 mb-8">Research Foundation</h2>
+          <div className="bg-white p-8 rounded-lg border-l-4 border-peach-600 shadow-sm">
+            <p className="text-gray-700 mb-6">
+              momo-kiji is built on the latest peer-reviewed research in neural engine optimization. 
+              Our compiler architecture and optimization strategies are informed by cutting-edge academic work.
+            </p>
+            <div className="flex gap-6 flex-wrap items-center">
+              <a 
+                href="https://arxiv.org/pdf/2603.06728"
+                onClick={() => trackExternalClick("https://arxiv.org/pdf/2603.06728", "orion_paper")}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-3 bg-gradient-to-r from-peach-500 to-peach-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-peach-600 hover:to-peach-700 transition-all"
+              >
+                <span>📄</span>
+                <div>
+                  <div>Orion Paper</div>
+                  <div className="text-xs font-normal opacity-90">Characterizing Apple Neural Engine</div>
+                </div>
+              </a>
+              <p className="text-sm text-gray-600">
+                <strong>Latest research</strong> revealing ANE architecture, optimization opportunities, 
+                and compiler design principles that power momo-kiji.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="py-20 bg-peach-600">
         <div className="container-wide text-center text-white">
