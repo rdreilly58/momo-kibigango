@@ -123,7 +123,7 @@ We're building what Apple hasn't: **a unified SDK for Apple Neural Engine**, ins
 
 Three things align right now:
 
-1. **Research Just Published:** The Orion paper (ArXiv 2603.06728) was published 2 weeks ago, revealing the most comprehensive ANE documentation ever
+1. **Research Just Published:** The Orion paper (https://arxiv.org/pdf/2603.06728) was published 2 weeks ago, revealing the most comprehensive ANE documentation ever
 2. **Community Ready:** Developers are hungry for better ANE tools (Reddit, HackerNews engagement is high)
 3. **Opportunity Window:** M5 just launched, M6 is coming, and the ANE story is just beginning
 
