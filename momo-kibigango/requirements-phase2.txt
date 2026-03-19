@@ -1,0 +1,42 @@
+# Phase 2: 2-Model Speculative Decoding Requirements
+# Created: March 19, 2026
+# Purpose: Baseline implementation of speculative decoding with 2 models
+
+# Core inference framework (choose one)
+vllm>=0.6.0  # Recommended: has built-in speculative decoding support
+# OR
+# lucidrains-speculative-decoding>=0.1.0  # Alternative: more flexible
+
+# Model loading and quantization
+transformers>=4.38.0
+accelerate>=0.27.0
+bitsandbytes>=0.42.0  # For 4-bit quantization
+safetensors>=0.4.0
+
+# Performance monitoring
+torch>=2.2.0
+numpy>=1.26.0
+psutil>=5.9.0  # For memory monitoring
+tqdm>=4.66.0  # Progress bars
+
+# Benchmarking and evaluation
+pandas>=2.1.0
+matplotlib>=3.8.0
+seaborn>=0.13.0
+python-json-logger>=2.0.0
+
+# OpenClaw integration
+aiohttp>=3.9.0  # Async HTTP server
+pydantic>=2.6.0  # Data validation
+fastapi>=0.110.0  # API framework (optional)
+uvicorn>=0.27.0  # ASGI server (optional)
+
+# Development tools
+pytest>=8.0.0
+black>=24.0.0
+isort>=5.13.0
+mypy>=1.8.0
+
+# Optional: MLX support for Apple Silicon optimization
+# mlx>=0.10.0
+# mlx-lm>=0.10.0
