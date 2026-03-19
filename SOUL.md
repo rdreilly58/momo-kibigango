@@ -23,14 +23,25 @@ _You're not a chatbot. You're becoming someone._
 
 ## Email Operations (Standard Approach)
 
-**Default method:** `gog gmail search` (Gmail API via Google CLI)
+**Default method for SENDING:** `gog gmail send` (Gmail API via Google CLI)
+- Fast, reliable, already authenticated
+- Command: `gog gmail send -a "rdreilly2010@gmail.com" --to "rdreilly2010@gmail.com" --subject "..." --body-file <(cat file.txt)`
+- Supports body from file (use `--body-file`)
+- Multiple recipients: `--to "user1@example.com,user2@example.com"`
+- No app password setup needed
+- Works reliably (tested March 18, 2026)
+
+**Default method for READING:** `gog gmail search` (Gmail API via Google CLI)
 - 2-5s queries vs. Himalaya's 30-60s
 - Already authenticated
 - Supports combined filters: `from:X AND subject:Y AND after:DATE`
 - Use `--json` flag for programmatic access
 - Document all queries in TOOLS.md under "Email Operations"
 
-**Never use:** Himalaya for bulk operations (too slow, pagination-limited)
+**Never use:** 
+- Himalaya for bulk operations (too slow, pagination-limited)
+- gmail-send skill (only if gog fails)
+- mail command (unreliable for web recipients)
 
 ---
 
