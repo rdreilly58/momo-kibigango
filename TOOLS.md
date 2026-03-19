@@ -66,7 +66,34 @@ gog calendar list -a rdreilly2010@gmail.com --json
 
 ## Email Operations (STANDARD METHOD)
 
-**Default method:** `gog gmail search` (Google CLI with Gmail API)
+**Default for SENDING:** `gog gmail send`
+
+```bash
+# Simple email
+gog gmail send \
+  -a "rdreilly2010@gmail.com" \
+  --to "rdreilly2010@gmail.com" \
+  --subject "Subject Line" \
+  --body-file <(cat file.txt)
+
+# Multiple recipients
+gog gmail send \
+  -a "rdreilly2010@gmail.com" \
+  --to "user1@example.com,user2@example.com" \
+  --subject "Subject" \
+  --body-file <(echo "Body text")
+
+# Direct text (no file)
+gog gmail send \
+  -a "rdreilly2010@gmail.com" \
+  --to "recipient@example.com" \
+  --subject "Subject" \
+  --body "Email body text here"
+```
+
+**Why:** Already authenticated, reliable, fast, no password setup
+
+**Default for READING:** `gog gmail search` (Google CLI with Gmail API)
 
 **Why:** 10-12x faster than Himalaya, already authenticated, supports combined filters
 
@@ -95,6 +122,7 @@ gog gmail search 'QUERY' --json | jq '.threads[] | ...'
 
 **When to use alternatives:**
 - Himalaya: Single email reads, interactive use
+- gmail-send skill: Only if gog fails (requires app password)
 - Notmuch: If doing heavy local analysis (set up with `notmuch new`)
 - Python IMAP: For building comprehensive email database
 
