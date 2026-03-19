@@ -1,5 +1,30 @@
 # HEARTBEAT.md - Periodic Tasks
 
+## Google Tasks Check
+
+Show pending tasks during periodic checks:
+
+```bash
+TASKLIST_ID="MDE3Mjg4NDY4MTYwNjc5NDE0MDY6MDow"
+PENDING=$(gog tasks list $TASKLIST_ID -a rdreilly2010@gmail.com --json 2>/dev/null | \
+  jq '[.tasks[] | select(.status == "needsAction")] | length')
+
+echo "📋 Pending Tasks: $PENDING"
+gog tasks list $TASKLIST_ID -a rdreilly2010@gmail.com --json 2>/dev/null | \
+  jq -r '.tasks[] | select(.status == "needsAction") | "  • \(.title)"' | head -5
+```
+
+**What it shows:**
+- Count of pending tasks
+- Top 5 task titles
+- Quick overview of what needs attention
+
+**Frequency:** Every heartbeat (~30 min)  
+**Duration:** <5 seconds  
+**Impact:** Lightweight, informational only
+
+---
+
 ## GPU Offload Health Check
 
 Run full GPU health test every heartbeat (detect issues early):

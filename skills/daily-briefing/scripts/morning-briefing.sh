@@ -31,10 +31,17 @@ CALENDAR_HTML=$(echo "$CALENDAR_DATA" | jq -r '.html // ""')
 PRIORITIES_DATA=$(python3 "$SCRIPT_DIR/scripts/get-todays-priorities.py" 2>/dev/null || echo '{"html":"<div class=\"item\"><em>Set priorities in MEMORY.md</em></div>"}')
 PRIORITIES_HTML=$(echo "$PRIORITIES_DATA" | jq -r '.html // ""')
 
+# Fetch Google Tasks
+TASKS_DATA=$(python3 "$SCRIPT_DIR/scripts/get-tasks.py" 2>/dev/null || echo '{"pending_count":0,"tasks":[]}')
+TASKS_COUNT=$(echo "$TASKS_DATA" | jq -r '.pending_count // 0')
+TASKS_LIST=$(echo "$TASKS_DATA" | jq -r '.tasks[] | "      <div class=\"item\">• \(.title)</div>"' | head -5 || echo '<div class="item"><em>No pending tasks</em></div>')
+
 # Export for envsubst
 export GMAIL_UNREAD
 export CALENDAR_HTML
 export PRIORITIES_HTML
+export TASKS_COUNT
+export TASKS_LIST
 export GA4_HTML
 export GA4_SOURCES_HTML
 export GA4_PAGES_HTML
@@ -71,6 +78,12 @@ envsubst << 'HTMLEOF'
         <div class="section">
             <h2>📅 Today's Calendar</h2>
             ${CALENDAR_HTML}
+        </div>
+
+        <div class="section">
+            <h2>📋 Pending Tasks</h2>
+            <div class="item"><strong>${TASKS_COUNT}</strong> pending tasks</div>
+            ${TASKS_LIST}
         </div>
 
         <div class="section">

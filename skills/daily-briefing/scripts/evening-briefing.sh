@@ -41,6 +41,11 @@ BLOCKERS_HTML=$(echo "$BLOCKERS_DATA" | jq -r '.html // ""')
 PREP_DATA=$(python3 "$SCRIPT_DIR/scripts/get-tomorrow-prep.py" 2>/dev/null || echo '{"html":"<div class=\"item\"><em>Check MEMORY.md</em></div>"}')
 PREP_HTML=$(echo "$PREP_DATA" | jq -r '.html // ""')
 
+# Fetch Google Tasks (remaining tasks for tomorrow)
+TASKS_DATA=$(python3 "$SCRIPT_DIR/scripts/get-tasks.py" 2>/dev/null || echo '{"pending_count":0,"total_count":0,"tasks":[]}')
+TASKS_COUNT=$(echo "$TASKS_DATA" | jq -r '.pending_count // 0')
+TASKS_LIST=$(echo "$TASKS_DATA" | jq -r '.tasks[] | "      <div class=\"item\">• \(.title)</div>"' | head -5 || echo '<div class="item"><em>All caught up!</em></div>')
+
 # Create HTML content
 cat > /tmp/evening-briefing.html << EOF
 <!DOCTYPE html>
@@ -97,6 +102,12 @@ cat > /tmp/evening-briefing.html << EOF
         <div class="section">
             <h2>⚠️ Blockers / Issues</h2>
             $BLOCKERS_HTML
+        </div>
+
+        <div class="section">
+            <h2>📋 Pending Tasks</h2>
+            <div class="item"><strong>$TASKS_COUNT</strong> pending tasks to carry forward</div>
+            $TASKS_LIST
         </div>
 
         <div class="tomorrow">
