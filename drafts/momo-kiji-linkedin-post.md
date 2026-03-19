@@ -22,7 +22,7 @@ We're building momo-kiji: an open-source framework that brings clarity, control,
 ✓ Community-driven standards
 
 **Why now:**
-→ Latest research (Orion paper, 2 weeks old) reveals ANE internals
+→ Latest research (Orion paper: https://arxiv.org/pdf/2603.06728) reveals ANE internals
 → Community is hungry for better tools
 → M5 launched, M6 on the horizon
 → Timing is perfect
@@ -129,7 +129,7 @@ Developers who want to use ANE either:
 
 This is a massive opportunity being left on the table.
 
-Two weeks ago, researchers published the Orion paper (ArXiv 2603.06728), detailing ANE internals in unprecedented detail. The community is ready. The research exists. The need is obvious.
+Two weeks ago, researchers published the Orion paper (https://arxiv.org/pdf/2603.06728), detailing ANE internals in unprecedented detail. The community is ready. The research exists. The need is obvious.
 
 So we're building momo-kiji: CUDA for Apple Neural Engine.
 
