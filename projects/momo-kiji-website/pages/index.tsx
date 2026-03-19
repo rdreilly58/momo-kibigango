@@ -1,5 +1,6 @@
 import Head from "next/head";
 import Link from "next/link";
+import { trackExternalClick, trackGitHubAction, trackDiscordJoin } from "../lib/analytics";
 
 export default function Home() {
   return (
@@ -46,7 +47,7 @@ export default function Home() {
               Stop letting ANE go unused. Compile any model, target ANE directly, get 10x efficiency.
             </p>
             <div className="flex gap-4">
-              <a href="https://momo-kiji.readthedocs.io" className="btn-primary">
+              <a href="https://github.com/ReillyDesignStudio/momo-kiji#readme" className="btn-primary">
                 Get Started →
               </a>
               <a href="https://github.com/ReillyDesignStudio/momo-kiji" className="btn-secondary">
@@ -137,8 +138,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Quick Start */}
-      <section className="py-20 bg-white">
+      {/* Quick Start / Docs */}
+      <section id="docs" className="py-20 bg-white">
         <div className="container-wide">
           <h2 className="text-3xl font-bold text-gray-900 mb-8">Quick Start</h2>
           <div className="bg-gray-900 text-gray-100 p-6 rounded-lg overflow-x-auto">
@@ -169,7 +170,7 @@ output = model.predict(input_data)`}
           </p>
           <div className="flex gap-4 justify-center flex-wrap">
             <a
-              href="https://momo-kiji.readthedocs.io"
+              href="https://github.com/ReillyDesignStudio/momo-kiji/blob/main/docs/source/index.rst"
               className="px-6 py-3 bg-white text-peach-600 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
             >
               Read Docs →
@@ -207,7 +208,7 @@ output = model.predict(input_data)`}
                   </a>
                 </li>
                 <li>
-                  <a href="https://momo-kiji.readthedocs.io" className="hover:text-white">
+                  <a href="https://github.com/ReillyDesignStudio/momo-kiji#readme" className="hover:text-white">
                     Documentation
                   </a>
                 </li>
@@ -227,8 +228,8 @@ output = model.predict(input_data)`}
                   </a>
                 </li>
                 <li>
-                  <a href="https://github.com/ReillyDesignStudio/momo-kiji/discussions" className="hover:text-white">
-                    Discussions
+                  <a href="https://discord.gg/DHRbKbzr" className="hover:text-white">
+                    Community (Discord)
                   </a>
                 </li>
                 <li>

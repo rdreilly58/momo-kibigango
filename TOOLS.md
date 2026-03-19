@@ -435,6 +435,43 @@ Skills are shared. Your setup is yours. Keeping them apart means you can update 
 
 ---
 
+## Google Tasks
+
+**Status:** ✅ Integrated via gog CLI
+
+### Your Task List
+- **Task List ID:** `MDE3Mjg4NDY4MTYwNjc5NDE0MDY6MDow`
+- **Account:** rdreilly2010@gmail.com
+- **List Name:** "ToDo"
+
+### Quick Commands
+
+**List all tasks:**
+```bash
+gog tasks list MDE3Mjg4NDY4MTYwNjc5NDE0MDY6MDow -a rdreilly2010@gmail.com --plain
+```
+
+**List pending only:**
+```bash
+gog tasks list MDE3Mjg4NDY4MTYwNjc5NDE0MDY6MDow -a rdreilly2010@gmail.com --json | jq '.tasks[] | select(.status == "needsAction")'
+```
+
+**Mark task done:**
+```bash
+gog tasks done MDE3Mjg4NDY4MTYwNjc5NDE0MDY6MDow <TASK_ID> -a rdreilly2010@gmail.com
+```
+
+**Add new task:**
+```bash
+gog tasks add MDE3Mjg4NDY4MTYwNjc5NDE0MDY6MDow -a rdreilly2010@gmail.com --title "Task title"
+```
+
+**Current tasks:** 15 total (11 pending, 4 completed)
+
+See **skills/google-tasks/SKILL.md** for full documentation.
+
+---
+
 ## AA Meetings
 
 **Bob's regular AA meetings:**

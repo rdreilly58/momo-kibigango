@@ -2,6 +2,56 @@
 - Provided weather forecast for Reston, VA, for March 13, 2026.
 - Acknowledged break request from Bob.
 
+## March 18-19, 2026 — OPEN SOURCE PROJECT STRATEGY RESEARCH
+
+### Key Findings on Open Source Best Practices (2026):
+
+**Strategic Decisions Made:**
+- **Separate Website WINS** over GitHub-only
+  - Create momo-kiji.dev (landing + docs + blog)
+  - 10x better SEO than GitHub Pages
+  - Natural marketing home
+  - Analytics visibility
+  
+- **GitHub Organization** = legitimacy signal
+  - Move momo-kiji to org (not personal account)
+  - Better for managing multiple projects
+  
+- **Responsive Maintainers** = real advantage
+  - First 24h: respond <2 hours
+  - Shows project alive, attracts contributors
+  
+- **Coordinated Launch** = momentum multiplier
+  - HackerNews + Reddit + Dev.to same day
+  - Expected: 5,000-15,000 views + 100-500 stars
+
+**2026 Reality:**
+- 36M new developers joined GitHub in 2025 (global scale)
+- Code is commodity (AI writes it), brand is moat
+- Open source = free distribution channel
+- Enterprise support contracts = real revenue model
+
+**Research Sources:**
+- GitHub Octoverse 2025 (trends)
+- PyTorch, Kubernetes, Next.js (project structure)
+- IndieRadar 2026 marketing playbook
+- Draft.dev open source as marketing
+- 10up best practices (agency-tested)
+
+**Deliverables Created:**
+- OPEN_SOURCE_BEST_PRACTICES_REPORT.md (12,000+ words)
+- OPEN_SOURCE_LAUNCH_CHECKLIST.md (printable, actionable)
+
+**Immediate Actions for momo-kiji:**
+1. Create GitHub organization
+2. Register momo-kiji.dev domain
+3. Set up Discord server
+4. Write CONTRIBUTING.md, ROADMAP.md, SECURITY.md
+5. Draft 3 blog posts for dev.to/Medium (pre-launch)
+6. Build momo-kiji.dev site (Next.js)
+7. Set up ReadTheDocs for technical docs
+8. Coordinated launch week (HN + Reddit + dev.to)
+
 ## March 13, 2026 — CRITICAL LESSONS LEARNED
 - **Never infer dates or days of week.** Always use the explicit metadata provided in conversations (e.g., "Fri 2026-03-13").
 - Made a serious mistake updating a recurring calendar event that deleted all future instances. Root cause: I assumed Thursday instead of checking the Friday date in the metadata.
