@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  cursor: pointer;
+}
+
+/* Custom utilities */
+.btn-primary {
+  @apply px-6 py-3 bg-peach-600 text-white rounded-lg font-semibold hover:bg-peach-700 transition-colors;
+}
+
+.btn-secondary {
+  @apply px-6 py-3 border-2 border-peach-600 text-peach-600 rounded-lg font-semibold hover:bg-peach-50 transition-colors;
+}
+
+.container-wide {
+  @apply max-w-6xl mx-auto px-4 sm:px-6 lg:px-8;
+}
