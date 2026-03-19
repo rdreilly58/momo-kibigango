@@ -400,6 +400,31 @@ sudo dscacheutil -flushcache
 
 ---
 
+## Orion Paper (Apple Neural Engine Research)
+
+**Title:** Orion: Characterizing and Programming Apple's Neural Engine for LLM Training and Inference
+
+**Link:** https://arxiv.org/pdf/2603.06728
+
+**Authors:** Ramchand Kumaresan + team
+
+**Significance:** 
+- Detailed ANE architecture documentation
+- First public detailed analysis of Apple Neural Engine
+- Foundation for momo-kiji project
+- Core reference for understanding ANE capabilities
+
+**Key Topics:**
+- ANE tensor operations
+- Memory layout & optimization
+- LLM training on ANE
+- Performance characteristics
+- Quantization strategies
+
+**Status:** ✅ Referenced for momo-kiji development
+
+---
+
 ## What Goes Here
 
 Things like:
