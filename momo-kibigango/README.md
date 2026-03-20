@@ -35,7 +35,11 @@ An implementation of the October 2025 NeurIPS-accepted paper "3-Model Speculativ
 ## Project Status
 
 - ✅ **Phase 1:** Research complete (analysis documents ready)
-- 📋 **Phase 2:** 2-model baseline pilot (April 2026)
+- 🚀 **Phase 2:** 2-model baseline pilot (Started March 19, 2026)
+  - ✅ Core implementation complete
+  - ✅ Benchmark suite ready
+  - ✅ OpenClaw integration layer
+  - 📋 Testing & validation pending
 - 📋 **Phase 3:** 3-model upgrade (May 2026)
 - 📋 **Phase 4:** Production deployment (June 2026)
 
@@ -61,16 +65,33 @@ An implementation of the October 2025 NeurIPS-accepted paper "3-Model Speculativ
 
 ## Quick Start
 
-```bash
-# Phase 2: Install 2-model baseline
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements-phase2.txt
+### Phase 2: 2-Model Baseline (Current)
 
-# Test benchmark
+```bash
+# Setup environment
+cd momo-kibigango
+./scripts/setup_phase2.sh
+source venv_phase2/bin/activate
+
+# Run basic test
+python src/speculative_2model.py
+
+# Run full benchmark suite
 python scripts/benchmark_2model.py
 
-# Phase 3: Upgrade to 3-model
+# Start OpenClaw integration server
+python src/openclaw_integration.py
+
+# Test API endpoint
+curl -X POST http://localhost:8080/v1/inference \
+  -H "Content-Type: application/json" \
+  -d '{"prompt": "What is the capital of France?", "max_tokens": 50}'
+```
+
+### Phase 3: 3-Model Pyramid (Coming Soon)
+
+```bash
+# Will be available after Phase 2 validation
 pip install -r requirements-phase3.txt
 python scripts/benchmark_3model.py
 ```
