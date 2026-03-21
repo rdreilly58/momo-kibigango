@@ -27,7 +27,7 @@
 - [ ] Locate GitHub PAT or create new one
 - [ ] Prepare AWS credentials or create new user
 - [ ] Prepare Slack workspace (must be admin)
-- [ ] Have 1Password CLI ready: `which op`
+- [ ] Have Apple Keychain CLI ready: `which op`
 
 ### Workspace Setup
 - [ ] Create OAuth directory: `mkdir -p ~/.mcporter/oauth`

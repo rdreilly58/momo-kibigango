@@ -15,7 +15,7 @@ This comprehensive analysis examines the current OpenClaw setup, identifying pai
 
 ### 2. Tool & Skill Management Issues
 - **PDF Tool Complexity**: Multiple competing PDF tools (nano-pdf, office-docs, make-pdf) with unclear use cases
-- **Password Manager Fragmentation**: Transition between multiple managers (Dashlane→1Password→Apple Passwords) creates complexity
+- **Password Manager Fragmentation**: Transition between multiple managers (Dashlane→Apple Keychain→Apple Passwords) creates complexity
 - **Skill Discovery**: No clear way to identify trending/new skills without manual ClawHub searches
 - **Missing Dependencies**: Skills often fail due to missing binaries (e.g., Roblox Studio, signal-cli)
 
@@ -95,7 +95,7 @@ This comprehensive analysis examines the current OpenClaw setup, identifying pai
 
 ## (d) Configuration Best Practices
 
-### 1. Secret Management (Without 1Password)
+### 1. Secret Management (Without Apple Keychain)
 ```bash
 # Option A: Apple Keychain (Native, Recommended)
 security add-generic-password -a "openclaw" \
@@ -244,7 +244,7 @@ cache = {
 - **Priority**: 🔴 CRITICAL  
 - **Effort**: Medium (2-3 hours)
 - **Impact**: Prevents credential exposure
-- **Action**: Move secrets from TOOLS.md to Apple Keychain or environment vars (1Password not available)
+- **Action**: Move secrets from TOOLS.md to Apple Keychain or environment vars (Apple Keychain not available)
 
 ### 3. **Deploy Model Routing** (High)
 - **Priority**: 🟠 HIGH
@@ -298,7 +298,7 @@ cache = {
 
 ### Week 1 (Immediate)
 - Fix tool profiles (Day 1)
-- Migrate secrets to 1Password (Day 2)
+- Migrate secrets to Apple Keychain (Day 2)
 - Configure model routing (Day 3)
 - Install monitoring skills (Day 4-5)
 
