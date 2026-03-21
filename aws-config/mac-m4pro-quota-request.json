@@ -1,0 +1,12 @@
+{
+  "request_id": "f385e0e9ebe248b1bbbc70b36755d34bU68btWJY",
+  "quota_code": "L-6919FC30",
+  "quota_name": "Running Dedicated mac-m4pro Hosts",
+  "requested_value": 1,
+  "region": "us-east-1",
+  "instance_type": "mac-m4pro.metal",
+  "requested_at": "2026-03-20T22:20:00Z",
+  "status": "PENDING",
+  "expected_approval": "within 24 hours",
+  "notes": "M4 Pro Mac for development and ML workloads"
+}

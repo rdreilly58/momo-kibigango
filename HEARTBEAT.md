@@ -25,6 +25,31 @@ gog tasks list $TASKLIST_ID -a rdreilly2010@gmail.com --json 2>/dev/null | \
 
 ---
 
+## Telegraph Heartbeat Publishing
+
+Publish OpenClaw status report (tasks, calendar, metrics) to Telegraph:
+
+```bash
+python3 ~/.openclaw/workspace/scripts/telegraph_heartbeat.py
+```
+
+**What it does:**
+- Fetches pending tasks from Google Tasks
+- Retrieves next 24h calendar events
+- Gets current system status (uptime)
+- Formats as rich Telegraph article with headings
+- Publishes to Telegraph.ph
+- Sends Telegram notification with published link
+
+**Output:** Telegraph article with sections for Tasks, Calendar, and System Status  
+**Telegram notification:** "📄 OpenClaw Heartbeat Report - [timestamp]" with link
+
+**Frequency:** Optional, every heartbeat (~30 min)  
+**Duration:** ~5 seconds (API calls only)  
+**Skip if:** No pending tasks + no upcoming events (can batch with other checks)
+
+---
+
 ## GPU Offload Health Check
 
 Run full GPU health test every heartbeat (detect issues early):
