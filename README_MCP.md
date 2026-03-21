@@ -46,7 +46,7 @@ This project contains a **complete, production-ready plan** for integrating Mode
 
 **Key sections**:
 - Tier 1 (immediate): Gmail, Calendar, GA4, GitHub, Slack
-- Tier 2 (30 days): AWS, WhatsApp, 1Password, Uptime Kuma
+- Tier 2 (30 days): AWS, WhatsApp, Apple Keychain, Uptime Kuma
 - Tier 3 (future): Linear, Airtable, Stripe, Docker, Kubernetes
 
 **Bottom line**: mcporter is already installed; we just need to configure Phase 1 services properly.
@@ -60,15 +60,15 @@ This project contains a **complete, production-ready plan** for integrating Mode
 - Credential storage architecture
 - OAuth flows for Gmail, GitHub, AWS, Slack
 - Automated token refresh strategies
-- 1Password integration
+- Apple Keychain integration
 - Security best practices
 - Token rotation schedules
 
-**Key recommendation**: Centralize all credentials in 1Password with automated injection.
+**Key recommendation**: Centralize all credentials in Apple Keychain with automated injection.
 
 **Security model**:
 ```
-Credentials in 1Password
+Credentials in Apple Keychain
      ↓
 Injected at startup via env vars
      ↓
@@ -226,7 +226,7 @@ Slack operations:    None     →  Slack MCP (<1s)    = New capability
 ## 🔒 Security Highlights
 
 **Credential Management**:
-- 1Password as central credential store
+- Apple Keychain as central credential store
 - Automated token injection at startup
 - File permissions: 600 (owner read/write only)
 - Audit logging of all MCP calls
@@ -320,7 +320,7 @@ Additional resources:
 
 **Recommendations**:
 - [ ] Create backups of existing configs
-- [ ] Have 1Password ready for credential storage
+- [ ] Have Apple Keychain ready for credential storage
 - [ ] Set aside 2-3 hours for Phase 1 setup
 - [ ] Have test channels ready (Slack, GitHub)
 

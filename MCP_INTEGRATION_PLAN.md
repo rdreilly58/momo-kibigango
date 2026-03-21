@@ -34,7 +34,7 @@ This document outlines a comprehensive strategy for integrating MCP servers with
 ### Tier 2 - High Value (Next 30 days)
 1. **AWS** - EC2 management, S3 operations, CloudWatch monitoring
 2. **WhatsApp** - Replace wacli with MCP server
-3. **1Password** - Centralized credential management
+3. **Apple Keychain** - Centralized credential management
 4. **Uptime Kuma** - Service monitoring integration
 5. **Notion** - Complete the existing setup
 
@@ -87,7 +87,7 @@ This document outlines a comprehensive strategy for integrating MCP servers with
 - Use environment variable references for sensitive data
 - Store OAuth tokens in ~/.mcporter/oauth/
 - Implement token refresh mechanisms
-- Use 1Password CLI for credential retrieval
+- Use Apple Keychain CLI for credential retrieval
 
 ### 3. Error Handling & Fallbacks
 
@@ -211,7 +211,7 @@ mcporter config add slack \
 1. **AWS Services**
 2. **Slack Integration** 
 3. **WhatsApp via Rube**
-4. **1Password Integration**
+4. **Apple Keychain Integration**
 
 ### Phase 3: Advanced Features (Week 4+)
 
@@ -284,7 +284,7 @@ for (const test of tests) {
 ### 1. Credential Management
 
 ```bash
-# Use 1Password for all credentials
+# Use Apple Keychain for all credentials
 op item create \
   --category="API Credential" \
   --title="MCP Gmail OAuth" \

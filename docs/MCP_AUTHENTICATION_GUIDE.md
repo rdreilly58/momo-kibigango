@@ -14,8 +14,8 @@ This guide covers how to set up and manage authentication for MCP servers in Ope
 │   ├── aws-creds.json     # AWS credentials
 │   └── bigquery-sa.json   # BigQuery service account
 └── secure/
-    ├── 1password.sh       # 1Password credential retrieval script
-    └── credential-sync.sh # Sync credentials from 1Password
+    ├── 1password.sh       # Apple Keychain credential retrieval script
+    └── credential-sync.sh # Sync credentials from Apple Keychain
 ```
 
 ## OAuth Flow Examples
@@ -198,7 +198,7 @@ crontab -e
 crontab -l
 ```
 
-## 1Password Integration
+## Apple Keychain Integration
 
 ### Automated Credential Injection
 
@@ -206,7 +206,7 @@ crontab -l
 #!/bin/bash
 # scripts/mcp-inject-from-1password.sh
 
-# This script retrieves credentials from 1Password and injects them
+# This script retrieves credentials from Apple Keychain and injects them
 # into MCP server environment variables at startup
 
 set -e
@@ -227,20 +227,20 @@ export AWS_SECRET_ACCESS_KEY=$(op read "op://$VAULT/AWS OpenClaw/secret_access_k
 export SLACK_BOT_TOKEN=$(op read "op://$VAULT/Slack MCP Bot/token" 2>/dev/null || echo "")
 export SLACK_APP_TOKEN=$(op read "op://$VAULT/Slack MCP App/token" 2>/dev/null || echo "")
 
-# Verify 1Password is authenticated
+# Verify Apple Keychain is authenticated
 if ! op user get --me &>/dev/null; then
-  echo "Error: 1Password CLI not authenticated"
+  echo "Error: Apple Keychain CLI not authenticated"
   exit 1
 fi
 
-echo "✓ Credentials loaded from 1Password"
+echo "✓ Credentials loaded from Apple Keychain"
 echo "Ready to start MCP servers with injected credentials"
 
 # Start mcporter daemon with these credentials
 exec mcporter daemon start
 ```
 
-### 1Password Setup
+### Apple Keychain Setup
 
 ```bash
 #!/bin/bash
@@ -283,7 +283,7 @@ op item create \
   access_key_id[password]="AKIAIOSFODNN7EXAMPLE" \
   secret_access_key[password]="wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
 
-echo "✓ MCP credentials stored in 1Password vault: $VAULT"
+echo "✓ MCP credentials stored in Apple Keychain vault: $VAULT"
 ```
 
 ## Security Best Practices

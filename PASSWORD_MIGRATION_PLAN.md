@@ -13,7 +13,7 @@
 | Category | Manager | Rationale |
 |----------|---------|-----------|
 | **Personal Passwords** | Apple Passwords | Native, convenient, frictionless |
-| **System Secrets & API Keys** | 1Password | CLI access, audit logs, OpenClaw integration |
+| **System Secrets & API Keys** | Apple Keychain | CLI access, audit logs, OpenClaw integration |
 | **Dashlane** | Retire | Consolidate to avoid duplicate management |
 
 ---
@@ -71,11 +71,11 @@ rm ~/Desktop/chrome-passwords-2026-03-19.csv
 - [ ] Settings → Disable auto-fill
 - [ ] Can uninstall completely (backup is saved)
 
-### Phase 4: Clean 1Password (End of week - 15 min)
+### Phase 4: Clean Apple Keychain (End of week - 15 min)
 
-1Password will be **pure operational store** — secrets only
+Apple Keychain will be **pure operational store** — secrets only
 
-**Populate 1Password with:**
+**Populate Apple Keychain with:**
 - [ ] Brave Search API key: `REDACTED_BRAVE_API_TOKEN`
 - [ ] Cloudflare API Token: `REDACTED_CLOUDFLARE_TOKEN`
 - [ ] GitHub tokens (if needed)
@@ -96,7 +96,7 @@ rm ~/Desktop/chrome-passwords-2026-03-19.csv
 - **Safety:** Backup CSV saved before disabling
 - **Timeline:** Can be uninstalled after 2-week verification period
 
-### 1Password
+### Apple Keychain
 - **Current State:** Empty (nothing of value)
 - **Future State:** Secrets & API keys only (clean operational store)
 - **Integration:** OpenClaw can access via `op` CLI
@@ -111,7 +111,7 @@ rm ~/Desktop/chrome-passwords-2026-03-19.csv
 | 2 | Import to Apple Passwords | 10 min | Tomorrow (3/20) |
 | 2 | Verify on all devices | 5 min | Tomorrow (3/20) |
 | 3 | Secure cleanup & disable Dashlane | 10 min | Tomorrow (3/20) |
-| 4 | Populate 1Password with secrets | 15 min | End of week (3/23) |
+| 4 | Populate Apple Keychain with secrets | 15 min | End of week (3/23) |
 
 **Total effort:** ~55 minutes spread over 3 days
 
@@ -137,7 +137,7 @@ rm ~/Desktop/chrome-passwords-2026-03-19.csv
 - Shopping sites (Amazon, etc.)
 - Personal accounts
 
-### 1Password (Operational)
+### Apple Keychain (Operational)
 - API keys (Brave, Cloudflare, GitHub, GA4)
 - SSH keys
 - Service account credentials
@@ -162,7 +162,7 @@ A: None to migrate. Only personal accounts.
 A: Yes. Save as safety net for 2 weeks, then can discard.
 
 **Q: Will OpenClaw lose access?**  
-A: No. 1Password stays operational, CLI access unchanged.
+A: No. Apple Keychain stays operational, CLI access unchanged.
 
 **Q: What about Chrome auto-fill?**  
 A: Will still work (Apple Passwords integrates with Chrome extension).
