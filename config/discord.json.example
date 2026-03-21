@@ -1,0 +1,26 @@
+{
+  "bot": {
+    "token": "YOUR_DISCORD_BOT_TOKEN_HERE",
+    "command_prefix": "!",
+    "status": "Playing with Momotaro"
+  },
+  "server": {
+    "id": "YOUR_SERVER_ID_HERE",
+    "channels": {
+      "general": "GENERAL_CHANNEL_ID",
+      "subagents": "SUBAGENTS_CHANNEL_ID",
+      "telegraph": "TELEGRAPH_CHANNEL_ID",
+      "heartbeat": "HEARTBEAT_CHANNEL_ID",
+      "archive": "ARCHIVE_CHANNEL_ID",
+      "dev_tools": "DEV_TOOLS_CHANNEL_ID",
+      "logs": "LOGS_CHANNEL_ID"
+    }
+  },
+  "features": {
+    "auto_threading": true,
+    "auto_embed_telegraph": true,
+    "archive_messages": true,
+    "telegraph_formatting": true,
+    "mention_on_reply": false
+  }
+}

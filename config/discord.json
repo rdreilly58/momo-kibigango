@@ -1,0 +1,37 @@
+{
+  "bot": {
+    "token": "9c309ce3d4e566c117caced9b4d6c10edb0a3cf552ea2c83bbe4f1fb3d13665c",
+    "command_prefix": "!",
+    "status": "Playing with Momotaro 🍑"
+  },
+  "server": {
+    "id": "1484831927914594425",
+    "channels": {
+      "general": "1484830406300930220",
+      "subagents": "1484830460717568171",
+      "telegraph": "1484830547766280212",
+      "heartbeat": "1484830618226528389",
+      "archive": "1484830728121487440",
+      "dev-tools": "1484830760870613054",
+      "logs": "1484830298389741650"
+    }
+  },
+  "features": {
+    "auto_threading": true,
+    "auto_embed_telegraph": true,
+    "archive_messages": true,
+    "telegraph_formatting": true,
+    "message_logging": true,
+    "error_logging": true
+  },
+  "integration": {
+    "telegraph_auto_post": true,
+    "subagent_auto_post": true,
+    "heartbeat_auto_post": true,
+    "archive_enabled": true
+  },
+  "logging": {
+    "level": "INFO",
+    "file": "~/.openclaw/logs/discord.log"
+  }
+}
