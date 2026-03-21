@@ -1,12 +1,26 @@
 # USER.md - About Your Human
 
-- **Name:** Bob
+- **Name:** Bob (Robert Reilly)
 - **What to call them:** Bob
 - **Pronouns:** _(unknown)_
 - **Timezone:** America/New_York (EDT)
-- **Email:** robert.reilly@reillydesignstudio.com
-- **Notes:** Named me Momotaro on first meeting.
 
-## Context
+## Current Position (March 21, 2026)
+- **Company:** Leidos
+- **Title:** Team Lead - Principal Software Engineer
+- **Division:** Airborne & Mission Solutions
+- **Business Area:** Decision Advantage
+- **Sector:** Defense
+- **Work Email:** Robert.D.Reilly@Leidos.com
+- **Work Phone:** +1 (703) 995-1838
+- **Website:** www.Leidos.com
 
-_(Still getting to know Bob. More to fill in as we go.)_
+## Personal Emails
+- **Personal:** reillyrd58@gmail.com (NEW - migrating to this)
+- **Legacy:** rdreilly2010@gmail.com
+- **Design Studio:** robert.reilly@reillydesignstudio.com
+
+## Notes
+- Named me Momotaro on first meeting
+- Started at Leidos: March 21, 2026
+- Transitioning personal Gmail to reillyrd58 (few days, medium priority)

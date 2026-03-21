@@ -324,9 +324,61 @@ export HF_API_TOKEN=hf_xxx
 - **Fallback:** Use Hugging Face API only if local model fails
 - **Long-term:** Full local integration (already working, no action needed)
 
+## Roblox Development Setup (March 21, 2026)
+
+**Account & Configuration**
+- **Roblox Username:** reillyrdai
+- **API Key:** Stored securely in 1Password (OpenClaw Secrets vault)
+- **Permissions:** universe-places (read/write), universe-datastores (read/write), universe-assets (write), universe-analytics (read)
+- **Status:** ✅ ACTIVE - Ready for game creation & debugging
+
+**Current Projects:**
+1. **RPG Prototype** (in progress)
+   - Status: Scripts added, MainGameScript syntax issue found (line 1 comment corruption)
+   - Next: Fix syntax error, run F5 test
+   - Location: Roblox Studio
+
+2. **Future projects:** To be determined
+
+**API Usage:**
+- Create & manage games
+- Manage DataStores (game data/player progress)
+- Publish game updates
+- Monitor game analytics
+- Debug games via API
+
+---
+
+## Work Account (Leidos - March 21, 2026)
+
+**New Position:**
+- **Title:** Team Lead - Principal Software Engineer
+- **Company:** Leidos (Airborne & Mission Solutions, Decision Advantage)
+- **Email:** Robert.D.Reilly@Leidos.com
+- **Phone:** +1 (703) 995-1838
+- **Start Date:** March 21, 2026
+
+---
+
+## Gmail Account Migration (March 21, 2026)
+
+**TRANSITION IN PROGRESS:**
+- **NEW Primary Gmail:** `reillyrd58@gmail.com` (migrating to this)
+- **OLD Accounts (stay active during transition):**
+  - `rdreilly2010@gmail.com`
+  - `robert.reilly@reillydesignstudio.com`
+- **Timeline:** Complete transition over next few days (medium priority)
+- **Status:** Just announced, beginning setup
+
+**Migration Plan:**
+1. Authenticate `gog` with reillyrd58@gmail.com (primary)
+2. Keep old accounts active as backup during transition
+3. Gradually shift all services to new account
+4. Update TOOLS.md as each service is migrated
+
 ## Calendar Operations (gog)
 
-**Important:** Always use the `-a rdreilly2010@gmail.com` flag for calendar requests!
+**Important:** Temporarily using `-a rdreilly2010@gmail.com` (will change to reillyrd58 soon)
 
 ```bash
 # Get calendar events
@@ -339,8 +391,14 @@ gog calendar list -a rdreilly2010@gmail.com [filter options]
 gog calendar list -a rdreilly2010@gmail.com --json
 ```
 
+**After migration to reillyrd58:**
+```bash
+# Will use:
+gog calendar list -a reillyrd58@gmail.com
+```
+
 **If authentication fails:**
-- Run: `gog login rdreilly2010@gmail.com`
+- Run: `gog login reillyrd58@gmail.com` (new) or `gog login rdreilly2010@gmail.com` (old)
 - Follow the browser OAuth flow
 - Token will be refreshed and stored
 

@@ -2,15 +2,29 @@
 """
 Discord bot integration for OpenClaw/Momotaro
 Handles message routing, Telegraph integration, and subagent updates
+
+USAGE:
+  source ~/.openclaw/workspace/discord-env/bin/activate
+  python3 ~/.openclaw/workspace/scripts/discord_bot.py
 """
 
 import os
+import sys
 import json
 import asyncio
 import logging
 from pathlib import Path
 from datetime import datetime
 from typing import Optional, Dict, List
+
+# Ensure we're using the venv
+venv_path = Path.home() / ".openclaw/workspace/discord-env/bin/python3"
+if str(sys.executable) != str(venv_path):
+    print(f"⚠️  Not using venv. Activate with:")
+    print(f"   source ~/.openclaw/workspace/discord-env/bin/activate")
+    print(f"Then run this script again.")
+    sys.exit(1)
+
 import discord
 from discord.ext import commands, tasks
 
@@ -78,12 +92,26 @@ class MomotaroBot(commands.Cog):
         if message.author == self.bot.user:
             return
         
+        # DEBUG: Log all messages
+        channel_name = message.channel.name if message.channel else "unknown"
+        logger.info(f"Message received in #{channel_name} from {message.author}: {message.content[:50]}")
+        
         # Log message to archive
         self._archive_message(message)
         
-        # Handle mentions of the bot
-        if self.bot.user in message.mentions:
+        # Respond to mentions OR messages in #general
+        is_mention = self.bot.user in message.mentions
+        is_general = message.channel.name == 'general' if message.channel else False
+        
+        logger.info(f"  is_mention={is_mention}, is_general={is_general}")
+        
+        if is_mention:
+            logger.info("  → Handling as mention")
             await self._handle_mention(message)
+        elif is_general:
+            logger.info("  → Handling as general message")
+            # Respond to all messages in #general
+            await self._handle_general_message(message)
         
         # Handle commands
         await self.bot.process_commands(message)
@@ -96,6 +124,24 @@ class MomotaroBot(commands.Cog):
         
         if not content:
             await message.reply("👋 Hi! How can I help?")
+            return
+        
+        logger.info(f"[{message.channel.name}] {message.author} (mention): {content}")
+        
+        # Show typing indicator
+        async with message.channel.typing():
+            # Route to Momotaro (main agent)
+            response = await self._route_to_momotaro(content, message.author.name)
+        
+        # Send response (split if too long)
+        await self._send_response(message, response)
+    
+    async def _handle_general_message(self, message: discord.Message):
+        """Handle messages in #general channel"""
+        
+        content = message.content.strip()
+        
+        if not content or len(content) < 2:
             return
         
         logger.info(f"[{message.channel.name}] {message.author}: {content}")
@@ -213,7 +259,7 @@ class MomotaroBot(commands.Cog):
         logger.info("Archive cleanup complete")
     
     @commands.command(name='status')
-    async def bot_status(self, ctx):
+    async def status_command(self, ctx):
         """Check bot status"""
         
         embed = discord.Embed(
@@ -294,11 +340,12 @@ async def main():
         logger.error("Bot token not found in config")
         return
     
-    # Create bot
+    # Create bot with required intents
+    # Note: message_content and members are PRIVILEGED intents
+    # They MUST be enabled in Discord Developer Portal
     intents = discord.Intents.default()
-    intents.message_content = True
-    intents.members = True
-    intents.presence = True
+    intents.message_content = True  # Read message content
+    intents.members = True  # Track server members
     
     bot = commands.Bot(
         command_prefix=config.get('bot', {}).get('command_prefix', '!'),
@@ -306,7 +353,15 @@ async def main():
     )
     
     # Add cog
-    await bot.add_cog(MomotaroBot(bot))
+    cog = MomotaroBot(bot)
+    await bot.add_cog(cog)
+    
+    # Also add direct event listener as backup
+    @bot.event
+    async def on_message(message: discord.Message):
+        """Direct message handler (backup to Cog)"""
+        logger.info(f"[Direct] Message from {message.author} in #{message.channel.name}: {message.content[:50]}")
+        await cog.on_message(message)
     
     # Start bot
     logger.info("Starting Momotaro Discord bot...")

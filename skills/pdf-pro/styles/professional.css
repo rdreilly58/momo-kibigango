@@ -1,0 +1,238 @@
+/* PDF Pro Professional Style - Business documents */
+
+/* Page setup */
+@page {
+    size: Letter;
+    margin: 1.25in 1in;
+    @top-right {
+        content: string(doc-title);
+        font-size: 9pt;
+        color: #666;
+        font-style: italic;
+    }
+    @bottom-center {
+        content: counter(page) " of " counter(pages);
+        font-size: 9pt;
+        color: #666;
+    }
+}
+
+/* Typography */
+body {
+    font-family: Georgia, "Times New Roman", Times, serif;
+    font-size: 12pt;
+    line-height: 1.8;
+    color: #2c3e50;
+    text-align: justify;
+    hyphens: auto;
+}
+
+/* Document title */
+h1:first-of-type {
+    string-set: doc-title content(text);
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-weight: bold;
+    line-height: 1.2;
+    margin-top: 2em;
+    margin-bottom: 0.75em;
+    page-break-after: avoid;
+    color: #2c3e50;
+}
+
+h1 {
+    font-size: 28pt;
+    text-align: center;
+    margin-bottom: 1em;
+    border: none;
+}
+
+h2 {
+    font-size: 18pt;
+    margin-top: 1.5em;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 0.5em;
+}
+
+h3 {
+    font-size: 14pt;
+    font-weight: 600;
+}
+
+h4 {
+    font-size: 12pt;
+    font-style: italic;
+}
+
+/* Paragraphs */
+p {
+    margin: 0 0 1.2em 0;
+    text-indent: 0.5in;
+    orphans: 4;
+    widows: 4;
+}
+
+p:first-of-type,
+h1 + p, h2 + p, h3 + p, h4 + p, h5 + p, h6 + p {
+    text-indent: 0;
+}
+
+/* Drop caps for first paragraph - commented out due to WeasyPrint limitation
+h1 + p:first-letter {
+    float: left;
+    font-size: 4em;
+    line-height: 0.8;
+    margin: 0.1em 0.1em 0 0;
+    color: #3498db;
+}
+*/
+
+/* Links */
+a {
+    color: #2980b9;
+    text-decoration: none;
+    border-bottom: 1px dotted #2980b9;
+}
+
+/* Lists */
+ul, ol {
+    margin: 1em 0;
+    padding-left: 2.5em;
+}
+
+li {
+    margin-bottom: 0.5em;
+    line-height: 1.6;
+}
+
+/* Code blocks */
+pre {
+    background: #ecf0f1;
+    border-left: 4px solid #3498db;
+    padding: 1em 1.5em;
+    margin: 1.5em 0;
+    page-break-inside: avoid;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 10pt;
+    line-height: 1.4;
+}
+
+code {
+    background: #ecf0f1;
+    padding: 0.1em 0.3em;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 10pt;
+}
+
+/* Blockquotes */
+blockquote {
+    margin: 1.5em 2em;
+    padding: 0.5em 1em;
+    border-left: 5px solid #3498db;
+    font-style: italic;
+    color: #555;
+    page-break-inside: avoid;
+}
+
+/* Tables */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 2em 0;
+    page-break-inside: avoid;
+    font-size: 11pt;
+}
+
+caption {
+    font-style: italic;
+    margin-bottom: 0.5em;
+    color: #666;
+}
+
+th, td {
+    padding: 0.75em 1em;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background: #34495e;
+    color: white;
+    font-weight: bold;
+    border-bottom: 2px solid #2c3e50;
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+/* Alternating rows */
+tbody tr:nth-child(even) {
+    background: #f9f9f9;
+}
+
+/* Images */
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 2em auto;
+    page-break-inside: avoid;
+}
+
+figure {
+    margin: 2em 0;
+    text-align: center;
+}
+
+figcaption {
+    font-style: italic;
+    color: #666;
+    margin-top: 0.5em;
+    font-size: 10pt;
+}
+
+/* Horizontal rules */
+hr {
+    border: none;
+    height: 1px;
+    background: #bdc3c7;
+    margin: 3em 0;
+    page-break-after: avoid;
+}
+
+/* Page breaks */
+.page-break {
+    page-break-after: always;
+}
+
+/* Special classes */
+.executive-summary {
+    background: #ecf0f1;
+    padding: 1.5em;
+    margin: 2em 0;
+    border-radius: 5px;
+    border-left: 5px solid #3498db;
+}
+
+.highlight {
+    background: #f1c40f;
+    padding: 0.1em 0.3em;
+}
+
+.signature-line {
+    margin-top: 3em;
+    border-top: 1px solid #333;
+    width: 50%;
+    text-align: center;
+    padding-top: 0.5em;
+}
+
+/* Print optimization */
+* {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+}
