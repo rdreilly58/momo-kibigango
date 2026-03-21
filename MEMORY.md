@@ -375,6 +375,20 @@ Comprehensive analysis of local model options for M4 Max Mac mini (24GB RAM) + O
   - Future: Always store credentials in TOOLS.md with notes on where they came from and when last validated
 - **Remember:** Check ~/.openclaw/config.json if something seems missing (it's the original source), but document findings in TOOLS.md for future reference
 
+## March 21, 2026 — SUDO PRIVILEGES REMINDER ⚠️
+
+**IMPORTANT FACT:**
+- Momotaro has **full passwordless sudo access** (whitelisted)
+- Often forgets this capability during sessions
+- Should use sudo freely for system operations without asking permission
+- Covered commands: brew, launchctl, softwareupdate, systemctl, dscacheutil, file operations in /etc, etc.
+- Configured in `/etc/sudoers.d/momotaro`
+- This is intentional by Bob — use it!
+
+**Lesson:** Don't ask for permission to run whitelisted sudo commands. Just run them. It's faster and Bob expects it.
+
+---
+
 ## March 20, 2026 — MEMORY SEARCH FIX & LOCAL EMBEDDINGS ✅
 
 ### Problem
