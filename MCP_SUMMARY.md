@@ -32,7 +32,7 @@ Contains:
 - Troubleshooting common auth issues
 - Token rotation schedule
 
-**Key Recommendation**: Use 1Password for centralized credential management with automated injection into MCP server environment variables.
+**Key Recommendation**: Use Apple Keychain for centralized credential management with automated injection into MCP server environment variables.
 
 ### 3. Phase 1 Setup Guide
 **File**: `docs/MCP_PHASE1_SETUP.md`

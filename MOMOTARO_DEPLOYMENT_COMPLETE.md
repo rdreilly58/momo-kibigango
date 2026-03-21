@@ -208,7 +208,7 @@ Professional HUD implementation:
 ## 🔒 SECURITY & MAINTENANCE
 
 ### API Key Protection
-- Store in 1Password under "OpenClaw Secrets" vault
+- Store in Apple Keychain under "openclaw" account
 - Never commit to git or public repositories
 - Rotate every 90 days
 - Limit to necessary permissions only
