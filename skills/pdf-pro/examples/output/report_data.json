@@ -1,0 +1,27 @@
+{
+  "title": "Quarterly Report",
+  "subtitle": "Q1 2024 Performance Analysis",
+  "author": "Analytics Team",
+  "date": "March 21, 2024",
+  "sections": [
+    {
+      "title": "Executive Summary",
+      "content": "This quarter showed significant growth across all key metrics."
+    },
+    {
+      "title": "Financial Performance",
+      "table": {
+        "headers": ["Metric", "Q1 2024", "Q4 2023", "Change"],
+        "data": [
+          ["Revenue", ".2M", "80K", "+22%"],
+          ["Profit", "20K", "50K", "+28%"],
+          ["Customers", "1,250", "1,100", "+14%"]
+        ]
+      }
+    },
+    {
+      "title": "Conclusion",
+      "content": "The positive trends indicate strong momentum heading into Q2."
+    }
+  ]
+}

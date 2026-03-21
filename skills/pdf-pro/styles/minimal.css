@@ -1,0 +1,166 @@
+/* PDF Pro Minimal Style - Simple and distraction-free */
+
+/* Page setup */
+@page {
+    size: Letter;
+    margin: 1.5in;
+}
+
+/* Typography */
+body {
+    font-family: "Helvetica", "Arial", sans-serif;
+    font-size: 12pt;
+    line-height: 2;
+    color: #000;
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+    font-weight: normal;
+    margin: 2em 0 1em 0;
+    page-break-after: avoid;
+}
+
+h1 {
+    font-size: 18pt;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    text-align: center;
+}
+
+h2 {
+    font-size: 14pt;
+    font-style: italic;
+}
+
+h3, h4, h5, h6 {
+    font-size: 12pt;
+    font-weight: bold;
+}
+
+/* Paragraphs */
+p {
+    margin: 0 0 1em 0;
+    text-align: justify;
+    orphans: 3;
+    widows: 3;
+}
+
+/* First line indent */
+p + p {
+    text-indent: 1em;
+}
+
+/* Links - print URL */
+a {
+    color: #000;
+    text-decoration: none;
+}
+
+a::after {
+    content: " (" attr(href) ")";
+    font-size: 10pt;
+    color: #666;
+}
+
+/* Lists */
+ul, ol {
+    margin: 1em 0;
+    padding-left: 2em;
+}
+
+li {
+    margin-bottom: 0.5em;
+}
+
+/* Remove bullets for cleaner look */
+ul {
+    list-style: none;
+}
+
+ul li::before {
+    content: "—";
+    margin-right: 0.5em;
+}
+
+/* Code */
+pre, code {
+    font-family: "Courier New", Courier, monospace;
+    font-size: 10pt;
+}
+
+pre {
+    margin: 1em 0;
+    padding: 1em 0;
+    border-top: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
+    page-break-inside: avoid;
+}
+
+/* Blockquotes */
+blockquote {
+    margin: 2em 4em;
+    font-style: italic;
+    text-align: center;
+    page-break-inside: avoid;
+}
+
+/* Tables - minimal style */
+table {
+    width: 100%;
+    margin: 2em 0;
+    border-collapse: collapse;
+    page-break-inside: avoid;
+}
+
+th, td {
+    padding: 0.5em 0;
+    text-align: left;
+    border-bottom: 1px solid #ccc;
+}
+
+th {
+    font-weight: bold;
+}
+
+/* Remove border from last row */
+tr:last-child td {
+    border-bottom: none;
+}
+
+/* Images */
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 2em 0;
+}
+
+/* Horizontal rules */
+hr {
+    border: none;
+    text-align: center;
+    margin: 3em 0;
+}
+
+hr::after {
+    content: "* * *";
+    letter-spacing: 1em;
+    color: #999;
+}
+
+/* Page breaks */
+.page-break {
+    page-break-after: always;
+}
+
+/* Hide unnecessary elements */
+nav, aside, .no-print {
+    display: none;
+}
+
+/* Print optimization */
+* {
+    background: white !important;
+    color: black !important;
+}

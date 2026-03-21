@@ -1,0 +1,31 @@
+{
+  "company_name": "Acme Corporation",
+  "company_address": "123 Business Street\nSuite 100\nNew York, NY 10001",
+  "invoice_number": "INV-2024-001",
+  "date": "2024-03-21",
+  "due_date": "2024-04-20",
+  "client": {
+    "name": "Client Company LLC",
+    "address": "456 Customer Lane\nBoston, MA 02101",
+    "email": "billing@clientcompany.com"
+  },
+  "items": [
+    {
+      "description": "Web Development Services",
+      "hours": 40,
+      "rate": 150
+    },
+    {
+      "description": "UI/UX Design",
+      "hours": 20,
+      "rate": 125
+    },
+    {
+      "description": "Project Management",
+      "hours": 10,
+      "rate": 100
+    }
+  ],
+  "payment_terms": "Net 30 days. 2% late fee per month on overdue balances.",
+  "notes": "Thank you for your business! Please reference the invoice number with your payment."
+}
