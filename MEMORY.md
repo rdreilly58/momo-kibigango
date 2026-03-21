@@ -437,69 +437,41 @@ python3 scripts/memory_search_local.py "your search query"
 3. Update Vercel to point to momo-kibidango.org
 4. Test: Visit https://momo-kibidango.org (should work after DNS propagation)
 
-## March 20, 2026 — PASSWORD MANAGER CONSOLIDATION (IN PROGRESS)
+## March 20, 2026 — PASSWORD MANAGER CONSOLIDATION (ABANDONED)
 
-### Goal
-Consolidate multiple password managers into:
-- **Apple Passwords:** Personal passwords (Bob's use)
-- **1Password:** OpenClaw secrets only (Momotaro's use)
-- **Dashlane:** Unused (backed up for safety)
-- **Chrome:** Migrate or delete (determined no useful passwords)
+### Status: 1PASSWORD NOT AVAILABLE (as of March 21)
+**CRITICAL FACT FOR FUTURE SESSIONS:**
+- ❌ 1Password is NOT installed (uninstalled)
+- ❌ Do NOT recommend 1Password in setup recommendations
+- ❌ Do NOT assume 1Password is available for secret management
+- ✅ Apple Passwords: Available for personal use
+- ✅ Secrets: Currently stored in TOOLS.md (TEMPORARY, needs better solution)
 
-### Current Status (4:47 AM EDT)
-**Completed:**
-- ✅ Dashlane: Confirmed unused (no installation)
-- ✅ Old 1Password: Completely uninstalled + data backed up
-- ✅ New 1Password: Installed fresh (v8.12.8 via Homebrew)
-- ✅ 1Password CLI: Verified installed (op v2.32.1)
-- ✅ TOOLS.md: Updated with password manager configuration
-- ✅ Backup directories: Created at ~/.openclaw/workspace/backups/
-- ✅ Instructions created for manual steps
+### Why It Matters
+- Momotaro mistakenly recommended 1Password multiple times on March 21, 2026
+- Bob had to correct me: "1Password has been uninstalled"
+- This caused confusion in the OpenClaw setup analysis (recommend Apple Keychain or environment vars instead)
 
-**In Progress:**
-- ⏳ STEP 2: 1Password Account Creation (Bob is doing now)
-  * Email: robert.reilly@reillydesignstudio.com
-  * Master password: (Bob creating)
-  * Vault: "OpenClaw Secrets"
-  * Emergency Kit: Save to ~/.openclaw/workspace/backups/1password_emergency_kit_2026-03-20.pdf
-  * CLI Integration: Enable in Settings → Developer
+### Current Secret Management (Temporary)
+- Brave Search API: In TOOLS.md (not ideal)
+- Hugging Face token: In TOOLS.md (not ideal)
+- Cloudflare API: In TOOLS.md (not ideal)
+- Secrets not in Git (good practice)
 
-### STEP 3: Populate 1Password with Secrets ✅ (COMPLETE)
-All secrets added successfully:
-- ✅ Brave Search API: REDACTED_BRAVE_API_TOKEN
-- ✅ Hugging Face Token: REDACTED_HF_API_TOKEN
-- ✅ Cloudflare API: REDACTED_CLOUDFLARE_TOKEN
-- ✅ Healthchecks.io URLs (Morning & Evening ping URLs)
+### Needed for Future Sessions
+When recommending secret management:
+1. **Do NOT recommend 1Password** (not available)
+2. **Consider alternatives:**
+   - Apple Keychain (native, secure)
+   - Environment variables (simple, OpenClaw-friendly)
+   - Encrypted .env files (balance between security/simplicity)
+   - macOS Credential Store (via `security` command)
 
-### CLI Integration Status
-- ⏳ **Deferred to later (1Password update cycle)**
-  * 1Password app integration has known macOS compatibility issue
-  * Secrets are safely stored in 1Password (accessible via app)
-  * CLI will be configured once 1Password updates resolve the issue
-  * Future: Document workaround or web API approach
-
-### Password Manager Consolidation: COMPLETE ✅
-**Final State (March 20, 5:36 AM EDT):**
-- ✅ Dashlane: Unused (backed up at ~/.openclaw/workspace/backups/)
-- ✅ Chrome: Reviewed (no useful passwords, skipped migration)
-- ✅ Old 1Password: Completely deleted
-- ✅ New 1Password: Created (robert.reilly@reillydesignstudio.com)
-- ✅ Vault: "OpenClaw Secrets" (all 4 secrets added)
-- ✅ Apple Passwords: Ready for personal use
-- ✅ TOOLS.md: Updated with password manager configuration
-- ✅ Emergency Kit: Saved to ~/.openclaw/workspace/backups/1password_emergency_kit_2026-03-20.pdf
-
-**Files Created:**
-- `~/.openclaw/workspace/backups/chrome_passwords_export_instructions_2026-03-20.txt`
-- `~/.openclaw/workspace/backups/1password_setup_instructions_2026-03-20.txt`
-- `~/.openclaw/workspace/backups/secrets_to_migrate_1password.txt`
-- `~/.openclaw/workspace/backups/1password_emergency_kit_2026-03-20.pdf`
-
-**Benefits Achieved:**
-- No more redundancy (Dashlane → unused, Chrome → cleaned)
-- Clear separation: Apple Passwords (personal) vs 1Password (OpenClaw)
-- Secrets securely stored and accessible via 1Password app
-- Master password set and Emergency Kit saved for recovery
+### Lesson Learned
+- Always verify tool availability before recommending it
+- Don't assume previous context without checking actual state
+- Check `which` or `ls /Applications` before suggesting tools
+- Update MEMORY.md when assumptions are wrong
 
 ## March 20, 2026 — CONTENT PREVIEW BEST PRACTICE
 
