@@ -87,7 +87,7 @@
 - [ ] All IDs populated correctly
 - [ ] Permissions set to 600 (chmod 600)
 - [ ] Config validated with script
-- [ ] Bot token stored in 1Password vault
+- [ ] Bot token stored in Apple Keychain (DiscordBotToken)
 
 **Status:** ⏳ READY TO EXECUTE (awaiting IDs from Bob)  
 **Expected Duration:** 10 minutes
