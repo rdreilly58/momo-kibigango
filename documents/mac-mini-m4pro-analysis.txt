@@ -1,0 +1,140 @@
+================================================================================
+                    MAC MINI M4 PRO VS AWS EC2 ANALYSIS
+                Total Cost of Ownership Comparison & Recommendation
+================================================================================
+
+Date: March 20, 2026
+Prepared by: Momotaro OpenClaw
+
+================================================================================
+EXECUTIVE SUMMARY
+================================================================================
+
+This analysis evaluates the financial feasibility of purchasing an Apple Mac 
+mini M4 Pro (48GB RAM, 1TB storage) versus utilizing AWS EC2 mac-m4pro.metal 
+instances for development and computational workloads.
+
+KEY FINDING: Home purchase becomes cost-effective after 18 months of 
+continuous use; AWS is preferable for short-term or variable workloads.
+
+================================================================================
+SYSTEM SPECIFICATIONS
+================================================================================
+
+CPU:              14-core M4 Pro (Apple Silicon)
+GPU:              20-core GPU
+Memory:           48GB Unified RAM
+Storage:          1TB NVMe SSD
+Neural Engine:    16-core
+Form Factor:      Desktop Computer
+
+================================================================================
+PRICING BREAKDOWN
+================================================================================
+
+APPLE MAC MINI M4 PRO (HOME PURCHASE)
+────────────────────────────────────────────────────────────────────────────
+Configuration                                          Price      Notes
+────────────────────────────────────────────────────────────────────────────
+Base M4 Pro (12-core CPU, 16-core GPU)              $1,399     Starting config
+Memory Upgrade: 24GB → 48GB                         +$600      Apple RAM upgrade
+Storage Upgrade: 512GB → 1TB                        +$200      SSD expansion
+────────────────────────────────────────────────────────────────────────────
+TOTAL HOME PURCHASE PRICE                           $2,199     One-time investment
+────────────────────────────────────────────────────────────────────────────
+
+AWS EC2 MAC-M4PRO.METAL (CLOUD PRICING)
+────────────────────────────────────────────────────────────────────────────
+Time Period                 Hourly Rate    Total Cost    Details
+────────────────────────────────────────────────────────────────────────────
+Per Hour                    $1.97          —             On-Demand (us-east-1)
+Per Day (24 hours)          —              $47.28        Minimum allocation period
+Per Month (730 hours)       —              $1,438        Continuous operation
+Per Year (8,760 hours)      —              $17,252       Full 12-month period
+────────────────────────────────────────────────────────────────────────────
+
+================================================================================
+TOTAL COST OF OWNERSHIP COMPARISON
+================================================================================
+
+Usage Duration      AWS EC2 Cost    Home Purchase    More Economical
+────────────────────────────────────────────────────────────────────────────
+1 Month             $1,438          $2,199           AWS (30% cheaper)
+3 Months            $4,314          $2,199           Home (49% cheaper)
+6 Months            $8,628          $2,199           Home (75% cheaper)
+12 Months           $17,256         $2,199           Home (87% cheaper)
+18 Months           $25,884         $2,199           Home (92% cheaper) ⭐
+24 Months           $34,512         $2,199           Home (94% cheaper)
+
+================================================================================
+BREAK-EVEN ANALYSIS
+================================================================================
+
+Break-even point at continuous usage: 18 MONTHS
+
+After 18 months, the home purchase has paid for itself through reduced AWS 
+fees. Beyond this point, home ownership becomes exponentially more economical.
+
+================================================================================
+RECOMMENDATIONS
+================================================================================
+
+CHOOSE AWS EC2 IF:
+  ✓ Your workload is sporadic or bursty (not continuous)
+  ✓ You need flexibility to scale resources up/down
+  ✓ Your project duration is under 12 months
+  ✓ You prefer no hardware maintenance burden
+  ✓ You want to minimize upfront capital investment
+
+CHOOSE HOME PURCHASE IF:
+  ✓ You need continuous or near-continuous access (18+ months)
+  ✓ You want complete control over your hardware
+  ✓ You can integrate it into your home/office setup
+  ✓ Long-term productivity tools investment
+  ✓ You want to avoid recurring monthly cloud bills
+
+================================================================================
+ADDITIONAL CONSIDERATIONS
+================================================================================
+
+AWS EC2 ADVANTAGES:
+  • Scale resources on demand
+  • No hardware maintenance responsibilities
+  • Global AWS infrastructure and services
+  • Easy integration with other AWS services
+
+HOME PURCHASE ADVANTAGES:
+  • Full ownership with no recurring fees
+  • Zero marginal cost after initial purchase
+  • Immediate local access (no cloud latency)
+  • Excellent resale value on secondary market
+
+================================================================================
+CONCLUSION
+================================================================================
+
+The choice between AWS EC2 and home purchase depends on your usage pattern:
+
+• Short-term projects (< 12 months): AWS offers lower total cost and better 
+  flexibility
+
+• Long-term development (18+ months): Home purchase provides 92%+ cost 
+  savings and permanent asset ownership
+
+• Variable/burst workloads: AWS provides better cost efficiency through 
+  pay-as-you-go pricing
+
+• Continuous workloads: Home purchase is significantly more economical
+
+================================================================================
+NOTES
+================================================================================
+
+Pricing based on current AWS On-Demand rates (us-east-1) and Apple official 
+retail pricing. AWS Savings Plans and home equipment depreciation not included 
+in analysis.
+
+AWS EC2 Mac instances require a 24-hour minimum allocation period per 
+instance allocation.
+
+================================================================================

@@ -93,6 +93,13 @@ iOSInjectionProject/
 Config/Secrets.plist
 *.log
 
+# Telegraph credentials (security)
+~/.telegraph_token
+.telegraph_token
+/config/telegraph_token
+/config/.telegraph_token
+*.telegraph_token
+
 # Temporary files
 .DS_Store
 .env

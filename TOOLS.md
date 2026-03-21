@@ -2,6 +2,98 @@
 
 Skills define _how_ tools work. This file is for _your_ specifics — the stuff that's unique to your setup.
 
+## Telegraph Publishing System (March 21, 2026)
+
+**Status:** ✅ ACTIVE - Full integration deployed
+
+### Account & Configuration
+- **Account:** OpenClaw/Momotaro (created March 21, 2026 00:47 EDT)
+- **Access Token:** Stored securely at `~/.telegraph_token` (600 permissions)
+- **Config File:** `~/.openclaw/workspace/config/telegraph.json`
+- **API Endpoint:** https://api.telegra.ph (connectivity verified ✅)
+
+### What It Does
+- **Auto-publishes formatted output** from subagents (>2000 chars or contains tables)
+- **Publishes HEARTBEAT reports** (tasks, calendar, metrics) to Telegraph
+- **Manual CLI publishing** for direct article creation
+- **Secure token management** with encrypted storage
+- **Retry logic** with exponential backoff (3 attempts, max 30s delay)
+- **Comprehensive logging** to `~/.openclaw/logs/telegraph.log`
+
+### CLI Commands
+
+```bash
+# Status & validation
+python3 ~/.openclaw/workspace/scripts/telegraph-cli.py status
+python3 ~/.openclaw/workspace/scripts/telegraph-cli.py config validate
+python3 ~/.openclaw/workspace/scripts/telegraph-cli.py logs --lines 50
+
+# Publishing
+python3 ~/.openclaw/workspace/scripts/telegraph-cli.py publish-md "Title" /path/to/file.md
+python3 ~/.openclaw/workspace/scripts/telegraph-cli.py publish-text "Title" "Content"
+python3 ~/.openclaw/workspace/scripts/telegraph-cli.py test
+```
+
+### File Locations
+- **Token:** `~/.telegraph_token` (600 perms)
+- **Config:** `~/.openclaw/workspace/config/telegraph.json` (600 perms)
+- **Publisher:** `~/.openclaw/workspace/scripts/telegraph_publisher.py`
+- **CLI:** `~/.openclaw/workspace/scripts/telegraph-cli.py`
+- **Heartbeat:** `~/.openclaw/workspace/scripts/telegraph_heartbeat.py`
+- **Logs:** `~/.openclaw/logs/telegraph.log`
+
+### First Published Article
+✅ **URL:** https://telegra.ph/OpenClaw-Telegraph-Integration-Test-03-21  
+✅ **Published:** March 21, 2026 00:48:41 EDT
+
+---
+
+## Password Manager Configuration (March 20, 2026)
+
+**Setup:** Consolidated from multiple managers → Apple Passwords (personal) + 1Password (OpenClaw)
+
+### Division of Responsibilities
+- **Apple Passwords:** Personal accounts, websites, Bob's daily use
+- **1Password:** OpenClaw/Momotaro secrets only (API keys, tokens, service accounts)
+
+### 1Password Setup Details
+- **Account:** robert.reilly@reillydesignstudio.com
+- **Vault:** "OpenClaw Secrets" (default)
+- **Emergency Kit:** ~/.openclaw/workspace/backups/1password_emergency_kit_2026-03-20.pdf
+- **Desktop Integration:** Enabled (Settings → Developer → Integrate with 1Password CLI)
+
+### 1Password CLI Usage
+```bash
+# Test CLI integration
+~/.openclaw/workspace/scripts/test_1password_cli.sh
+
+# Sign in (requires desktop app unlocked)
+op signin
+
+# List vaults
+op vault list
+
+# Read an item
+op item get "Brave Search API" --fields password
+
+# Create new API key entry
+op item create --category="API Key" --title="Service Name" --vault="OpenClaw Secrets" password="key_value"
+```
+
+### Migration Status
+- ✅ Dashlane: No installation found (already unused)
+- ⏳ Chrome passwords: Manual export required → Apple Passwords
+- ✅ Old 1Password: Deleted and backed up
+- ⏳ New 1Password: App installed, awaiting account creation
+- ⏳ CLI integration: Ready to configure after account setup
+
+### Backup Locations
+- Chrome export instructions: ~/.openclaw/workspace/backups/chrome_passwords_export_instructions_2026-03-20.txt
+- 1Password setup guide: ~/.openclaw/workspace/backups/1password_setup_instructions_2026-03-20.txt
+- Old 1Password data: ~/Library/Application Support/1Password.backup.*
+
+---
+
 ## API Keys & Credentials
 
 **⚠️ Location:** Keep all API keys here in TOOLS.md (workspace file), NOT in ~/.openclaw/config.json (system file)
@@ -41,6 +133,129 @@ Skills define _how_ tools work. This file is for _your_ specifics — the stuff 
 - If briefing doesn't complete within grace period, Healthchecks alerts via Telegram
 - Each cron job is configured to ping URL automatically after success
 - Prevents silent failures in automation
+
+## Embeddings Provider (Hugging Face API)
+
+**Setup Date:** March 20, 2026, 4:11 AM EDT
+**Status:** ✅ ACTIVE - Using Hugging Face API for memory search
+**Provider:** Hugging Face Inference API
+
+### Configuration
+- **Model:** sentence-transformers/all-MiniLM-L6-v2
+- **API Token:** `REDACTED_HF_API_TOKEN`
+- **Endpoint:** api-inference.huggingface.co
+- **Performance:** ~500-1000ms per embedding (API latency)
+- **Dimension:** 384 (vector size)
+- **Cost:** Free (generous free tier, no quota limits)
+- **Fallback:** Local Sentence Transformers if API fails
+
+### Installation
+- **Python Environment:** `~/.openclaw/workspace/venv/`
+- **Package:** sentence-transformers v5.3.0
+- **Dependencies:** PyTorch, transformers, numpy
+
+### Usage
+
+**Embedding Service:**
+```bash
+# Single text
+cd ~/.openclaw/workspace && source venv/bin/activate
+python scripts/embedding_service.py "text to embed"
+
+# Batch processing
+echo '["text 1", "text 2", "text 3"]' | python scripts/embedding_service.py --batch
+
+# Check stats
+python scripts/embedding_service.py --stats
+```
+
+**Memory Search:**
+```bash
+# Search memory files
+cd ~/.openclaw/workspace && source venv/bin/activate
+python scripts/memory_search.py "search query"
+
+# With options
+python scripts/memory_search.py "password manager" --top-k 5 --context 3
+
+# JSON output for scripts
+python scripts/memory_search.py "query" --json
+
+# Force reindex
+python scripts/memory_search.py "query" --reindex
+```
+
+### Performance Characteristics
+- **First load:** 2-5 seconds (model initialization)
+- **Subsequent embeddings:** 50-100ms per text
+- **Memory indexing:** ~5 seconds for 595 chunks (22 files)
+- **Search latency:** <1 second (after initial indexing)
+- **Cache:** In-memory cache reduces duplicate embeddings
+
+### Integration with OpenClaw
+The local embedding service is available as standalone Python scripts that can be called:
+- `scripts/embedding_service.py` - Generate embeddings for any text
+- `scripts/memory_search.py` - Search MEMORY.md and memory/*.md files
+
+These scripts use the virtual environment at `~/.openclaw/workspace/venv/` with all dependencies installed.
+
+### Fallback Plan
+If local embeddings fail (e.g., model corruption, PyTorch issues):
+1. **Option 1:** Reinstall: `rm -rf venv && python3 -m venv venv && source venv/bin/activate && pip install sentence-transformers`
+2. **Option 2:** Use Hugging Face API (requires API key):
+   - Sign up at https://huggingface.co
+   - Get API key from https://huggingface.co/settings/tokens
+   - Set environment variable: `export HF_API_TOKEN=hf_xxx`
+   - Modify scripts to use API instead of local model
+
+### Why This Solution?
+- **No quota limits:** Unlimited local embeddings (vs OpenAI quota exceeded)
+- **Fast:** 100ms per embedding after model loads
+- **Private:** All processing happens locally, no API calls
+- **Reliable:** Works offline, no external dependencies
+- **Cost-effective:** $0 ongoing cost
+
+## Hugging Face API (TEMPORARY FALLBACK - March 20, 2026)
+
+**Status:** ✅ Available as backup if local embeddings fail
+
+**Why this exists:**
+- Local Sentence Transformers is the primary solution (no quota issues, no API calls)
+- Hugging Face API provides a fallback if local model becomes corrupted
+- Evaluated and approved March 20, 2026 but not required for normal operation
+
+### Configuration (If Needed)
+- **Endpoint:** api-inference.huggingface.co
+- **Model:** sentence-transformers/all-MiniLM-L6-v2
+- **Setup:** https://huggingface.co/settings/tokens (free tier, generous limits)
+- **Environment variable:** `HF_API_TOKEN=hf_xxx`
+- **Latency:** 500-1000ms per request (slower than local, but reliable)
+- **Cost:** Free tier sufficient for moderate usage
+
+### When to Use Hugging Face API Fallback
+1. **Only if local embeddings fail** with import errors
+2. **If PyTorch becomes incompatible** with system updates
+3. **For distributed systems** needing API-based embeddings
+
+### Quick Fallback Setup
+```bash
+# 1. Create Hugging Face account (if needed)
+# https://huggingface.co/signup
+
+# 2. Get API token
+# https://huggingface.co/settings/tokens (free tier)
+
+# 3. Set environment variable
+export HF_API_TOKEN=hf_xxx
+
+# 4. Modify scripts to use API
+# See hf_embedding_wrapper.py for implementation details
+```
+
+### Future Plan
+- **Primary:** Keep using local Sentence Transformers (current setup)
+- **Fallback:** Use Hugging Face API only if local model fails
+- **Long-term:** Full local integration (already working, no action needed)
 
 ## Calendar Operations (gog)
 

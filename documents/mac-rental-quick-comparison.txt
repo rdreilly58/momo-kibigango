@@ -1,0 +1,192 @@
+================================================================================
+                        MAC MINI RENTAL OPTIONS
+                        Quick Comparison (March 2026)
+================================================================================
+
+SITUATION: AWS EC2 Mac instance quota approved but zero capacity (allocation in progress)
+SOLUTION: Multiple third-party rental services available immediately
+
+================================================================================
+CLOUD RENTAL OPTIONS (Remote Access via SSH/VNC)
+================================================================================
+
+1. RENT A MAC (rentamac.io) ⭐ BEST VALUE
+────────────────────────────────────────────────────────────────────────────
+  Daily:    $3.30/day     (cheapest option)
+  Weekly:   $23/week      (~$3.29/day)
+  Monthly:  $99/month     (~$3.30/day)
+  
+  Specs:    M4 10-core CPU, 16GB RAM, 512GB SSD
+  Access:   DeskIn remote desktop (Windows/Linux/Mac)
+  Setup:    Instant (credentials upon payment)
+  Admin:    Full access (unrestricted)
+  
+  Best for: Budget-conscious, quick testing, pay-as-you-go
+  Website:  https://rentamac.io
+
+
+2. MACLY (macly.io) ⭐ ENTERPRISE QUALITY
+────────────────────────────────────────────────────────────────────────────
+  Daily:    $14.99/day    (premium service)
+  Weekly:   ~$99/week     
+  Monthly:  ~$99/month    (competitive with Rent a Mac)
+  Yearly:   Contact sales
+  
+  Specs:    M4 10-core CPU, 16GB RAM, NVMe SSD
+  Access:   SSH, VNC, AnyDesk
+  Setup:    <10 minutes (Xcode pre-installed)
+  Uptime:   99.9% SLA guaranteed
+  
+  Features: 5-minute CI/CD builds, GitHub Actions ready
+  Best for: Production CI/CD pipelines, reliability required
+  Website:  https://macly.io/pricing
+
+
+3. SSHMAC (sshmac.com)
+────────────────────────────────────────────────────────────────────────────
+  Pricing:  Daily/Weekly/Monthly available (contact for rates)
+  
+  Specs:    M4 with multiple memory configurations
+  Locations: 5 global datacenters
+  Network:  Dedicated gigabit bandwidth per instance
+  Access:   SSH access included
+  
+  Best for: Global teams, high-bandwidth needs
+  Website:  https://sshmac.com
+
+
+4. SMTPMAC (smtpmac.com)
+────────────────────────────────────────────────────────────────────────────
+  Pricing:  Hourly/Daily/Weekly/Monthly (flexible, transparent)
+  
+  Specs:    M4 various configurations
+  Locations: 5 global datacenters
+  Network:  Dedicated gigabit per instance
+  
+  Features: No setup fees, pay-as-you-go, instant start
+  Best for: Variable workloads, global presence
+  Website:  https://smtpmac.com
+
+================================================================================
+PHYSICAL DEVICE RENTAL (Shipped to Your Location)
+================================================================================
+
+5. ETECH RENTALS (etechrentals.com) ⭐ PROFESSIONAL SERVICE
+────────────────────────────────────────────────────────────────────────────
+  Pricing:  Quote-based (contact for pricing)
+  
+  Devices:  
+    • Mac mini M4 Pro (12-core CPU, 16-core GPU, up to 24GB)
+    • Mac Studio M1 Ultra
+    • Optional: Monitors (Apple Studio Display, 4K)
+  
+  Service:
+    • Guaranteed next-day delivery (Southern California)
+    • On-site or remote setup support
+    • White-glove service
+    • Custom pre-installation available
+    • Free pickup or return shipping
+  
+  Best for: Events, studios, office setups, production teams
+  Contact:  1-877-738-3246
+  Website:  https://etechrentals.com
+  Region:   Southern California (delivery)
+
+
+6. MIKEGYVER (mikegyver.com) ⭐ OFF-GRID SOLUTION
+────────────────────────────────────────────────────────────────────────────
+  Weekly:   $99/week
+  
+  Unique:   12V DC-powered Mac mini M4 (no AC power needed)
+  
+  Best for: Field production, mobile workstations, remote locations
+  Website:  https://mikegyver.com
+
+================================================================================
+QUICK DECISION GUIDE
+================================================================================
+
+SITUATION                              RECOMMENDATION        COST/MONTH
+────────────────────────────────────────────────────────────────────────────
+Need it today, budget-conscious        Rent a Mac           $99
+Need immediate + reliability (CI/CD)   Macly                $99
+Global team, multiple locations        SSHMac/SmtpMac       TBD
+Event/office setup (physical)          eTech Rentals        Quote
+Off-grid/mobile work                   MikeGyver            $396 (~$99/wk)
+Long-term (18+ months)                 AWS EC2 (in progress) $1,438/mo
+
+================================================================================
+COST COMPARISON (Monthly Estimates)
+================================================================================
+
+Provider          Daily Rate    Monthly (30 days)    Notes
+────────────────────────────────────────────────────────────────────────────
+Rent a Mac        $3.30         $99                 Cheapest
+Macly             $14.99        $449                +SLA, CI/CD optimized
+eTech Rentals     —             Quote               Physical + setup included
+MikeGyver         —             $396                12V DC-powered
+AWS EC2 mac      $1.97/hr       $1,438              Top-tier specs (48GB RAM)
+
+================================================================================
+KEY ADVANTAGES BY SERVICE
+================================================================================
+
+RENT A MAC
+  ✓ Cheapest option ($3.30/day)
+  ✓ Zero setup fees
+  ✓ Fully dedicated (no sharing)
+  ✓ Full admin access
+  ✓ Instant credentials
+
+MACLY
+  ✓ 99.9% uptime SLA
+  ✓ GitHub Actions CI/CD optimized
+  ✓ 5-minute build times (vs 15+ min on GitHub)
+  ✓ Xcode pre-installed
+  ✓ Professional support
+
+ETECH RENTALS
+  ✓ Next-day physical delivery
+  ✓ M4 Pro specs (higher than cloud options)
+  ✓ White-glove setup
+  ✓ Optional monitors included
+  ✓ Expert support included
+
+AWS EC2
+  ✓ Highest specs (48GB RAM, 14-core)
+  ✓ Permanent infrastructure
+  ✓ Breaks even at 18 months
+  ✓ Full AWS integration
+  ✗ Currently at capacity (allocation in progress)
+
+================================================================================
+NEXT STEPS
+================================================================================
+
+Option A: Use cloud rental immediately while AWS allocation completes
+  1. Sign up: https://rentamac.io ($3.30/day, instant)
+  2. Get credentials
+  3. Connect via DeskIn
+  4. AWS daemon still running (will allocate when capacity opens)
+
+Option B: Use reliable CI/CD service if building/testing is priority
+  1. Sign up: https://macly.io ($14.99/day or $99/month)
+  2. Get SSH/VNC access
+  3. Configure GitHub Actions runner
+  4. Enjoy 5-minute builds
+
+Option C: Contact eTech for physical device (if local, CA-based)
+  1. Phone: 1-877-738-3246
+  2. Request Mac mini M4 Pro quote
+  3. Arrange next-day delivery
+  4. On-site setup included
+
+Option D: Keep AWS allocation running in parallel
+  - 8-hour daemon: Running (PID 11798)
+  - 5-minute cron: Deployed
+  - Will auto-allocate when capacity opens
+
+================================================================================
+
+Research completed: March 20, 2026, 7:28 PM EDT
+AWS EC2 allocation daemon: Still running (will notify on success)
