@@ -2,6 +2,73 @@
 
 Skills define _how_ tools work. This file is for _your_ specifics — the stuff that's unique to your setup.
 
+## Discord Integration (March 21, 2026)
+
+**Status:** ✅ CONFIGURED - Ready for deployment
+
+### Configuration Details (March 21, 04:46 EDT)
+
+**Server:**
+- **Server ID:** `1484831927914594425`
+- **Email:** New (fresh setup)
+- **Bot Status:** Authorized & configured
+
+**Channel IDs:**
+| Channel | ID | Purpose |
+|---------|---|---------|
+| #general | 1484830406300930220 | Main chat with Momotaro |
+| #subagents | 1484830460717568171 | Subagent task results |
+| #telegraph | 1484830547766280212 | Telegraph articles |
+| #heartbeat | 1484830618226528389 | Status reports |
+| #archive | 1484830728121487440 | Message archive |
+| #dev-tools | 1484830760870613054 | Dev commands (Bob only) |
+| #logs | 1484830298389741650 | Error logs (Bob only) |
+
+**Bot Configuration:**
+- **Bot Token:** Stored securely (`9c309ce3d4e566c117ca...***`)
+- **Config File:** `~/.openclaw/config/discord.json` ✅
+- **Validation:** PASSED ✅
+- **Command Prefix:** `!`
+- **Status Message:** "Playing with Momotaro 🍑"
+
+### Features Enabled
+✅ Auto-threading for organized discussions
+✅ Auto-embed Telegraph links with previews
+✅ Archive all messages to searchable index
+✅ Telegraph formatting in Discord
+✅ Message logging to #logs
+✅ Error logging and reporting
+
+### Files
+- **Config:** `~/.openclaw/config/discord.json` (960 bytes)
+- **Validator:** `scripts/validate_discord_config.py` (executable)
+- **Bot Script:** `scripts/discord_bot.py` (ready)
+- **Logs:** `~/.openclaw/logs/discord.log`
+
+### CLI to Deploy Bot
+```bash
+# Validate config (should pass)
+python3 scripts/validate_discord_config.py
+
+# Start bot
+python3 scripts/discord_bot.py
+
+# View logs
+tail -f ~/.openclaw/logs/discord.log
+
+# Test connectivity
+# Send message in Discord #general → should see response
+```
+
+### Next: Gateway Integration
+- Update gateway config to enable Discord channel
+- Restart gateway
+- Test message routing: Telegram ↔ Discord
+- Verify Telegraph auto-posting
+- Verify subagent integration
+
+---
+
 ## Telegraph Publishing System (March 21, 2026)
 
 **Status:** ✅ ACTIVE - Full integration deployed
