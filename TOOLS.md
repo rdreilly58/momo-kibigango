@@ -373,78 +373,83 @@ export HF_API_TOKEN=hf_xxx
 
 ---
 
-## Gmail Account Migration (March 21, 2026)
+## Gmail Account Migration (March 22, 2026 — ACTIVE)
 
-**TRANSITION IN PROGRESS:**
-- **NEW Primary Gmail:** `reillyrd58@gmail.com` (migrating to this)
-- **OLD Accounts (stay active during transition):**
-  - `rdreilly2010@gmail.com`
-  - `robert.reilly@reillydesignstudio.com`
-- **Timeline:** Complete transition over next few days (medium priority)
-- **Status:** Just announced, beginning setup
+**NEW PRIMARY GMAIL:** `reillyrd58@gmail.com`
+- **Status:** ✅ ACTIVE — All work-related email uses this account NOW
+- **Decision:** March 22, 5:29 AM EDT — Bob approved transition
+- **Implementation:** All future email operations default to reillyrd58@gmail.com
 
-**Migration Plan:**
-1. Authenticate `gog` with reillyrd58@gmail.com (primary)
-2. Keep old accounts active as backup during transition
-3. Gradually shift all services to new account
-4. Update TOOLS.md as each service is migrated
+**Account Status:**
+- ✅ `reillyrd58@gmail.com` — Primary work account (ACTIVE)
+- ✓ `rdreilly2010@gmail.com` — Legacy, stays for backward compatibility
+- ✓ `robert.reilly@reillydesignstudio.com` — Personal/design studio
+
+**Services Migrated to reillyrd58:**
+- ✅ First Day & First Week Plan email (March 22, 5:29 AM)
+- ✅ Future leadership planning emails (Sunday 3 AM plans)
+- ✅ Future strategy review notifications
+- ✅ All Leidos work-related communication
+
+**gog Default:**
+- When sending work email: `gog gmail send -a reillyrd58@gmail.com ...`
+- For backward compat: older scripts may still reference rdreilly2010@gmail.com (update as encountered)
 
 ## Calendar Operations (gog)
 
-**Important:** Temporarily using `-a rdreilly2010@gmail.com` (will change to reillyrd58 soon)
+**Primary Account:** `reillyrd58@gmail.com` (use for all new operations)
 
 ```bash
 # Get calendar events
-gog calendar list -a rdreilly2010@gmail.com
+gog calendar list -a reillyrd58@gmail.com
 
 # Get specific date
-gog calendar list -a rdreilly2010@gmail.com [filter options]
+gog calendar list -a reillyrd58@gmail.com [filter options]
 
 # JSON output for scripting
-gog calendar list -a rdreilly2010@gmail.com --json
+gog calendar list -a reillyrd58@gmail.com --json
 ```
 
-**After migration to reillyrd58:**
+**Legacy (rdreilly2010) still available if needed:**
 ```bash
-# Will use:
-gog calendar list -a reillyrd58@gmail.com
+gog calendar list -a rdreilly2010@gmail.com
 ```
 
 **If authentication fails:**
-- Run: `gog login reillyrd58@gmail.com` (new) or `gog login rdreilly2010@gmail.com` (old)
+- Run: `gog login reillyrd58@gmail.com`
 - Follow the browser OAuth flow
 - Token will be refreshed and stored
 
 ---
 
-## Email Operations (STANDARD METHOD)
+## Email Operations (STANDARD METHOD - March 22, ACTIVE)
 
-**Default for SENDING:** `gog gmail send`
+**Default for SENDING (Work-Related):** `gog gmail send -a reillyrd58@gmail.com ...`
 
 ```bash
 # Simple email
 gog gmail send \
-  -a "rdreilly2010@gmail.com" \
-  --to "rdreilly2010@gmail.com" \
+  -a "reillyrd58@gmail.com" \
+  --to "reillyrd58@gmail.com" \
   --subject "Subject Line" \
   --body-file <(cat file.txt)
 
 # Multiple recipients
 gog gmail send \
-  -a "rdreilly2010@gmail.com" \
+  -a "reillyrd58@gmail.com" \
   --to "user1@example.com,user2@example.com" \
   --subject "Subject" \
   --body-file <(echo "Body text")
 
 # Direct text (no file)
 gog gmail send \
-  -a "rdreilly2010@gmail.com" \
+  -a "reillyrd58@gmail.com" \
   --to "recipient@example.com" \
   --subject "Subject" \
   --body "Email body text here"
 ```
 
-**Why:** Already authenticated, reliable, fast, no password setup
+**Why:** Already authenticated, reliable, fast, work-related primary account (reillyrd58)
 
 **Default for READING:** `gog gmail search` (Google CLI with Gmail API)
 
