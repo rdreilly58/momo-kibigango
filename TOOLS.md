@@ -124,7 +124,7 @@ python3 ~/.openclaw/workspace/scripts/telegraph-cli.py test
 - **1Password:** OpenClaw/Momotaro secrets only (API keys, tokens, service accounts)
 
 ### 1Password Setup Details
-- **Account:** robert.reilly@reillydesignstudio.com
+- **Account:** robert@reillydesignstudio.com
 - **Vault:** "OpenClaw Secrets" (default)
 - **Emergency Kit:** ~/.openclaw/workspace/backups/1password_emergency_kit_2026-03-20.pdf
 - **Desktop Integration:** Enabled (Settings → Developer → Integrate with 1Password CLI)
@@ -383,7 +383,7 @@ export HF_API_TOKEN=hf_xxx
 **Account Status:**
 - ✅ `reillyrd58@gmail.com` — Primary work account (ACTIVE)
 - ✓ `rdreilly2010@gmail.com` — Legacy, stays for backward compatibility
-- ✓ `robert.reilly@reillydesignstudio.com` — Personal/design studio
+- ✓ `robert@reillydesignstudio.com` — Primary design studio email
 
 **Services Migrated to reillyrd58:**
 - ✅ First Day & First Week Plan email (March 22, 5:29 AM)

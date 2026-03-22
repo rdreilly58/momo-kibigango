@@ -146,7 +146,7 @@
 - [x] Debug toolkit (5 new skills)
 
 ### **🟡 Pending Confirmation**
-- [ ] SNS email confirmation (check robert.reilly@reillydesignstudio.com)
+- [ ] SNS email confirmation (check robert@reillydesignstudio.com)
 - [ ] CloudFront CDN setup (manual via console)
 
 ### **🔴 Blocked Until Tomorrow**

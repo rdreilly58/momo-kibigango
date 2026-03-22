@@ -307,7 +307,7 @@ All three options require updating your domain's DNS records. Since you own `rei
 - [ ] Test send/receive
 
 **Step 5: (Optional) Forward Old Email**
-- [ ] Set up forwarding from robert.reilly@reillydesignstudio.com → new address
+- [ ] Legacy email forwarding (robert.reilly@reillydesignstudio.com) deprecated
 - [ ] Or: Stop using old address entirely
 
 ---

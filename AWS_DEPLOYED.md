@@ -55,7 +55,7 @@ aws s3 presign s3://reillydesignstudio-assets/invoices/FILE.pdf --expires-in 864
 |----------|-------|
 | **Topic ARN** | `arn:aws:sns:us-east-1:053677584823:reillydesignstudio-notifications` |
 | **Display Name** | `ReillyDesignStudio Notifications` |
-| **Subscriptions** | 1 (email: robert.reilly@reillydesignstudio.com) |
+| **Subscriptions** | 1 (email: robert@reillydesignstudio.com) |
 | **Status** | ⏳ Pending email confirmation |
 
 **Purpose:** Send notifications for:
@@ -65,7 +65,7 @@ aws s3 presign s3://reillydesignstudio-assets/invoices/FILE.pdf --expires-in 864
 - System errors
 
 **Email Confirmation Required:**
-- Check robert.reilly@reillydesignstudio.com for SNS confirmation
+- Check robert@reillydesignstudio.com for SNS confirmation
 - Click "Confirm subscription" link to activate
 
 **Publishing a message:**
@@ -103,7 +103,7 @@ Lambda Function
     ↓ (process)
 S3 / SNS / Database
     ↓ (notify)
-Email to robert.reilly@reillydesignstudio.com
+Email to robert@reillydesignstudio.com
 ```
 
 **Send a test message:**
@@ -201,7 +201,7 @@ Stripe Payment Received
 ## 🚀 Next Steps
 
 ### **Step 1: Confirm SNS Subscription (REQUIRED)**
-Check email: robert.reilly@reillydesignstudio.com  
+Check email: robert@reillydesignstudio.com  
 Click the confirmation link sent by AWS SNS
 
 ### **Step 2: Create Lambda Function**

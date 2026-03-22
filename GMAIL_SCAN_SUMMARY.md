@@ -98,7 +98,7 @@
 **Date:** March 15, 2026, 6:07 PM  
 **Status:** Business activity  
 **Details:**
-- From: robert.reilly@reillydesignstudio.com
+- From: robert@reillydesignstudio.com
 - Subject: Returns
 - Likely: ReillyDesignStudio business operations
 

@@ -64,7 +64,7 @@
 **Location:** `~/.openclaw/workspace/skills/email-management/SKILL.md`
 
 **Capabilities:**
-- Himalaya wrapper for robert.reilly@reillydesignstudio.com
+- Himalaya wrapper for robert@reillydesignstudio.com
 - Standard email operations
 - Account-specific configuration
 
