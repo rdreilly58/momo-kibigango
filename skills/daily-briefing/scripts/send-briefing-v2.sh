@@ -50,6 +50,7 @@ echo "[briefing] 📧 Sending email to $BRIEFING_EMAIL..."
 EMAIL_SUBJECT="$(echo $BRIEFING_TYPE | tr '[:lower:]' '[:upper:]') Briefing — $(date '+%A, %B %d')"
 
 gog gmail send \
+  -a "$BRIEFING_EMAIL" \
   --to "$BRIEFING_EMAIL" \
   --subject "$EMAIL_SUBJECT" \
   --body-html "$(cat "$HTML_FILE")" 2>&1 | grep -E "message_id|Error" | head -1

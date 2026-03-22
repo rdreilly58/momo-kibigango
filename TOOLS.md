@@ -179,7 +179,17 @@ op item create --category="API Key" --title="Service Name" --vault="OpenClaw Sec
 - **Used for:** DNS management for reillydesignstudio.com
 - **Permissions:** Zone.DNS
 - **Status:** ✅ Active
-- **Last used:** March 18, 2026
+- **Last used:** March 22, 2026
+
+### Cloudflare Support Case (March 22, 2026)
+- **Case ID:** 02033456
+- **Issue:** Account recovery — old email (robert.reilly@peraton.com) no longer accessible
+- **Requested Changes:** 
+  - Update primary email to `robert@reillydesignstudio.com`
+  - Add secondary email: `reillyrd58@gmail.com`
+- **Phone on file:** 703-955-1838
+- **Status:** Awaiting Cloudflare response (created 4:59 PM EDT March 22, 2026)
+- **Follow-up:** Reply to support case email or visit https://dash.cloudflare.com/support
 
 ### Healthchecks.io (Cron Monitoring)
 - **Account:** https://healthchecks.io (free tier)
