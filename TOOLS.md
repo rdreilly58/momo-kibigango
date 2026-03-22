@@ -358,6 +358,19 @@ export HF_API_TOKEN=hf_xxx
 - **Phone:** +1 (703) 995-1838
 - **Start Date:** March 21, 2026
 
+**Organization:**
+- **Local Workspace:** `~/.openclaw/workspace/leidos/` (CUI + sensitive content)
+- **GitHub Repo:** [leidos-engineering-notes](https://github.com/rdreilly58/leidos-engineering-notes) (Private, unclassified only)
+- **Structure:** Hybrid model with segregated security classifications
+  - 🔴 Classified: SCIF/GFE only
+  - 🟡 CUI: `leidos/cui/` (never GitHub)
+  - 🟢 Unclassified: GitHub private repo (after sanitization)
+
+**Daily Notes:** `~/.openclaw/workspace/leidos/memory/daily/`  
+**Architecture Decisions:** `~/.openclaw/workspace/leidos/memory/decisions/` (ADRs)  
+**Meeting Notes:** `~/.openclaw/workspace/leidos/memory/meetings/`  
+**Knowledge Base:** `~/.openclaw/workspace/leidos/knowledge/`
+
 ---
 
 ## Gmail Account Migration (March 21, 2026)
