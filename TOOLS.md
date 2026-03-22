@@ -422,6 +422,53 @@ gog calendar list -a rdreilly2010@gmail.com
 
 ---
 
+## PDF Generation (DEFAULT - March 22, TESTED & VERIFIED)
+
+**Status:** ✅ PRODUCTION READY - Use WeasyPrint
+
+### Quick Usage
+
+**Markdown to PDF:**
+```bash
+bash ~/.openclaw/workspace/scripts/pdf-from-markdown.sh \
+  document.md \
+  -o output.pdf \
+  -t "Document Title" \
+  -a "Author Name"
+```
+
+**Direct WeasyPrint (HTML):**
+```bash
+weasyprint input.html output.pdf
+```
+
+### Why WeasyPrint Works
+
+- ✅ Already installed: `/opt/homebrew/bin/weasyprint` (v68.1)
+- ✅ Fast: ~2 seconds for 15KB Markdown → PDF
+- ✅ Professional quality: HTML rendering
+- ✅ No missing dependencies (unlike pandoc backends)
+- ✅ Reliable: Used successfully multiple times (tested March 22)
+
+### Pipeline
+
+1. Markdown → HTML (pandoc)
+2. HTML → PDF (weasyprint)
+3. Metadata (title, author) preserved
+
+### Scripts Available
+
+- `scripts/pdf-from-markdown.sh` — Shell wrapper (recommended)
+- `scripts/weasy-pdf.py` — Python wrapper (for programmatic use)
+
+### Previous Attempts (DO NOT USE)
+
+❌ ReportLab — fragile, complex
+❌ Pandoc xelatex — backend not installed
+❌ Pandoc wkhtmltopdf — backend not installed
+
+---
+
 ## Email Operations (STANDARD METHOD - March 22, ACTIVE)
 
 **Default for SENDING (Work-Related):** `gog gmail send -a reillyrd58@gmail.com ...`
