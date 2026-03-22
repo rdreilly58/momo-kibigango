@@ -73,7 +73,7 @@
    - Ready for team collaboration
 
 ### Email
-1. ✅ Sent to robert.reilly@reillydesignstudio.com
+1. ✅ Sent to robert@reillydesignstudio.com
    - Project plan summary
    - 18K-word plan attached
    - Decision items listed

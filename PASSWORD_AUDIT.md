@@ -17,7 +17,7 @@
 | 4 | **Amazon** | rdreilly2010@gmail.com | ✅ DONE | ✅ YES | — | Password changed ✅ |
 | 5 | **GitHub** | (need to verify) | ⏳ PENDING | ❌ No | — | Code repository access (4 visits) |
 | 6 | **CapitalOne** | rdreilly58 | ✅ DONE | ✅ YES | — | 🟠 Financial institution — Updated ✅ |
-| 7 | **Mercury** | robert.reilly@reillydesignstudio.com | ✅ DONE | ✅ YES | aifngc45fsjrzbcxzenom5flxa | 🟠 Financial/banking app (13-15 visits) — Changed ✅ |
+| 7 | **Mercury** | robert@reillydesignstudio.com | ✅ DONE | ✅ YES | aifngc45fsjrzbcxzenom5flxa | 🟠 Financial/banking app (13-15 visits) — Changed ✅ |
 | 8 | **LinkedIn** | robert.reilly@alum.mit.edu | `8JIWESX1JzW5q5rAzN87` | ✅ DONE | ✅ YES | — | Professional network — Updated ✅ |
 | 8b | **Facebook** | robert.reilly@alum.mit.edu | `8JIWESX1JzW5q5rAzN87` | ✅ DONE | ✅ YES | — | Social media — Updated ✅ (shares password with LinkedIn) |
 | 9 | **Apple** | (need to verify) | ⏳ PENDING | ❌ No | — | Apple ID - critical |

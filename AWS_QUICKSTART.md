@@ -125,7 +125,7 @@ cat > /tmp/budget-config.json << 'EOF'
     },
     "Subscribers": [{
       "SubscriptionType": "EMAIL",
-      "Address": "robert.reilly@reillydesignstudio.com"
+      "Address": "robert@reillydesignstudio.com"
     }]
   }]
 }

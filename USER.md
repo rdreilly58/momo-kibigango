@@ -18,7 +18,7 @@
 ## Personal Emails
 - **Personal:** reillyrd58@gmail.com (NEW - migrating to this)
 - **Legacy:** rdreilly2010@gmail.com
-- **Design Studio:** robert.reilly@reillydesignstudio.com
+- **Design Studio:** robert@reillydesignstudio.com
 
 ## Notes
 - Named me Momotaro on first meeting

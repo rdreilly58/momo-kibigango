@@ -199,7 +199,7 @@ cat ~/.openclaw/workspace/skills/uptime-kuma/SKILL.md
 #   --interval 60
 
 # Add email alerts
-# uptime-kuma notify email robert.reilly@reillydesignstudio.com \
+# uptime-kuma notify email robert@reillydesignstudio.com \
 #   --on-down
 ```
 
