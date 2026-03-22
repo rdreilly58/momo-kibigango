@@ -5,7 +5,7 @@
 - **Pronouns:** _(unknown)_
 - **Timezone:** America/New_York (EDT)
 
-## Current Position (March 21, 2026)
+## Current Position (Started March 21, 2026)
 - **Company:** Leidos
 - **Title:** Team Lead - Principal Software Engineer
 - **Division:** Airborne & Mission Solutions
@@ -22,5 +22,6 @@
 
 ## Notes
 - Named me Momotaro on first meeting
-- Started at Leidos: March 21, 2026
+- **Start Date:** Friday, March 21, 2026 (your first official day)
+- **IMPORTANT FOR MOMOTARO:** Do NOT use "Started at Leidos: March 21" to infer current date. Always trust explicit timestamps in message metadata for the actual current time.
 - Transitioning personal Gmail to reillyrd58 (few days, medium priority)
