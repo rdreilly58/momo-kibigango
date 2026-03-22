@@ -1,3 +1,57 @@
+## March 22, 2026 — DUAL MAC DIRECT ETHERNET CONNECTION ESTABLISHED ✅
+
+**Date:** Sunday, March 22, 2026, 12:34 PM EDT  
+**Setup:** Direct Cat5 Ethernet cable between M4 Mac mini + Intel Mac mini 2017-19  
+**Status:** FULLY OPERATIONAL
+
+### Network Configuration
+
+**M4 Mac mini:**
+- IP Address: `169.254.58.83`
+- Netmask: `0xffff0000`
+- Broadcast: `169.254.255.255`
+
+**Intel Mac mini (2017-19):**
+- IP Address: `169.254.170.29`
+- Netmask: `0xffff0000`
+- Broadcast: `169.254.255.255`
+
+### Connectivity Tests ✅
+
+- ✅ **Ping (M4 → Intel):** No packet loss (5/5 packets)
+- ✅ **SSH (M4 → Intel):** `ssh username@169.254.170.29` — Working
+- ✅ **SSH (Intel → M4):** `ssh username@169.254.58.83` — Bidirectional working
+- ✅ **Remote Login:** Enabled on both Macs (System Settings → General → Sharing → Remote Login)
+
+### Quick Commands
+
+```bash
+# From M4 to Intel Mac
+ssh username@169.254.170.29
+
+# From Intel to M4 Mac
+ssh username@169.254.58.83
+
+# Check Ethernet status on either Mac
+ifconfig en0 | grep inet
+```
+
+### Use Cases Enabled
+
+1. **File Sharing** — SFTP/rsync between machines
+2. **Distributed Builds** — Compile on Intel while using M4
+3. **Backups** — Automate periodic backups
+4. **Remote Commands** — Execute commands on either Mac
+5. **Architecture Testing** — Test on both Apple Silicon + Intel
+
+### Decision: No Switch Needed (Yet)
+
+- Direct Cat5 cable is simpler for 2 Macs
+- Netgear switch deferred (can add later if expanding)
+- Link-Local IPs auto-assign in 169.254.x.x range
+
+---
+
 ## March 20, 2026 — MOMO-KIBIDANGO INSTALLATION METHODS DESIGN ✅ COMPLETE
 
 ### Installation Strategy Documented & Committed
