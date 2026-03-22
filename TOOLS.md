@@ -994,3 +994,156 @@ ssh -i ~/.ssh/vlm-deploy-key.pem ubuntu@54.81.20.218
 - **Keep always-on:** If using >3 times/day, worth $980/month
 - **Switch to on-demand:** If <3 times/day, save money with per-request billing
 - **Review metrics:** Check logs for actual usage patterns + latency tolerance
+
+---
+
+## Local Brother Printers (March 22, 2026)
+
+**Status:** ✅ DISCOVERED & CONFIGURED
+
+### Printers on Network
+
+| Printer | Model | Type | Status | Notes |
+|---------|-------|------|--------|-------|
+| **Brother_HL_L2350DW_series** | HL-L2350DW | Laser (B&W) | ✅ Online | General printing |
+| **Brother_MFC_L2700DW_series** | MFC-L2700DW | MFP (B&W) | ✅ Online | Default (has scanner) |
+
+### Network Details
+
+- **Connection:** Bonjour/mDNS (dnssd://)
+- **CUPS Status:** Running
+- **Default Printer:** Brother_MFC_L2700DW_series
+- **Network:** Local network (192.168.x.x range)
+
+### Quick Print Commands
+
+**List printers:**
+```bash
+bash ~/.openclaw/workspace/skills/printer-brother/scripts/list-printers.sh
+```
+
+**Print a document:**
+```bash
+# To default printer
+bash ~/.openclaw/workspace/skills/printer-brother/scripts/print-file.sh -f document.pdf
+
+# To specific printer with options
+bash ~/.openclaw/workspace/skills/printer-brother/scripts/print-file.sh \
+  -f document.pdf \
+  -p Brother_MFC_L2700DW_series \
+  -c 2 --duplex --fit-to-page
+```
+
+**Test printer:**
+```bash
+bash ~/.openclaw/workspace/skills/printer-brother/scripts/test-printer.sh -p Brother_MFC_L2700DW_series
+```
+
+### Printer Skill Location
+
+- **Skill:** `~/.openclaw/workspace/skills/printer-brother/`
+- **SKILL.md:** Full documentation with all options
+- **README.md:** Quick reference guide
+- **Scripts:** list-printers.sh, print-file.sh, test-printer.sh
+
+### Print Options
+
+- `-f, --file FILE` — File to print (required)
+- `-p, --printer PRINTER` — Target printer (default: system default)
+- `-c, --copies N` — Number of copies
+- `--duplex` — Print double-sided
+- `--fit-to-page` — Scale to fit page
+- `--landscape` — Landscape orientation
+- `--grayscale` — Force grayscale
+- `--status` — Show printer status only
+
+### Supported File Formats
+
+- ✅ PDF (native, best quality)
+- ✅ PostScript (.ps)
+- ✅ Text (.txt)
+- ⚠️ Images (.jpg, .png) — convert to PDF first
+- ⚠️ Office (.docx, .xlsx) — convert to PDF first
+
+### Printer Capabilities
+
+**Brother HL-L2350DW (Laser):**
+- Resolution: 2400 x 600 dpi
+- Speed: 32 ppm
+- Color: Black & white only
+- Best for: Documents, text
+
+**Brother MFC-L2700DW (Multifunction):**
+- Resolution: 2400 x 600 dpi
+- Speed: 34 ppm
+- Color: Black & white only
+- Features: Print, scan, copy, fax, ADF
+- Best for: Office documents, multi-page scanning
+
+### Common Tasks
+
+**Print 3 copies with duplex:**
+```bash
+bash ~/.openclaw/workspace/skills/printer-brother/scripts/print-file.sh \
+  -f report.pdf \
+  -p Brother_MFC_L2700DW_series \
+  -c 3 --duplex
+```
+
+**Batch print all PDFs:**
+```bash
+for pdf in *.pdf; do
+  bash ~/.openclaw/workspace/skills/printer-brother/scripts/print-file.sh \
+    -f "$pdf" \
+    -p Brother_MFC_L2700DW_series
+done
+```
+
+**Convert Markdown and print:**
+```bash
+pandoc document.md -o document.pdf
+bash ~/.openclaw/workspace/skills/printer-brother/scripts/print-file.sh -f document.pdf
+```
+
+### Troubleshooting
+
+**List all printers:**
+```bash
+lpstat -p
+```
+
+**Check printer status:**
+```bash
+lpstat -p -l
+```
+
+**View print queue:**
+```bash
+lpq -P Brother_MFC_L2700DW_series
+```
+
+**Cancel print job:**
+```bash
+lprm -P Brother_MFC_L2700DW_series JOB_ID
+```
+
+**Restart CUPS:**
+```bash
+sudo launchctl stop org.cups.cupsd
+sudo launchctl start org.cups.cupsd
+```
+
+### Performance
+
+- **Max jobs in queue:** 50+
+- **Network latency:** <100ms (local network)
+- **Print speed:** 32-34 ppm
+- **Max file size:** 500 MB
+- **Job timeout:** 30 minutes
+
+### References
+
+- **CUPS Docs:** https://www.cups.org/doc/
+- **Brother Support:** https://support.brother.com/
+- **macOS Printing:** https://support.apple.com/guide/mac-help/mh1607/
+
