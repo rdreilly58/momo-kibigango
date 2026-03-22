@@ -2,6 +2,7 @@
 # send-morning-briefing.sh — Send morning briefing via Email + Telegram with health checks
 #
 # Usage: bash send-morning-briefing.sh
+# Updated: March 22, 2026 (uses standardized email-utils.sh)
 
 set -uo pipefail  # Remove -e to prevent trap from killing script on warnings
 
@@ -11,6 +12,12 @@ BRIEFING_TYPE="morning"
 # Load config
 source ~/.openclaw/workspace/config/briefing.env 2>/dev/null || {
   echo "[briefing] Error: briefing.env not found"
+  exit 1
+}
+
+# Load email utilities
+source ~/.openclaw/workspace/lib/email-utils.sh 2>/dev/null || {
+  echo "[briefing] Error: email-utils.sh not found"
   exit 1
 }
 
@@ -41,13 +48,8 @@ echo "[briefing] 📧 Sending email to $BRIEFING_EMAIL..."
 
 EMAIL_SUBJECT="☀️ $(echo $BRIEFING_TYPE | tr '[:lower:]' '[:upper:]') Briefing — $(date '+%A, %B %d')"
 
-gog gmail send \
-  -a "$BRIEFING_EMAIL" \
-  --to "$BRIEFING_EMAIL" \
-  --subject "$EMAIL_SUBJECT" \
-  --body-html "$(cat "$HTML_FILE")" 2>&1 | grep -E "message_id|Error" | head -1
-
-if [ $? -eq 0 ]; then
+# Use standardized email utility (html body)
+if send_email "$EMAIL_SUBJECT" "$(cat "$HTML_FILE")" "$BRIEFING_EMAIL" --html; then
   echo "[briefing] ✓ Email sent successfully"
 else
   echo "[briefing] ⚠️  Email delivery may have issues"
