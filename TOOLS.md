@@ -334,6 +334,21 @@ export HF_API_TOKEN=hf_xxx
 - **Fallback:** Use Hugging Face API only if local model fails
 - **Long-term:** Full local integration (already working, no action needed)
 
+## ReillyDesignStudio Deployment (March 22, 2026)
+
+**Deployment Platform:** Vercel (primary)
+- Auto-deploys from `main` branch pushes
+- Build time: ~4-5 minutes from push to live
+- URL: https://reillydesignstudio.com
+- Domain: reillydesignstudio.com (via Cloudflare)
+
+**Vercel Project:**
+- Framework: Next.js 16
+- Environment: Production
+- Auto-deploy: Enabled on GitHub push
+
+---
+
 ## Roblox Development Setup (March 21, 2026)
 
 **Account & Configuration**
