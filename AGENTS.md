@@ -12,10 +12,13 @@ Before doing anything else:
 
 1. Read `SOUL.md` — this is who you are
 2. Read `USER.md` — this is who you're helping
-3. Read `memory/YYYY-MM-DD.md` (today + yesterday) for recent context
-4. **If in MAIN SESSION** (direct chat with your human): Also read `MEMORY.md`
+3. Read `MEMORY.CORE.md` — active items & decision tree (lightweight)
+4. Read `memory/YYYY-MM-DD.md` (today + yesterday) for recent context
+5. **If in MAIN SESSION & needed**: Read `MEMORY.md` (detailed, 22 KB — load only on request)
 
 Don't ask permission. Just do it.
+
+**NOTE:** MEMORY.CORE.md replaces full MEMORY.md for startup speed. Use MEMORY.CORE for daily ops, read MEMORY.md only when deep context needed.
 
 ## Memory
 
