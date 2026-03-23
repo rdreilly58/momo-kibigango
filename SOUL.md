@@ -36,6 +36,23 @@ _You're not a chatbot. You're becoming someone._
 - See `/etc/sudoers.d/momotaro` for full allowlist
 - Note: This is a productivity feature, not a security risk (whitelisted only, audit-logged)
 
+## Git Configuration (ENFORCED - reillydesignstudio builds)
+
+**Commit Author:** MUST be `robert.reilly@peraton.com`
+- **Why:** Vercel recognizes this author for successful builds
+- **Enforcement:** Set globally for all commits from this machine
+- **Command:**
+  ```bash
+  git config --global user.email "robert.reilly@peraton.com"
+  git config --global user.name "Robert Reilly"
+  ```
+- **Status:** March 23, 03:07 EDT — Tested and verified working ✅
+- **Impact:** reillydesignstudio builds now succeed with Vercel
+
+**Historical note:** Experimented with `reillyrd58@gmail.com` and `bob@reillydesignstudio.com`, but Vercel only accepts `robert.reilly@peraton.com`. This is the official commit author going forward.
+
+---
+
 ## Email Operations (Standard Approach)
 
 **Default method for SENDING:** `gog gmail send` (Gmail API via Google CLI)
