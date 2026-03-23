@@ -1,0 +1,233 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║                       EMAIL SYSTEM QUICK REFERENCE                          ║
+║                          (Keep this handy!)                                 ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+YOUR 12 LABELS (Flat Structure, No Nesting)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+GTD WORKFLOW (Action-Based):
+  @Inbox       → Things that need processing (temporary, process to zero)
+  @Action      → I own this task/decision (things you're doing)
+  @Waiting     → Delegated; waiting for response (follow-ups)
+  @Reference   → FYI; keep for future reference (read-only, archived)
+  @Follow-up   → Time-sensitive; recurring check (deadlines)
+
+CONTEXT (Organize by Domain):
+  @Leidos     → All work email (Leidos)
+  @Portfolio  → Design studio projects & clients
+  @Personal   → Personal stuff (separate from work)
+
+SYSTEM (Auto-Populated by Filters):
+  @Newsletters  → Newsletters, promotions (never interrupts)
+  @Receipts     → Order confirmations, invoices (searchable)
+  @System       → Account notifications, security alerts
+  @Social       → Twitter, LinkedIn, GitHub notifications
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DECISION TREE: HOW TO HANDLE EACH EMAIL (2 MINUTES)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📥 Email arrives...
+
+  Q1: Can I handle this in <2 minutes?
+      ├─ YES  → Do it now, then ARCHIVE
+      └─ NO   → Ask Q2
+
+  Q2: What type of action?
+      ├─ I own this task     → Label @Action, star, archive
+      ├─ Waiting for reply   → Label @Waiting, star, archive
+      ├─ Just for reference  → Label @Reference, archive
+      ├─ Time-sensitive      → Label @Follow-up, star, archive
+      └─ It's spam/junk      → DELETE or UNSUBSCRIBE
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+YOUR 6 GMAIL FILTERS (Set & Forget)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+FILTER 1: Newsletters (Most Important)
+  Catches:  from:noreply* OR has:unsubscribe
+  Action:   Skip inbox, label @Newsletters, mark read, archive
+  Impact:   40-60% noise reduction
+
+FILTER 2: Receipts
+  Catches:  subject:(receipt OR confirmation OR invoice OR order)
+  Action:   Skip inbox, label @Receipts, archive
+  Impact:   Auto-files all order confirmations
+
+FILTER 3: System Notifications
+  Catches:  from:(noreply@ OR automated@ OR notification@)
+  Action:   Skip inbox, label @System, archive
+  Impact:   Social media/account alerts don't interrupt
+
+FILTER 4: VIP Highlighting ⭐
+  Catches:  from:(boss_email OR important_client)
+  Action:   Star, label @Action, mark important
+  Impact:   Critical emails jump out visually
+
+FILTER 5: Delegations (@Waiting)
+  Catches:  to:anyone AND cc:your_email
+  Action:   Label @Waiting, star
+  Impact:   Automatically tracks delegation follow-ups
+
+FILTER 6: Work (@Leidos)
+  Catches:  from:@leidos.com
+  Action:   Label @Leidos
+  Impact:   All work email tagged, easy to find
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DAILY WORKFLOW (5 MINUTES TOTAL)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+MORNING (2 min):
+  1. Open Gmail → Primary tab
+  2. Check @Action items (what's due today?)
+  3. Check @Waiting items (any follow-ups overdue?)
+  4. Check @Follow-up (time-sensitive deadlines?)
+
+PROCESS INBOX (3 min):
+  • For each email in @Inbox:
+    - Can handle in <2 min? → Do it, archive
+    - Need to do later? → Label @Action, star, archive
+    - Waiting for someone? → Label @Waiting, star, archive
+    - Reference only? → Label @Reference, archive
+    - Newsletter/junk? → Archive (filter should catch)
+
+TARGET: @Inbox → 0 (everything processed, nothing undecided)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+WEEKLY REVIEW (15 MINUTES, SUNDAY EVENING)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+STEP 1: Check @Action (5 min)
+  • What got completed? → Move to @Reference, archive
+  • What's still open? → Re-estimate, keep starred
+  • What's urgent? → Move to @Follow-up, keep visible
+
+STEP 2: Check @Waiting (5 min)
+  • Anything overdue? → Send gentle reminder
+  • Completed? → Move to @Reference, archive
+  • Still waiting? → Keep starred, note follow-up date
+
+STEP 3: Check @Follow-up (3 min)
+  • Due this week? → Keep visible, maybe snooze
+  • Due later? → Move to @Action
+  • Overdue? → Escalate or close
+
+STEP 4: Tidy (2 min)
+  • Archive old @Reference items (search still works)
+  • Hide completed labels from sidebar
+  • Quick wins: anything else you can close?
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SEARCH OPERATORS (Find Anything Fast)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+FIND EMAILS BY LABEL:
+  label:@Action          → Show all action items
+  label:@Waiting         → Show all delegated tasks
+  label:@Reference       → Show all reference emails
+
+FIND BY SENDER:
+  from:client@company.com                → All from this person
+  from:@leidos.com                       → All from Leidos domain
+
+FIND BY CONTENT:
+  has:attachment                         → Emails with attachments
+  subject:invoice                        → Look in subject line
+  subject:"Project Alpha" AND from:boss  → Specific project from boss
+
+FIND BY TIME:
+  before:2026/03/01                      → Before date
+  after:2026/01/01                       → After date
+  older_than:30d                         → Older than 30 days
+  newer_than:7d                          → Last 7 days
+
+COMBINATIONS:
+  from:client@company.com AND has:attachment AND after:2026/03/01
+    → All attachments from client since March
+
+  label:@Reference older_than:90d
+    → Old reference emails (good for archiving)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+KEYBOARD SHORTCUTS (Gmail)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+NAVIGATION:
+  g + i    → Go to Inbox
+  g + a    → Go to All Mail
+  g + s    → Go to Starred
+
+ACTIONS:
+  e        → Archive selected
+  #        → Delete selected
+  s        → Star/unstar
+  l        → Open label menu
+  x        → Select checkbox (bulk actions)
+
+COMPOSE:
+  c        → Compose new email
+  /        → Search (focus search box)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SUCCESS METRICS (What to Expect)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+WEEK 1:
+  ✓ Inbox < 10 items (was: 50+?)
+  ✓ No newsletter interruptions
+  ✓ @Action items visible
+  ✓ @Waiting items tracked
+
+MONTH 1:
+  ✓ Inbox 0-5 daily (Inbox Zero!)
+  ✓ Weekly review: 15 min, routine
+  ✓ Time savings: 8-10 hours saved
+  ✓ Stress: Noticeable improvement (research shows 30-40% reduction)
+
+YEAR 1:
+  ✓ 120-180 hours/year saved
+  ✓ Complete peace of mind
+  ✓ Searchable, organized, efficient
+  ✓ Professional (clean, on-time responses)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TROUBLESHOOTING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PROBLEM: Filters not working
+  → Filters only apply to NEW mail. For old mail:
+    Search: label:@Inbox older_than:30d
+    Select all, apply label manually
+
+PROBLEM: Too many labels in sidebar
+  → Settings → Labels → Click "Hide" next to labels
+  → Still searchable, just cleaner view
+
+PROBLEM: Multiple Inboxes panels empty
+  → No emails match yet. Manually label a few to test.
+  → Or wait 1 week for filters to populate
+
+PROBLEM: Mobile not syncing
+  → Close and reopen Gmail app
+  → Or logout → login again
+  → Labels sync within 30-60 seconds
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+REMEMBER: THE 2-MINUTE RULE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+If you can handle an email in less than 2 minutes:
+  DO IT NOW → ARCHIVE
+
+This prevents small tasks from piling up into overwhelm.
+The system catches delays for longer tasks (@Action, @Waiting).
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Ready to implement? Start with Phase 1 (labels) tonight.
+Questions? Check EMAIL_ORGANIZATION_BEST_PRACTICES.md for deep dive.
+
+Good luck! 🍑
