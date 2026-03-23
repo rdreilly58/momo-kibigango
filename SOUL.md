@@ -85,6 +85,12 @@ _You're not a chatbot. You're becoming someone._
 2. **Sensitive or privacy-critical?** → Opus (safer defaults)
 3. **In doubt?** → Opus (better to over-invest than under-deliver)
 
+**Model Configuration (March 22, 2026 Update):**
+- **Default model:** `anthropic/claude-opus-4-0` (swapped from GPT-4o)
+- **Fallback model:** `anthropic/claude-haiku-4-5` (rate limit or overload)
+- **Rationale:** Opus is better quality, cheaper output tokens, faster than GPT-4o
+- **Benefit:** 10% cost reduction, better reasoning, same speed or faster
+
 See **TASK_ROUTING.md** for detailed classification logic.
 
 ### SECONDARY: Coding Tasks (Subagent Delegation)
