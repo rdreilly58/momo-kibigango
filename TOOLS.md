@@ -163,23 +163,25 @@ op item create --category="API Key" --title="Service Name" --vault="OpenClaw Sec
 
 ## API Keys & Credentials
 
-**⚠️ Location:** Keep all API keys here in TOOLS.md (workspace file), NOT in ~/.openclaw/config.json (system file)
-
-**Why:** This workspace file is where you naturally look for your setup details. System config files get updated/reset by OpenClaw.
+**⚠️ SECURITY UPDATE (March 24, 2026):**
+All actual API tokens have been moved to local-only file: `TOOLS.secrets.local`
+- This file is in `.gitignore` and will NEVER be committed
+- Store actual tokens only in TOOLS.secrets.local, never in TOOLS.md
+- To use: `source ~/.openclaw/workspace/TOOLS.secrets.local`
 
 ### Brave Search API
-- **Key:** `REDACTED_BRAVE_API_TOKEN`
-- **Source:** ~/.openclaw/config.json (originally) → moved to TOOLS.md for reference
+- **Source:** ~/.openclaw/config.json (originally)
 - **Used for:** Web search via `web_search` tool (gas prices, news, research)
-- **Status:** ✅ Active
-- **Last validated:** March 15, 2026
+- **Status:** ✅ Configured
+- **Token location:** TOOLS.secrets.local (`$BRAVE_API_KEY`)
+- **Note:** Token rotated March 24, 2026 (GitHub exposure incident)
 
 ### Cloudflare API Token
-- **Token:** `REDACTED_CLOUDFLARE_TOKEN`
 - **Used for:** DNS management for reillydesignstudio.com
 - **Permissions:** Zone.DNS
-- **Status:** ✅ Active
-- **Last used:** March 22, 2026
+- **Status:** ✅ Configured
+- **Token location:** TOOLS.secrets.local (`$CLOUDFLARE_TOKEN`)
+- **Note:** Token rotated March 24, 2026 (GitHub exposure incident)
 
 ### Cloudflare Support Case (March 22, 2026)
 - **Case ID:** 02033456
@@ -219,12 +221,13 @@ op item create --category="API Key" --title="Service Name" --vault="OpenClaw Sec
 
 ### Configuration
 - **Model:** sentence-transformers/all-MiniLM-L6-v2
-- **API Token:** `REDACTED_HF_API_TOKEN`
+- **API Token:** Stored in `TOOLS.secrets.local` (`$HF_API_TOKEN`)
 - **Endpoint:** api-inference.huggingface.co
 - **Performance:** ~500-1000ms per embedding (API latency)
 - **Dimension:** 384 (vector size)
 - **Cost:** Free (generous free tier, no quota limits)
 - **Fallback:** Local Sentence Transformers if API fails
+- **Note:** Token rotated March 24, 2026 (GitHub exposure incident)
 
 ### Installation
 - **Python Environment:** `~/.openclaw/workspace/venv/`
