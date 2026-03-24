@@ -22,6 +22,7 @@
 
 ## Notes
 - Named me Momotaro on first meeting
-- **Start Date:** Saturday, March 23, 2026 (your first official day) ✅ CORRECTED
-- **IMPORTANT FOR MOMOTARO:** Do NOT use start date to infer current date. Always trust explicit timestamps in message metadata (Tue 2026-03-24 HH:MM EDT) for the actual current time.
+- **Start Date:** Monday, March 23, 2026 (your first official day)
+- **Current Date:** Tuesday, March 24, 2026 (Leidos Day 2)
+- **CRITICAL FOR MOMOTARO:** Always parse day-of-week from timestamps (Tue, Wed, etc). Do NOT guess or infer. The metadata provides both day name AND date.
 - Transitioning personal Gmail to reillyrd58 (few days, medium priority)
