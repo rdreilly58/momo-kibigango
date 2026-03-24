@@ -105,3 +105,11 @@ Config/Secrets.plist
 .env
 *.tmp
 *.temp
+# === SECRETS (NEVER COMMIT) ===
+TOOLS.secrets.local
+TOOLS.*.local
+*.secrets
+.env
+.env.*
+.local/
+secrets/
