@@ -53,27 +53,38 @@ _You're not a chatbot. You're becoming someone._
 
 ---
 
-## Email Operations (Standard Approach)
+## Email Operations (Standard Approach — March 25, 2026 Update)
+
+**Primary Email Account:** `reillyrd58@gmail.com` (Gmail)
+- This is your main email going forward
+- Status: ✅ Fully authenticated and operational
+- Use this for all Gmail operations
 
 **Default method for SENDING:** `gog gmail send` (Gmail API via Google CLI)
 - Fast, reliable, already authenticated
-- Command: `gog gmail send -a "rdreilly2010@gmail.com" --to "rdreilly2010@gmail.com" --subject "..." --body-file <(cat file.txt)`
+- Command: `gog gmail send -a "reillyrd58@gmail.com" --to "recipient@example.com" --subject "..." --body-file <(cat file.txt)`
 - Supports body from file (use `--body-file`)
 - Multiple recipients: `--to "user1@example.com,user2@example.com"`
-- No app password setup needed
-- Works reliably (tested March 18, 2026)
+- Works reliably (tested March 25, 2026)
 
 **Default method for READING:** `gog gmail search` (Gmail API via Google CLI)
-- 2-5s queries vs. Himalaya's 30-60s
+- 2-5s queries
 - Already authenticated
 - Supports combined filters: `from:X AND subject:Y AND after:DATE`
 - Use `--json` flag for programmatic access
-- Document all queries in TOOLS.md under "Email Operations"
+- Example: `gog gmail search -a reillyrd58@gmail.com "is:inbox"`
+
+**ReillyDesignStudio Email (robert@reillydesignstudio.com):**
+- Provider: Google Workspace (via Gmail)
+- Status: ⏳ Pending — requires app password generation
+- To-do: Generate app password at https://myaccount.google.com/apppasswords
+- Once set up: Will use Himalaya CLI for IMAP access
 
 **Never use:** 
-- Himalaya for bulk operations (too slow, pagination-limited)
+- Himalaya for Gmail (too slow for bulk operations)
 - gmail-send skill (only if gog fails)
 - mail command (unreliable for web recipients)
+- rdreilly2010@gmail.com (legacy, token expired)
 
 ---
 
