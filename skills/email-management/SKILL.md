@@ -1,15 +1,36 @@
 ---
 name: email-management
-description: "Manage ReillyDesignStudio email account (robert.reilly@reillydesignstudio.com) using Himalaya CLI. List, search, read, reply, and organize emails."
+description: "Manage email accounts: primary Gmail (reillyrd58@gmail.com) via gog CLI, and ReillyDesignStudio (robert@reillydesignstudio.com) via Himalaya CLI when app password is configured."
 metadata:
   {
-    "openclaw": { "emoji": "📧", "requires": { "bins": ["himalaya"] } },
+    "openclaw": { "emoji": "📧", "requires": { "bins": ["himalaya", "gog"] } },
   }
 ---
 
-# Email Management (ReillyDesignStudio)
+# Email Management
 
-Manage your work email account using Himalaya CLI.
+Manage multiple email accounts using CLI tools.
+
+## Quick Reference
+
+**Primary Gmail Account (reillyrd58@gmail.com):**
+```bash
+# Search inbox
+gog gmail search -a reillyrd58@gmail.com "is:inbox"
+
+# Send email
+gog gmail send -a reillyrd58@gmail.com --to "recipient@example.com" --subject "Subject" --body-file <(cat message.txt)
+
+# Search with filters
+gog gmail search -a reillyrd58@gmail.com "from:sender@example.com subject:important"
+```
+
+**ReillyDesignStudio Account (robert@reillydesignstudio.com):**
+- Status: Pending app password setup (see Setup section below)
+- Provider: Google Workspace (Gmail)
+- Method: Himalaya CLI (IMAP/SMTP)
+
+---
 
 ## Setup
 
@@ -20,7 +41,7 @@ himalaya account configure
 ```
 
 Follow the interactive wizard to:
-- Set email: robert.reilly@reillydesignstudio.com
+- Set email: robert@reillydesignstudio.com
 - Configure IMAP (ask your email provider for settings)
 - Configure SMTP (for sending)
 - Store password securely in system keyring

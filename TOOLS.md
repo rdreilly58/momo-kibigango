@@ -161,6 +161,33 @@ op item create --category="API Key" --title="Service Name" --vault="OpenClaw Sec
 
 ---
 
+## Email Accounts (March 25, 2026 Update)
+
+**CURRENT STATUS:**
+
+| Account | Provider | Status | Method | Notes |
+|---------|----------|--------|--------|-------|
+| **reillyrd58@gmail.com** | Gmail | ✅ ACTIVE | `gog gmail` | Primary Gmail account — working perfectly |
+| **rdreilly2010@gmail.com** | Gmail | ❌ EXPIRED | `gog gmail` | Token revoked — deferred for later reset |
+| **robert@reillydesignstudio.com** | Google Workspace | ⏳ PENDING | Himalaya | Requires app password — deferred for now |
+
+**Active Account for Daily Use:**
+- Use `reillyrd58@gmail.com` for all Gmail operations
+- Command: `gog gmail search -a reillyrd58@gmail.com "query"`
+- Command: `gog gmail send -a reillyrd58@gmail.com --to "recipient@example.com" --subject "..." --body-file <(cat file.txt)`
+
+**Deprecated/Deferred:**
+- `rdreilly2010@gmail.com` — Legacy account, token expired, deferred reset
+- `robert@reillydesignstudio.com` — Requires Google Workspace app password setup (deferred)
+
+**To-Do (Future Sessions):**
+1. Reset rdreilly2010@gmail.com password (if needed)
+2. Generate Google Workspace app password for robert@reillydesignstudio.com
+3. Re-configure Himalaya with app password
+4. Consider archiving or fully deprecating rdreilly2010@gmail.com
+
+---
+
 ## API Keys & Credentials
 
 **⚠️ SECURITY UPDATE (March 24, 2026):**
