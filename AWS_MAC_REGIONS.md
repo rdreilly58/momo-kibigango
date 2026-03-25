@@ -108,3 +108,31 @@ aws service-quotas list-requested-service-quota-change-history \
 
 **Last Updated:** March 25, 2026, 1:05 AM EDT  
 **Action Required:** Check AWS Console → Service Quotas for current status
+
+---
+
+## Update: us-west-2 Request Submitted (March 25, 1:08 AM)
+
+**Action Taken:** Submitted parallel Mac quota request to us-west-2
+
+**New Status:**
+| Region | Request Date | Status | Expected Approval |
+|--------|--------------|--------|-------------------|
+| us-east-1 | Mar 20, 6:58 PM | ⏳ PENDING (overdue) | 24-48h (missed) |
+| us-west-2 | Mar 25, 1:08 AM | ✅ SUBMITTED | 24-48h from now |
+
+**Strategy:** Monitor both regions. Whichever approves first will be used for instance launch.
+
+**Next Steps:**
+1. Check AWS Console for approval notifications (both regions)
+2. Expect us-west-2 approval by March 26-27, 1:08 AM
+3. Auto-launch script ready: `~/.openclaw/workspace/scripts/auto-launch-mac-instance.sh`
+4. Optionally escalate us-east-1 if approval very delayed
+
+**Monitor Script:**
+```bash
+# Check both regions hourly
+watch -n 3600 'aws service-quotas list-requested-service-quota-change-history --service-code ec2 --region us-west-2 | jq ".RequestedQuotaChangeHistoryDetails[0]"'
+```
+
+---
