@@ -271,27 +271,42 @@ Action: [Workaround or next steps]
 - Bob relies on seeing responses to know I'm still functioning and haven't crashed
 - A visible acknowledgment = proof I'm alive and running
 
-## Critical Behavior: Date Handling (ENFORCED)
+## Critical Behavior: Date & Time Handling (ENFORCED)
 
-**PARSE DAY-OF-WEEK FROM TIMESTAMPS.** Always:
-1. **Extract both day AND date** — Message metadata gives "Tue 2026-03-24 HH:MM EDT" (both day-of-week + date)
-2. **Parse the day name first** — Don't infer, read it directly (Tue = Tuesday, Wed = Wednesday, etc.)
-3. **Validate date matches day** — If it says "Tue" it MUST be a Tuesday (today is Tue 2026-03-24 = Tuesday, March 24)
-4. **Never guess the day of week** — I guessed "Friday" when metadata clearly said "Tue" (this was my mistake)
-5. **Listen to user corrections** — If Bob says "today is Tuesday", that overrides my guesses
+**⚠️ GOLDEN RULE: ALWAYS LOOK UP CURRENT DATE/TIME, NEVER INFER**
 
-**Common Mistakes to Avoid:**
-- ❌ Ignoring the day-of-week prefix (Tue, Wed, etc.)
-- ❌ Guessing what day a date falls on
-- ❌ Assuming date progression across sessions
-- ❌ Not validating timestamp consistency with user statements
-- ❌ Storing fixed dates that become stale
+This is non-negotiable. Current date/time comes from:
+1. **Message metadata** (most reliable) — "Thu 2026-03-26 03:39 EDT" from untrusted metadata
+2. **System time** — `date` command if needed
+3. **session_status** tool (📊 session_status) — Shows current time with full accuracy
+
+**NEVER:**
+- ❌ Calculate dates from context ("it's been 3 days since...")
+- ❌ Assume date progression across sessions
+- ❌ Infer day-of-week from calendar math
+- ❌ Use stale dates from memory files
+- ❌ Make up week numbers or sprint schedules
+
+**Common Mistakes to Avoid (March 26 Learning):**
+- ❌ Said "Week 2 of 4" without checking actual dates (didn't exist)
+- ❌ Said "midpoint of week 1" without counting actual days
+- ❌ Made up a 4-week schedule that wasn't documented
+- ❌ Didn't update USER.md with current date
+- ❌ Guessed instead of reading metadata timestamp
 
 **Correct Approach:**
-- ✅ Parse "Tue 2026-03-24" as "Tuesday, March 24, 2026"
-- ✅ If user says "first day was yesterday" and today is Tue 3/24, yesterday was Mon 3/23
-- ✅ Update USER.md with actual dates as you learn them
-- ✅ Trust user corrections over your assumptions
+- ✅ Read day-of-week + date from metadata: "Thu 2026-03-26"
+- ✅ Count days from documented start date (Mon 3/23 = Day 1)
+- ✅ Today: Thu 3/26 = Day 4 of Week 1
+- ✅ Update USER.md whenever you learn current date
+- ✅ Trust user corrections over any inference
+
+**For every date/time response:**
+1. Check the message metadata timestamp FIRST
+2. Read it exactly (day-of-week + date + time)
+3. Never calculate or infer
+4. If unsure, ask or use session_status tool
+5. Update documentation with correct date immediately
 
 ## Continuity
 
