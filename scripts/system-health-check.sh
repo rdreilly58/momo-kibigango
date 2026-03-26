@@ -1,182 +1,245 @@
 #!/bin/bash
-# System Health Check — Monitor API quotas, services, disk, memory, git sync
-# Usage: system-health-check.sh [--json] [--alert]
+# OpenClaw System Health Check
+# Monitors critical systems and alerts on failures
+# Usage: system-health-check.sh [--verbose] [--telegram]
 
 set -e
 
 WORKSPACE="$HOME/.openclaw/workspace"
+SCRIPT_DIR="$WORKSPACE/scripts"
+LOG_DIR="$HOME/.openclaw/logs"
 TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
-JSON_MODE="${1:-}"
-ALERT_MODE="${2:-}"
 
-# Color codes
-GREEN='\033[0;32m'
+# Colors
 RED='\033[0;31m'
+GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-# Initialize results
-RESULTS=()
-STATUS="HEALTHY"
+# Options
+VERBOSE=0
+SEND_TELEGRAM=0
 
-# Helper function to add check result
-check_result() {
-    local name="$1"
-    local status="$2"
-    local message="$3"
-    
-    RESULTS+=("name:$name|status:$status|message:$message")
-    
-    if [ "$status" = "CRITICAL" ]; then
-        STATUS="CRITICAL"
-    elif [ "$status" = "WARNING" ] && [ "$STATUS" != "CRITICAL" ]; then
-        STATUS="WARNING"
-    fi
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --verbose) VERBOSE=1 ;;
+    --telegram) SEND_TELEGRAM=1 ;;
+  esac
+  shift
+done
+
+# Ensure log directory exists
+mkdir -p "$LOG_DIR"
+
+# Report function
+report() {
+  local status=$1
+  local service=$2
+  local message=$3
+  
+  local timestamp=$(date '+%H:%M:%S')
+  local color=""
+  local symbol=""
+  
+  case $status in
+    OK)
+      color=$GREEN
+      symbol="✅"
+      ;;
+    WARN)
+      color=$YELLOW
+      symbol="⚠️"
+      ;;
+    ERROR)
+      color=$RED
+      symbol="❌"
+      ;;
+  esac
+  
+  if [ $VERBOSE -eq 1 ]; then
+    echo -e "${color}${symbol} [$timestamp] $service: $message${NC}"
+  fi
+  
+  echo "[$timestamp] $status: $service — $message" >> "$LOG_DIR/health-check.log"
 }
 
-echo "🏥 OpenClaw System Health Check"
-echo "Time: $TIMESTAMP"
-echo ""
+# Check Gateway connectivity
+check_gateway() {
+  if curl -s http://localhost:8080/health >/dev/null 2>&1; then
+    report "OK" "OpenClaw Gateway" "Running (port 8080)"
+    return 0
+  else
+    report "ERROR" "OpenClaw Gateway" "Not responding on port 8080"
+    return 1
+  fi
+}
 
-# 1. API Quotas Check
-echo "📊 API Quotas:"
-if [ -f "$WORKSPACE/TOOLS.secrets.local" ]; then
-    source "$WORKSPACE/TOOLS.secrets.local" 2>/dev/null || true
-    
-    # Brave Search quota (simple check - just verify connectivity)
-    if curl -s -f "https://api.search.brave.com/res/v1/web/search?q=test&count=1" \
-        -H "X-Subscription-Token: $BRAVE_API_KEY" > /dev/null 2>&1; then
-        echo "✅ Brave Search API: Operational"
-        check_result "brave_search" "OK" "API responding normally"
+# Check Git repository
+check_git() {
+  if [ -d "$WORKSPACE/.git" ]; then
+    local status=$(cd "$WORKSPACE" && git status --short 2>/dev/null || echo "unknown")
+    if [ -z "$status" ]; then
+      report "OK" "Git Repository" "Clean"
     else
-        echo "❌ Brave Search API: Failed"
-        check_result "brave_search" "CRITICAL" "API not responding"
-        STATUS="CRITICAL"
+      report "WARN" "Git Repository" "Uncommitted changes detected"
     fi
-    
-    # Cloudflare quota check
-    if curl -s -f https://api.cloudflare.com/client/v4/zones \
-        -H "Authorization: Bearer $CLOUDFLARE_TOKEN" > /dev/null 2>&1; then
-        echo "✅ Cloudflare API: Operational"
-        check_result "cloudflare" "OK" "API responding normally"
+    return 0
+  else
+    report "ERROR" "Git Repository" "Not initialized"
+    return 1
+  fi
+}
+
+# Check API Keys
+check_api_keys() {
+  local missing=0
+  
+  # Check BRAVE_API_KEY
+  if [ -z "$BRAVE_API_KEY" ]; then
+    report "WARN" "API Keys" "BRAVE_API_KEY not set in environment"
+    missing=$((missing + 1))
+  else
+    report "OK" "API Keys" "BRAVE_API_KEY loaded"
+  fi
+  
+  # Check if ~/.openclaw/config.json exists
+  if [ ! -f ~/.openclaw/config.json ]; then
+    report "WARN" "Config" "~/.openclaw/config.json not found"
+  else
+    report "OK" "Config" "~/.openclaw/config.json present"
+  fi
+  
+  return $missing
+}
+
+# Check memory files
+check_memory_files() {
+  local missing=0
+  
+  for file in SOUL.md USER.md MEMORY.CORE.md; do
+    if [ ! -f "$WORKSPACE/$file" ]; then
+      report "ERROR" "Memory Files" "$file missing"
+      missing=$((missing + 1))
+    fi
+  done
+  
+  if [ -d "$WORKSPACE/memory" ]; then
+    local count=$(find "$WORKSPACE/memory" -name "*.md" 2>/dev/null | wc -l)
+    report "OK" "Memory Files" "$count daily logs"
+  else
+    report "WARN" "Memory Files" "memory/ directory not found"
+  fi
+  
+  return $missing
+}
+
+# Check disk space
+check_disk_space() {
+  local usage=$(df "$WORKSPACE" | awk 'NR==2 {print $5}' | sed 's/%//')
+  
+  if [ "$usage" -gt 90 ]; then
+    report "ERROR" "Disk Space" "Critical: $usage% used"
+    return 1
+  elif [ "$usage" -gt 75 ]; then
+    report "WARN" "Disk Space" "Warning: $usage% used"
+    return 0
+  else
+    report "OK" "Disk Space" "$usage% used"
+    return 0
+  fi
+}
+
+# Check Python environment
+check_python() {
+  if [ ! -d "$WORKSPACE/venv" ]; then
+    report "WARN" "Python Env" "Virtual environment not found"
+    return 1
+  fi
+  
+  if [ -f "$WORKSPACE/venv/bin/python3" ]; then
+    local version=$("$WORKSPACE/venv/bin/python3" --version 2>&1)
+    report "OK" "Python Env" "$version"
+    return 0
+  else
+    report "ERROR" "Python Env" "python3 not found in venv"
+    return 1
+  fi
+}
+
+# Check cron jobs
+check_cron() {
+  local count=$(crontab -l 2>/dev/null | grep -c "^[^#]" || echo "0")
+  report "OK" "Cron Jobs" "$count active entries"
+  return 0
+}
+
+# Check launchd services
+check_launchd() {
+  local count=$(ls -1 ~/Library/LaunchAgents/ 2>/dev/null | wc -l)
+  local active=$(launchctl list 2>/dev/null | grep -c "openclaw\|momotaro" || echo "0")
+  report "OK" "LaunchD Services" "$count agents, $active active"
+  return 0
+}
+
+# GPU Health (if configured)
+check_gpu() {
+  if [ -f "$SCRIPT_DIR/gpu-health-check-quick.sh" ]; then
+    if bash "$SCRIPT_DIR/gpu-health-check-quick.sh" >/dev/null 2>&1; then
+      report "OK" "GPU Health" "Quick check passed"
     else
-        echo "❌ Cloudflare API: Failed"
-        check_result "cloudflare" "CRITICAL" "API not responding"
-        STATUS="CRITICAL"
+      report "WARN" "GPU Health" "Quick check failed (may be unavailable)"
     fi
-else
-    echo "⚠️ TOOLS.secrets.local not found"
-    check_result "credentials" "WARNING" "Cannot load API credentials"
-fi
+  fi
+  return 0
+}
 
-# 2. Disk Space Check
-echo ""
-echo "💾 Disk Space:"
-DISK_USAGE=$(df "$WORKSPACE" | awk 'NR==2 {print $5}' | sed 's/%//')
-if [ "$DISK_USAGE" -lt 80 ]; then
-    echo "✅ Disk: ${DISK_USAGE}% used (healthy)"
-    check_result "disk_space" "OK" "${DISK_USAGE}% used"
-elif [ "$DISK_USAGE" -lt 95 ]; then
-    echo "⚠️ Disk: ${DISK_USAGE}% used (warning)"
-    check_result "disk_space" "WARNING" "${DISK_USAGE}% used"
-else
-    echo "❌ Disk: ${DISK_USAGE}% used (critical)"
-    check_result "disk_space" "CRITICAL" "${DISK_USAGE}% used"
-    STATUS="CRITICAL"
-fi
+# Send Telegram alert (if enabled and errors found)
+send_telegram_alert() {
+  if [ $SEND_TELEGRAM -eq 0 ]; then
+    return
+  fi
+  
+  # Count errors from log
+  local error_count=$(grep -c "ERROR:" "$LOG_DIR/health-check.log" 2>/dev/null || echo "0")
+  
+  if [ "$error_count" -gt 0 ]; then
+    # Implementation would go here to send to Telegram
+    # For now, just indicate it would be sent
+    echo "Would send Telegram alert: $error_count errors detected"
+  fi
+}
 
-# 3. Memory Check
-echo ""
-echo "🧠 Memory Usage:"
-if command -v free &> /dev/null; then
-    MEM_USAGE=$(free | awk 'NR==2 {printf "%.0f", ($3/$2)*100}')
-else
-    # macOS version
-    MEM_USAGE=$(vm_stat | grep 'Pages free' | awk '{print int(($3 / 4194304) * 100)}' 2>/dev/null || echo "N/A")
-fi
+# Main execution
+main() {
+  echo "╔════════════════════════════════════════════════════════════════╗"
+  echo "║              OpenClaw System Health Check                      ║"
+  echo "║              $TIMESTAMP                         ║"
+  echo "╚════════════════════════════════════════════════════════════════╝"
+  echo ""
+  
+  local errors=0
+  
+  # Run all checks
+  check_gateway || errors=$((errors + 1))
+  check_git || true
+  check_api_keys || true
+  check_memory_files || errors=$((errors + 1))
+  check_disk_space || true
+  check_python || true
+  check_cron || true
+  check_launchd || true
+  check_gpu || true
+  
+  echo ""
+  if [ $errors -eq 0 ]; then
+    echo -e "${GREEN}✅ System Health: GOOD${NC}"
+  else
+    echo -e "${RED}❌ System Health: $errors ERRORS${NC}"
+    send_telegram_alert
+  fi
+  
+  echo ""
+  echo "Log: $LOG_DIR/health-check.log"
+}
 
-if [ "$MEM_USAGE" != "N/A" ]; then
-    if [ "$MEM_USAGE" -lt 80 ]; then
-        echo "✅ Memory: ${MEM_USAGE}% used (healthy)"
-        check_result "memory" "OK" "${MEM_USAGE}% used"
-    elif [ "$MEM_USAGE" -lt 95 ]; then
-        echo "⚠️ Memory: ${MEM_USAGE}% used (warning)"
-        check_result "memory" "WARNING" "${MEM_USAGE}% used"
-    else
-        echo "❌ Memory: ${MEM_USAGE}% used (critical)"
-        check_result "memory" "CRITICAL" "${MEM_USAGE}% used"
-        STATUS="CRITICAL"
-    fi
-else
-    echo "⚠️ Memory: Cannot determine"
-    check_result "memory" "WARNING" "Unable to measure"
-fi
-
-# 4. Git Sync Status
-echo ""
-echo "📦 Git Sync Status:"
-cd "$WORKSPACE" 2>/dev/null || true
-if [ -d .git ]; then
-    UNCOMMITTED=$(git status --short | wc -l)
-    if [ "$UNCOMMITTED" -eq 0 ]; then
-        echo "✅ Git: All changes committed"
-        check_result "git_sync" "OK" "Repository clean"
-    else
-        echo "⚠️ Git: $UNCOMMITTED uncommitted changes"
-        check_result "git_sync" "WARNING" "$UNCOMMITTED uncommitted files"
-    fi
-    
-    # Check last commit time
-    LAST_COMMIT=$(git log -1 --format=%ci 2>/dev/null || echo "N/A")
-    echo "   Last commit: $LAST_COMMIT"
-else
-    echo "⚠️ Git: Not a git repository"
-    check_result "git_sync" "WARNING" "Not a git repository"
-fi
-
-# 5. Python venv Check
-echo ""
-echo "🐍 Python Environment:"
-if [ -d "$WORKSPACE/venv" ]; then
-    echo "✅ venv: Found"
-    check_result "python_venv" "OK" "Virtual environment available"
-else
-    echo "⚠️ venv: Not found"
-    check_result "python_venv" "WARNING" "Virtual environment missing"
-fi
-
-# Summary
-echo ""
-echo "════════════════════════════════════════"
-if [ "$STATUS" = "HEALTHY" ]; then
-    echo -e "${GREEN}✅ Overall Status: HEALTHY${NC}"
-elif [ "$STATUS" = "WARNING" ]; then
-    echo -e "${YELLOW}⚠️ Overall Status: WARNING${NC}"
-else
-    echo -e "${RED}❌ Overall Status: CRITICAL${NC}"
-fi
-echo "════════════════════════════════════════"
-
-# Output JSON if requested
-if [ "$JSON_MODE" = "--json" ]; then
-    echo ""
-    echo "JSON Output:"
-    echo "{"
-    echo "  \"timestamp\": \"$TIMESTAMP\","
-    echo "  \"status\": \"$STATUS\","
-    echo "  \"checks\": ["
-    
-    for i in "${!RESULTS[@]}"; do
-        IFS='|' read -r name status msg <<< "${RESULTS[$i]}"
-        IFS=':' read -r _ name <<< "$name"
-        IFS=':' read -r _ status <<< "$status"
-        IFS=':' read -r _ msg <<< "$msg"
-        
-        echo "    {\"check\": \"$name\", \"status\": \"$status\", \"message\": \"$msg\"}"
-        [ $i -lt $((${#RESULTS[@]} - 1)) ] && echo ","
-    done
-    echo "  ]"
-    echo "}"
-fi
-
-exit 0
+main "$@"
