@@ -1052,6 +1052,91 @@ ssh -i ~/.ssh/vlm-deploy-key.pem ubuntu@54.81.20.218
 
 ---
 
+## OpenClaw Reliability & Safety (March 26, 2026 - Complete)
+
+**Status:** All major improvements implemented and production-ready
+
+### P1.1: Cron Job Reliability ✅ COMPLETE
+- **Issue:** Scheduler starvation from missing timeoutSeconds
+- **Fix:** p1.1-add-timeouts-to-jobs.py adds 16 job timeouts
+- **Impact:** Prevents queue backlog, auto-cancels hung jobs
+- **Script:** `~/.openclaw/workspace/scripts/p1.1-add-timeouts-to-jobs.py`
+- **Status:** Production ready, all jobs have timeouts
+
+### P1.2: Memory Search ✅ COMPLETE
+- **Status:** Already working (local embeddings configured)
+- **Provider:** Sentence Transformers (all-MiniLM-L6-v2)
+- **Cost:** $0/month (local, no quota)
+- **No action required**
+
+### P2.1: Pre-Update Validation ✅ COMPLETE
+**Comprehensive 5-step update safety procedure:**
+
+1. **System Status Snapshot**
+   - File: `docs/P2.1_CURRENT_SYSTEM_STATUS.md`
+   - Documents current version, config, cron jobs, skills
+
+2. **Backup Procedure**
+   - Script: `scripts/backup-before-update.sh`
+   - Creates timestamped backup with manifest
+
+3. **Staging Environment**
+   - Script: `scripts/setup-staging-environment.sh`
+   - Isolated test environment at `~/.openclaw-staging`
+
+4. **Post-Update Test Suite**
+   - Script: `scripts/test-post-update.sh`
+   - 14 comprehensive validation tests
+
+5. **Rollback Plan**
+   - File: `docs/P2.1_UPDATE_PROCEDURES.md`
+   - Complete pre/during/post-update checklists
+   - 3-level rollback procedures
+   - Emergency recovery guide
+
+**Usage Before Update:**
+```bash
+bash ~/.openclaw/workspace/scripts/backup-before-update.sh
+bash ~/.openclaw/workspace/scripts/setup-staging-environment.sh
+# Test in staging if desired
+openclaw update
+bash ~/.openclaw/workspace/scripts/test-post-update.sh
+```
+
+### P2.2: Tool Permission Audit ✅ COMPLETE
+**Tool protection and recovery:**
+
+1. **Tool Verification Script**
+   - Script: `scripts/verify-tools-post-update.sh`
+   - 12 automated tool tests
+   - Tests critical tools (exec, read, write, edit, process)
+   - Tests integration (web_search, cron, memory_search, gateway)
+   - Tests security (camera, screen, sms properly denied)
+   - Status: 12/12 PASS ✅
+
+2. **Tool Restoration Script**
+   - Script: `scripts/restore-tool-permissions.sh`
+   - Automatic restoration from backup or manual config
+   - Includes dry-run mode for testing
+   - Restarts gateway and re-verifies
+
+3. **Tool Configuration**
+   - File: `docs/P2.2_TOOL_PERMISSION_AUDIT.md`
+   - Current tool allowlist documented
+   - Denied commands documented
+   - Manual restoration procedures
+
+**Usage After Update:**
+```bash
+# Verify tools are working
+bash ~/.openclaw/workspace/scripts/verify-tools-post-update.sh
+
+# If tools broken, restore
+bash ~/.openclaw/workspace/scripts/restore-tool-permissions.sh
+```
+
+---
+
 ## Local Brother Printers (March 22, 2026)
 
 **Status:** ✅ DISCOVERED & CONFIGURED
