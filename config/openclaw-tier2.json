@@ -1,0 +1,22 @@
+{
+  "models": {
+    "primary": "openrouter/openrouter/auto",
+    "fallback": "anthropic/claude-haiku-4-5"
+  },
+  "gateway": {
+    "bind": "127.0.0.1:8080",
+    "tls": {
+      "enabled": true
+    }
+  },
+  "context": {
+    "simple": {
+      "max_chars": 5000,
+      "files": ["SOUL.md", "USER.md"]
+    },
+    "complex": {
+      "max_chars": 135000,
+      "files": ["SOUL.md", "USER.md", "MEMORY.md", "MEMORY.CORE.md", "TOOLS.md"]
+    }
+  }
+}
