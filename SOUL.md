@@ -316,6 +316,75 @@ bash scripts/subagent-cost-report.sh
 - ✅ Cost tracking (works, logs created)
 - ✅ Cost reporting (works, breakdown generated)
 
+### Intelligent Task Batching (Tier C — March 26, 2026)
+
+**NEW:** For large multi-file tasks, analyze complexity per file and batch similar work  
+**Tools:** `scripts/analyze-task-complexity.sh`, `scripts/split-complex-task.sh`, `scripts/execute-batch.sh`
+
+**How it works:**
+1. Analyze task for per-file complexity (Haiku/Opus/GPT-4)
+2. Split into batches by complexity tier
+3. Execute batches sequentially
+4. Track costs per batch
+5. Aggregate results + savings
+
+**Tier C Workflow:**
+
+```bash
+# Step 1: Analyze complexity of all files
+bash scripts/analyze-task-complexity.sh "Task description" file1 file2 file3 ...
+
+# Step 2: Review batch split
+bash scripts/split-complex-task.sh "Task description" file1 file2 file3 ...
+
+# Step 3: Execute each batch
+bash scripts/execute-batch.sh "Task" "opus" file1 file2
+bash scripts/execute-batch.sh "Task" "haiku" file3
+
+# Step 4: View aggregated costs
+bash scripts/subagent-cost-report.sh
+```
+
+**When to use Tier C:**
+- Task has 4+ files with mixed complexity
+- Contains new files + modifications + tests
+- Contains documentation alongside code
+- Example: "Implement feature (5 files: 2 new, 2 modified, 1 test)"
+
+**Example: 4-File Caching Task**
+
+```
+Task: "Implement caching layer"
+Files:
+  • NetworkCache.swift (new) → OPUS
+  • CacheManager.swift (new) → OPUS
+  • NetworkManager.swift (modify) → HAIKU
+  • tests/CacheTests.swift → HAIKU
+
+Without Tier C (all Opus):
+  Cost: $0.060 (4 × $0.015)
+
+With Tier C (batched):
+  Batch 1 (Opus): 2 files = $0.030
+  Batch 2 (Haiku): 2 files = $0.0002
+  Total: $0.0302
+  
+Savings: 50% ✅
+```
+
+**Expected Impact (Tier A + B + C):**
+- Small tasks (1-2 files): 150x cheaper (Tier A)
+- Medium tasks (3-5 files): 40-50% savings (Tier A + B + C)
+- Large tasks (6+ files): 60-80% savings (Tier A + B + C)
+- Monthly coding costs: $2.38 → $0.50 (79% reduction)
+- Annual savings: $22+ on coding tasks
+
+**Testing (Verified March 26, 2026):**
+- ✅ Task analyzer (correctly identified file complexity)
+- ✅ Task splitter (generated correct batch plan)
+- ✅ Batch executor (spawned with cost tracking)
+- ✅ Cost calculations (all verified accurate)
+
 **NON-CODING COMPLEX TASKS** → Opus (see above)
 
 **SPECIALIZED TASKS** → Skill-based (no LLM needed)
