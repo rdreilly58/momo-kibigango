@@ -73,21 +73,22 @@ fi
 # MEDIUM COMPLEXITY PATTERNS (Opus)
 # ===================================
 
-# Add feature/function
-if echo "$TASK_LOWER" | grep -qE "add.*feature|implement.*feature|add.*function|implement.*function"; then
+# Add feature/function/layer/component
+if echo "$TASK_LOWER" | grep -qE "add.*feature|implement.*feature|add.*function|implement.*function|add.*layer|add.*component|add.*system|caching|cache"; then
   echo -e "${YELLOW}✓ Feature addition detected${NC} → Opus"
   OPUS_SCORE=$((OPUS_SCORE + 3))
 fi
 
-# Refactor/improve
-if echo "$TASK_LOWER" | grep -qE "refactor|improve|optimize|clean.*up|rewrite"; then
+# Refactor/improve (but not large refactors)
+if echo "$TASK_LOWER" | grep -qE "refactor|improve|optimize|clean.*up" && \
+   ! echo "$TASK_LOWER" | grep -qE "major.*refactor|large.*refactor"; then
   echo -e "${YELLOW}✓ Refactoring pattern detected${NC} → Opus"
   OPUS_SCORE=$((OPUS_SCORE + 3))
 fi
 
-# Build/create new
+# Build/create new (but not if distributed/complex)
 if echo "$TASK_LOWER" | grep -qE "build|create|write|implement" && \
-   ! echo "$TASK_LOWER" | grep -qE "add.*line|add.*import|fix"; then
+   ! echo "$TASK_LOWER" | grep -qE "add.*line|add.*import|fix|distributed|consistency"; then
   echo -e "${YELLOW}✓ Build pattern detected${NC} → Opus"
   OPUS_SCORE=$((OPUS_SCORE + 2))
 fi
@@ -103,15 +104,15 @@ fi
 # ===================================
 
 # Architecture/design
-if echo "$TASK_LOWER" | grep -qE "architecture|design.*pattern|design.*system"; then
+if echo "$TASK_LOWER" | grep -qE "architecture|design.*pattern|design.*system|distributed|consistency|distributed.*system"; then
   echo -e "${RED}✓ Architecture pattern detected${NC} → GPT-4"
   GPT4_SCORE=$((GPT4_SCORE + 4))
 fi
 
 # Large refactor
-if echo "$TASK_LOWER" | grep -qE "large.*refactor|major.*rewrite|complete.*redesign"; then
+if echo "$TASK_LOWER" | grep -qE "large.*refactor|major.*rewrite|major.*refactor|complete.*redesign|rewrite.*CQRS"; then
   echo -e "${RED}✓ Large refactor pattern detected${NC} → GPT-4"
-  GPT4_SCORE=$((GPT4_SCORE + 4))
+  GPT4_SCORE=$((GPT4_SCORE + 5))
 fi
 
 # Multiple features
@@ -222,5 +223,7 @@ echo "}"
 echo ""
 
 # Exit with model in variable (for sourcing)
-echo "CLASSIFIED_MODEL=$RECOMMENDED_MODEL"
+# Normalize model name (gpt-4 → gpt4 for consistency)
+NORMALIZED_MODEL=$(echo "$RECOMMENDED_MODEL" | sed 's/-//g')
+echo "CLASSIFIED_MODEL=$NORMALIZED_MODEL"
 echo "CLASSIFIED_MODEL_ALIAS=$MODEL_ALIAS"
