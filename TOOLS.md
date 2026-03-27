@@ -161,30 +161,73 @@ op item create --category="API Key" --title="Service Name" --vault="OpenClaw Sec
 
 ---
 
-## Email Accounts (March 25, 2026 Update)
+## Email Accounts & Sending (March 27, 2026 Update)
 
 **CURRENT STATUS:**
 
 | Account | Provider | Status | Method | Notes |
 |---------|----------|--------|--------|-------|
-| **reillyrd58@gmail.com** | Gmail | ✅ ACTIVE | `gog gmail` | Primary Gmail account — working perfectly |
-| **rdreilly2010@gmail.com** | Gmail | ❌ EXPIRED | `gog gmail` | Token revoked — deferred for later reset |
+| **reillyrd58@gmail.com** | Gmail | ✅ ACTIVE | Receive only | Primary personal Gmail account |
+| **rdreilly2010@gmail.com** | Gmail | ✅ ACTIVE | `gmail-send skill` | Default sender account (has app password) |
 | **robert@reillydesignstudio.com** | Google Workspace | ⏳ PENDING | Himalaya | Requires app password — deferred for now |
 
-**Active Account for Daily Use:**
-- Use `reillyrd58@gmail.com` for all Gmail operations
-- Command: `gog gmail search -a reillyrd58@gmail.com "query"`
-- Command: `gog gmail send -a reillyrd58@gmail.com --to "recipient@example.com" --subject "..." --body-file <(cat file.txt)`
+---
 
-**Deprecated/Deferred:**
-- `rdreilly2010@gmail.com` — Legacy account, token expired, deferred reset
-- `robert@reillydesignstudio.com` — Requires Google Workspace app password setup (deferred)
+## DEFAULT EMAIL SENDING METHOD ✅ (March 27, 2026)
 
-**To-Do (Future Sessions):**
-1. Reset rdreilly2010@gmail.com password (if needed)
-2. Generate Google Workspace app password for robert@reillydesignstudio.com
-3. Re-configure Himalaya with app password
-4. Consider archiving or fully deprecating rdreilly2010@gmail.com
+**Use the gmail-send skill** for all email operations with attachments, HTML, or multiple recipients.
+
+**Sender Account:** `rdreilly2010@gmail.com` (with app password configured)
+
+**App Password:** `qvdiuvwpoutomegr` (stored, 16-char for Gmail SMTP)
+
+**How to send an email:**
+
+```bash
+# Simple email
+python3 ~/.openclaw/workspace/skills/gmail-send/scripts/send_email.py \
+  --to "recipient@example.com" \
+  --subject "Subject Line" \
+  --body "Email body text" \
+  --from "rdreilly2010@gmail.com"
+
+# With attachment(s)
+python3 ~/.openclaw/workspace/skills/gmail-send/scripts/send_email.py \
+  --to "recipient@example.com" \
+  --subject "Subject Line" \
+  --body "See attached documents" \
+  --from "rdreilly2010@gmail.com" \
+  --attach "/path/to/file1.pdf" "/path/to/file2.md"
+
+# To multiple recipients
+python3 ~/.openclaw/workspace/skills/gmail-send/scripts/send_email.py \
+  --to "user1@example.com,user2@example.com" \
+  --subject "Subject" \
+  --body "Message" \
+  --from "rdreilly2010@gmail.com"
+
+# HTML email
+python3 ~/.openclaw/workspace/skills/gmail-send/scripts/send_email.py \
+  --to "recipient@example.com" \
+  --subject "Subject" \
+  --body-html "<h1>Title</h1><p>Content</p>" \
+  --from "rdreilly2010@gmail.com"
+```
+
+**Key Features:**
+- ✅ Works with any recipient email
+- ✅ Supports file attachments (PDF, images, documents)
+- ✅ HTML or plain text content
+- ✅ Multiple recipients (comma-separated)
+- ✅ From name customization (--from-name)
+- ✅ Dry-run mode (--dry-run to preview)
+- ✅ Verbose logging (--verbose)
+
+**Location:** `~/.openclaw/workspace/skills/gmail-send/scripts/send_email.py`
+
+**Documentation:** `~/.openclaw/workspace/skills/gmail-send/SKILL.md`
+
+**Status:** Production ready, tested March 27, 2026 ✅
 
 ---
 
