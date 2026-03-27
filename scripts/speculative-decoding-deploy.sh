@@ -49,14 +49,22 @@ def health():
 def generate():
     data = request.json
     prompt = data.get('prompt', '')
-    max_length = data.get('max_length', 100)
+    max_tokens = data.get('max_tokens', 100)
+    draft_len = data.get('draft_len', 4)
     
     if not decoder:
         return jsonify({"error": "Model not loaded"}), 500
     
     try:
-        result = decoder.speculative_generate(prompt, max_length=max_length)
-        return jsonify({"prompt": prompt, "output": result})
+        result = decoder.speculative_generate(prompt, max_tokens=max_tokens, draft_len=draft_len)
+        return jsonify({
+            "prompt": prompt,
+            "generated_text": result.get("generated_text", ""),
+            "tokens_generated": result.get("tokens_generated", 0),
+            "time_taken_seconds": result.get("time_taken", 0),
+            "throughput_tokens_per_sec": result.get("throughput", 0),
+            "memory_gb": result.get("memory_gb", 0)
+        })
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
