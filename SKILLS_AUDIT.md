@@ -1,5 +1,10 @@
 # Skills Audit — March 27, 2026
 
+## ACTUAL INVENTORY (Corrected)
+- **Active Skills:** 26 (in `~/.openclaw/workspace/skills/`)
+- **Archived Skills:** 13 (in `~/.openclaw/workspace/skills-archived/`)
+- **Total:** 39 skills
+
 ## Problem Statement
 Claude kept generating analytical reports WITHOUT showing the actual commands/lists needed for execution. This made recommendations useless without additional back-and-forth.
 
