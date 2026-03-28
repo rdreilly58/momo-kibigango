@@ -1,0 +1,26 @@
+{
+  "models": {
+    "draft": "Qwen/Qwen2.5-0.5B-Instruct",
+    "qualifier": "microsoft/phi-2",
+    "target_api": "claude-opus-4-1-20250805"
+  },
+  "thresholds": {
+    "math": 0.80,
+    "code": 0.80,
+    "creative": 0.75,
+    "general": 0.85
+  },
+  "performance_targets": {
+    "startup_seconds": 6,
+    "local_acceptance_rate_pct": 70,
+    "average_latency_seconds": 0.6,
+    "quality_percent": 92,
+    "monthly_cost_dollars": 10
+  },
+  "api": {
+    "provider": "anthropic",
+    "key_env_var": "ANTHROPIC_API_KEY",
+    "rate_limit_rpm": 60
+  },
+  "device": "mps"
+}
