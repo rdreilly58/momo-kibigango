@@ -54,7 +54,7 @@ def generate():
         
         # Generate with 3-tier pyramid
         start_time = time.time()
-        result = decoder.generate_pyramid(prompt, max_tokens=max_tokens)
+        result = decoder.generate(prompt, max_length=max_tokens)
         elapsed = time.time() - start_time
         
         # Calculate metrics
