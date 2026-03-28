@@ -1,0 +1,49 @@
+{
+  "models": {
+    "draft": {
+      "id": "Qwen/Qwen2.5-0.5B-Instruct",
+      "load_time_estimate": "5s",
+      "memory_usage": "~1GB",
+      "description": "Fast draft model for initial generation"
+    },
+    "qualifier": {
+      "id": "microsoft/phi-2",
+      "load_time_estimate": "1s",
+      "memory_usage": "~5GB", 
+      "description": "Qualifier model for confidence scoring"
+    },
+    "similarity": {
+      "id": "sentence-transformers/all-MiniLM-L6-v2",
+      "description": "Semantic similarity model for quality scoring"
+    },
+    "target": {
+      "id": "claude-3-opus-20240229",
+      "provider": "anthropic",
+      "input_cost_per_1M": 15.0,
+      "output_cost_per_1M": 75.0,
+      "description": "High-quality fallback model"
+    }
+  },
+  "thresholds": {
+    "math": 0.90,
+    "code": 0.88,
+    "creative": 0.80,
+    "general": 0.85
+  },
+  "api": {
+    "host": "127.0.0.1",
+    "port": 7779,
+    "debug": false,
+    "log_file": "hybrid_api.log"
+  },
+  "targets": {
+    "acceptance_rate": 0.70,
+    "average_latency": 1.0,
+    "startup_time": 6.0
+  },
+  "features": {
+    "cache_embeddings": true,
+    "batch_processing": false,
+    "streaming": false
+  }
+}

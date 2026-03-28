@@ -127,12 +127,26 @@ export default function Home() {
                 title: "Python API",
                 desc: "Simple, intuitive Python interface.",
               },
+              {
+                icon: "🔺",
+                title: "3-Tier Speculative Decoding",
+                desc: "92% quality at $5-10/month with pyramid architecture.",
+              },
             ].map((feature, i) => (
-              <div key={i} className="bg-white p-6 rounded-lg border border-gray-200">
-                <div className="text-4xl mb-4">{feature.icon}</div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">{feature.title}</h3>
-                <p className="text-gray-700">{feature.desc}</p>
-              </div>
+              feature.title === "3-Tier Speculative Decoding" ? (
+                <Link key={i} href="/features/3-tier" className="bg-white p-6 rounded-lg border border-gray-200 hover:border-peach-400 hover:shadow-lg transition-all block">
+                  <div className="text-4xl mb-4">{feature.icon}</div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{feature.title}</h3>
+                  <p className="text-gray-700">{feature.desc}</p>
+                  <p className="text-peach-600 font-medium mt-2">Learn more →</p>
+                </Link>
+              ) : (
+                <div key={i} className="bg-white p-6 rounded-lg border border-gray-200">
+                  <div className="text-4xl mb-4">{feature.icon}</div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{feature.title}</h3>
+                  <p className="text-gray-700">{feature.desc}</p>
+                </div>
+              )
             ))}
           </div>
         </div>
