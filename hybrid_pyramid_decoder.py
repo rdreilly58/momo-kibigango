@@ -316,7 +316,10 @@ if __name__ == "__main__":
         print(f"   Confidence: {result['confidence']:.2f}")
         print(f"   Cost: ${result['cost']:.6f}")
         print(f"   Latency: {result['latency']:.2f}s")
-        print(f"   Text: {result['text'][:100]}...")
+        if result['text']:
+            print(f"   Text: {result['text'][:100]}...")
+        else:
+            print(f"   Text: (API error - no text)")
         print()
     
     # Print statistics
