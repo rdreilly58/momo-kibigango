@@ -29,19 +29,14 @@ except ImportError:
 # GA4 Property Configuration
 GA4_PROPERTIES = {
     "reillydesignstudio": {
-        "property_id": "468246850",  # Update with actual property ID
+        "property_id": "529199158",
         "domain": "reillydesignstudio.com",
         "description": "Robert Reilly Design Studio",
     },
     "momo-kij": {
-        "property_id": "468246851",  # Update with actual property ID
+        "property_id": "536826321",
         "domain": "momo-kij.vercel.app",
         "description": "Momotaro Kiji (Blog)",
-    },
-    "momo-kibidango": {
-        "property_id": "468246852",  # Update with actual property ID
-        "domain": "momo-kibidango.org",
-        "description": "Momotaro Kibidango (Portfolio)",
     },
 }
 
