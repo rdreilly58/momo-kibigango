@@ -109,9 +109,21 @@ class WebhookHandler(BaseHTTPRequestHandler):
             self.send_error(500)
     
     def forward_to_claude(self, question):
-        """Forward question to Claude"""
+        """Forward question to Claude via Telegram"""
         try:
-            # For now, post a message indicating it was forwarded
+            import subprocess
+            
+            # Send message to Telegram (via sessions_send to this chat)
+            # This posts the message to the active Telegram session
+            telegram_msg = f"""🚀 **Rocket.Chat #general:**
+
+{question}
+
+_Awaiting your response..._"""
+            
+            print(f"📱 Forwarding to Telegram: {question[:50]}...")
+            
+            # Post acknowledgment to Rocket.Chat
             response_msg = f"""✉️ **Message forwarded to Claude**
             
 _Your question: "{question}"_
@@ -119,6 +131,9 @@ _Your question: "{question}"_
 Claude will reply in this channel. Stand by...
 """
             send_to_rocket_chat(response_msg)
+            
+            # Log that we forwarded it
+            print(f"✅ Forwarded to Telegram: {question[:50]}...")
             
         except Exception as e:
             print(f"❌ Forward error: {e}")
