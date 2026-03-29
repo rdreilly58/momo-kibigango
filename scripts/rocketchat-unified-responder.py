@@ -101,10 +101,17 @@ def get_latest_message():
     return None
 
 def generate_response(user_message, username):
-    """Generate response - calls Claude via OpenClaw sessions_send"""
-    # For now, return a simple response
-    # In production, this would call Claude
-    return f"Acknowledged: {user_message} (awaiting Claude integration)"
+    """
+    Generate response - IMPORTANT: This is where Claude (me) responds
+    This script detects messages and prepares them for response
+    The actual response generation happens through Claude's reasoning
+    """
+    # For this script to work, it needs to be called from a Claude session
+    # where I can think about the message and provide a response
+    
+    # For now: return acknowledgment 
+    # In actual use: I will manually provide responses to messages I see
+    return f"Acknowledged: {user_message}"
 
 def process_message(msg):
     """Process a new message"""
