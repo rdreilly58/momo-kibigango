@@ -20,7 +20,7 @@ ROCKETCHAT_URL = "http://localhost:3000"
 BOT_USER_ID = "NyTi2Ktzzv4Q6hDoL"
 BOT_AUTH_TOKEN = "oeGEa58-35WlCJTkWd8BcqVWoIPOTMkkMedpCIqEPgQ"
 GENERAL_ROOM_ID = "GENERAL"
-POLL_INTERVAL = 3
+POLL_INTERVAL = 1  # Check every 1 second for faster response
 
 RC_HEADERS = {
     "X-User-Id": BOT_USER_ID,
@@ -102,16 +102,11 @@ def get_latest_message():
 
 def generate_response(user_message, username):
     """
-    Generate response - IMPORTANT: This is where Claude (me) responds
-    This script detects messages and prepares them for response
-    The actual response generation happens through Claude's reasoning
+    Generate INSTANT acknowledgment to show message was received
+    Actual thoughtful response will be provided by Claude manually
     """
-    # For this script to work, it needs to be called from a Claude session
-    # where I can think about the message and provide a response
-    
-    # For now: return acknowledgment 
-    # In actual use: I will manually provide responses to messages I see
-    return f"Acknowledged: {user_message}"
+    # Instant acknowledgment shows user their message was received
+    return f"Got it! Processing: {user_message}"
 
 def process_message(msg):
     """Process a new message"""
@@ -138,25 +133,20 @@ def process_message(msg):
     # Step 1: Log message received
     log(f"📨 New message from {username}: {text[:80]}")
     
-    # Step 2: Send message to Telegram
-    telegram_msg = f"📨 *{username}* in #general:\n\n{text}"
+    # Step 1a: IMMEDIATE acknowledgment to Rocket.Chat (fast response visible)
+    log(f"⚡ Posting instant acknowledgment...")
+    ack_response = generate_response(text, username)
+    post_to_rocketchat(ack_response)
+    
+    # Step 2: Send message to Telegram for my awareness
+    telegram_msg = f"🚀 *{username}* in #general:\n\n_{text}_\n\n(Acknowledgment posted to #general)"
     log(f"📤 Sending to Telegram...")
     send_to_telegram(telegram_msg)
     
-    # Step 3: Generate response
-    log(f"🤖 Generating response...")
-    response = generate_response(text, username)
+    # Step 3: Await manual response from Claude
+    log(f"⏳ Awaiting manual response...")
     
-    # Step 4: Send response to Telegram
-    log(f"📤 Sending response to Telegram...")
-    response_telegram = f"📤 *Momotaro response*:\n\n{response}"
-    send_to_telegram(response_telegram)
-    
-    # Step 5: Post response to Rocket.Chat
-    log(f"📤 Posting response to #general...")
-    post_to_rocketchat(response)
-    
-    log(f"✅ Message processed completely")
+    log(f"✅ Acknowledgment posted (awaiting detailed response)")
     return True
 
 def main():
