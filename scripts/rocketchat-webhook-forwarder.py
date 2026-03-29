@@ -11,6 +11,7 @@ import json
 import requests
 from datetime import datetime
 import sys
+import os
 
 # Configuration
 WEBHOOK_PORT = 9998
@@ -138,20 +139,23 @@ def run_server():
     server.serve_forever()
 
 if __name__ == '__main__':
+    import os
+    
     # Get Telegram token from environment or config file
-    global TELEGRAM_BOT_TOKEN
+    telegram_token = None
     
     # Try to read from file first
     try:
         with open(os.path.expanduser('~/.openclaw/telegram-bot-token'), 'r') as f:
-            TELEGRAM_BOT_TOKEN = f.read().strip()
+            telegram_token = f.read().strip()
             print(f"✅ Telegram token loaded from file")
+            TELEGRAM_BOT_TOKEN = telegram_token
     except:
         # Try environment variable
-        import os
-        TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
-        if TELEGRAM_BOT_TOKEN:
+        telegram_token = os.getenv('TELEGRAM_BOT_TOKEN')
+        if telegram_token:
             print(f"✅ Telegram token loaded from environment")
+            TELEGRAM_BOT_TOKEN = telegram_token
         else:
             print(f"⚠️ Warning: No Telegram token configured")
             print(f"   Set TELEGRAM_BOT_TOKEN environment variable or")
