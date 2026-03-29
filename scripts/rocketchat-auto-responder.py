@@ -1,20 +1,24 @@
 #!/usr/bin/env python3
 """
 Rocket.Chat Auto-Responder
-Monitors #general for new messages from bob_r and automatically generates
-Claude responses using the local Mistral 7B model (instant responses)
+Polls #general, detects messages from bob_r, generates responses with Claude
+Auto-posts responses back to #general
 """
 
 import requests
 import json
 import time
 from datetime import datetime
+import os
+import sys
+import subprocess
 
+# Configuration
 ROCKETCHAT_URL = "http://localhost:3000"
-OLLAMA_URL = "http://localhost:11434"
 BOT_USER_ID = "NyTi2Ktzzv4Q6hDoL"
 BOT_AUTH_TOKEN = "oeGEa58-35WlCJTkWd8BcqVWoIPOTMkkMedpCIqEPgQ"
 GENERAL_ROOM_ID = "GENERAL"
+POLL_INTERVAL = 3
 
 RC_HEADERS = {
     "X-User-Id": BOT_USER_ID,
@@ -22,106 +26,137 @@ RC_HEADERS = {
     "Content-Type": "application/json"
 }
 
-# Track processed messages
-PROCESSED_MESSAGE_IDS = set()
+LAST_MESSAGE_ID = None
+POSTING_SCRIPT = "/Users/rreilly/.openclaw/workspace/scripts/post-to-rocketchat.sh"
 
-def get_latest_messages(limit=5):
-    """Get latest messages from #general"""
-    url = f"{ROCKETCHAT_URL}/api/v1/channels.messages?roomId={GENERAL_ROOM_ID}&count={limit}"
+def log(msg):
+    """Log with timestamp"""
+    timestamp = datetime.now().strftime("%H:%M:%S")
+    print(f"[{timestamp}] {msg}", flush=True)
+    sys.stdout.flush()
+
+def get_latest_message():
+    """Get latest message from #general"""
     try:
+        url = f"{ROCKETCHAT_URL}/api/v1/channels.messages?roomId={GENERAL_ROOM_ID}&count=1"
         resp = requests.get(url, headers=RC_HEADERS, timeout=5)
         if resp.status_code == 200:
-            return resp.json().get('messages', [])
+            data = resp.json()
+            messages = data.get('messages', [])
+            if messages:
+                return messages[0]
     except Exception as e:
-        print(f"❌ Error fetching messages: {e}")
-    return []
-
-def generate_response_with_mistral(question):
-    """Generate response using local Mistral 7B via Ollama"""
-    url = f"{OLLAMA_URL}/api/generate"
-    payload = {
-        "model": "mistral",
-        "prompt": question,
-        "stream": False
-    }
-    try:
-        print(f"🤖 Generating response with Mistral 7B...")
-        resp = requests.post(url, json=payload, timeout=60)
-        if resp.status_code == 200:
-            result = resp.json()
-            response_text = result.get("response", "").strip()
-            if response_text:
-                return response_text
-    except Exception as e:
-        print(f"❌ Error generating response: {e}")
+        log(f"❌ API error: {e}")
     return None
 
-def post_response_to_rocket_chat(text):
-    """Post response to #general"""
-    url = f"{ROCKETCHAT_URL}/api/v1/chat.postMessage"
-    payload = {
-        "roomId": GENERAL_ROOM_ID,
-        "text": text
-    }
+def post_to_rocketchat(message_text):
+    """Post response to Rocket.Chat using script"""
     try:
-        resp = requests.post(url, json=payload, headers=RC_HEADERS, timeout=10)
-        if resp.status_code == 200 and resp.json().get("success"):
-            print(f"✅ Posted to #general: {text[:50]}...")
+        result = subprocess.run(
+            [POSTING_SCRIPT, message_text],
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+        if result.returncode == 0:
+            log(f"✅ Posted to #general")
             return True
+        else:
+            log(f"⚠️ Posting failed: {result.stderr}")
+            return False
     except Exception as e:
-        print(f"❌ Error posting response: {e}")
-    return False
+        log(f"❌ Post error: {e}")
+        return False
 
-def process_new_messages():
-    """Check for new messages and respond automatically"""
-    messages = get_latest_messages(limit=10)
+def generate_response(user_message):
+    """Generate response using Claude (via oracle CLI if available, else default response)"""
+    # Try to use oracle/Claude if available
+    try:
+        # Create a simple prompt for Claude
+        prompt = f"The user asked in Rocket.Chat: {user_message}\n\nRespond conversationally and helpfully. Keep response concise (2-3 sentences)."
+        
+        # Try using oracle CLI
+        result = subprocess.run(
+            ["oracle", "--model", "claude-opus", "--print", user_message],
+            capture_output=True,
+            text=True,
+            timeout=15
+        )
+        
+        if result.returncode == 0 and result.stdout:
+            return result.stdout.strip()
+    except:
+        pass
     
-    if not messages:
-        return
+    # Fallback: Use gog or simple response
+    # For now, return a simple acknowledgment
+    return f"I received your message: '{user_message}'. (Auto-response - awaiting Claude connection)"
+
+def check_and_respond():
+    """Check for new messages and auto-respond"""
+    global LAST_MESSAGE_ID
     
-    # Process messages in reverse order (oldest first)
-    for msg in reversed(messages):
+    try:
+        msg = get_latest_message()
+        if not msg:
+            return False
+        
         msg_id = msg.get('_id', '')
         username = msg.get('u', {}).get('username', '')
         text = msg.get('msg', '')
         
-        # Skip if already processed, or not from bob_r, or from momotaro
-        if msg_id in PROCESSED_MESSAGE_IDS or username != 'bob_r' or not text:
-            continue
+        # Skip if same message
+        if msg_id == LAST_MESSAGE_ID:
+            return False
         
-        print(f"\n📨 New message from bob_r: {text}")
+        # Update last message ID
+        LAST_MESSAGE_ID = msg_id
         
-        # Mark as processed
-        PROCESSED_MESSAGE_IDS.add(msg_id)
+        # Skip if not from bob_r
+        if username != 'bob_r':
+            return False
         
-        # Limit processed messages to prevent memory leak
-        if len(PROCESSED_MESSAGE_IDS) > 100:
-            PROCESSED_MESSAGE_IDS.clear()
+        # Skip if no text
+        if not text:
+            return False
+        
+        # New message from bob_r!
+        log(f"🚀 NEW MESSAGE FROM bob_r: {text[:100]}")
         
         # Generate response
-        response = generate_response_with_mistral(text)
+        log(f"🤖 Generating response...")
+        response = generate_response(text)
         
-        if response:
-            print(f"✨ Response: {response[:100]}...")
-            # Post immediately
-            post_response_to_rocket_chat(response)
-        else:
-            print("⚠️ No response generated")
+        # Post response
+        log(f"📤 Posting response to #general...")
+        post_to_rocketchat(response)
+        
+        return True
+    except Exception as e:
+        log(f"❌ Error: {e}")
+        return False
 
 def main():
-    """Main loop"""
-    print(f"🚀 Rocket.Chat Auto-Responder Started")
-    print(f"📍 Monitoring #general for messages from bob_r")
-    print(f"🤖 Using Mistral 7B for instant responses")
-    print(f"⏱️  Checking every 2 seconds")
-    print("=" * 50)
+    """Main auto-responder loop"""
+    log("=" * 60)
+    log("🤖 Rocket.Chat Auto-Responder Started")
+    log(f"📍 Polling #general every {POLL_INTERVAL} seconds")
+    log(f"📍 Auto-responding to messages from bob_r")
+    log("=" * 60)
     
     try:
+        poll_count = 0
         while True:
-            process_new_messages()
-            time.sleep(2)  # Check every 2 seconds for instant responses
+            poll_count += 1
+            check_and_respond()
+            if poll_count % 20 == 0:
+                log(f"Polling... ({poll_count} checks)")
+            time.sleep(POLL_INTERVAL)
     except KeyboardInterrupt:
-        print("\n⏹️  Auto-responder stopped")
+        log("✋ Auto-responder stopped")
+    except Exception as e:
+        log(f"❌ Fatal error: {e}")
+        raise
 
 if __name__ == '__main__':
     main()

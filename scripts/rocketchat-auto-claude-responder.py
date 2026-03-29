@@ -94,31 +94,14 @@ def get_latest_message():
 
 def generate_response_with_claude(user_message):
     """
-    Generate response using Claude
-    Since we don't have direct API access, send to main Claude session via sessions_send
-    For now, use a subprocess to call Claude via OpenClaw
+    Generate response using Claude via sessions_send
+    For now, post a placeholder and await manual response
+    (Full Claude integration requires API key configuration)
     """
-    try:
-        # Use oracle CLI if available (Claude interface)
-        # Otherwise fall back to a simple response
-        result = subprocess.run(
-            ["oracle", "--model", "claude-opus", "--print", "--permission-mode", "bypassPermissions", user_message],
-            capture_output=True,
-            text=True,
-            timeout=30
-        )
-        
-        if result.returncode == 0 and result.stdout.strip():
-            response = result.stdout.strip()
-            # Limit response length for Rocket.Chat
-            if len(response) > 500:
-                response = response[:500] + "..."
-            return response
-    except Exception as e:
-        log(f"⚠️ Claude API error: {e}")
-    
-    # Fallback: acknowledgment
-    return f"Processing: {user_message}"
+    # For immediate deployment: return placeholder
+    # User can provide response manually if needed
+    # Full Claude integration (API call) can be added later
+    return f"Thinking about: {user_message}"
 
 def process_message(msg):
     """Process a new message"""
