@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  rocketchat:
+    image: rocketchat/rocket.chat:latest
+    container_name: rocketchat
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      MONGO_URL: mongodb://rocketchat:rocketchat_password@mongodb:27017/rocketchat?authSource=admin
+      MONGO_OPLOG_URL: mongodb://rocketchat:rocketchat_password@mongodb:27017/local?authSource=admin
+      ROOT_URL: http://localhost:3000
+      Accounts_UseDNSDomainCheck: "false"
+      DEPLOY_METHOD: docker
+      DEPLOY_PLATFORM: docker
+      # Optional: Enable specific features
+      FileUpload_Enabled: "true"
+      FileUpload_MaxFileSize: 52428800  # 50MB
+      Jitsi_Enabled: "true"
+      Jitsi_URL_Room_Prefix: "RocketChat"
+    depends_on:
+      - mongodb
+    volumes:
+      - rocketchat-data:/app/uploads
+    networks:
+      - rocketchat-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/v1/info"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+  mongodb:
+    image: mongo:6.0
+    container_name: rocketchat-mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: rocketchat
+      MONGO_INITDB_ROOT_PASSWORD: rocketchat_password
+      MONGO_INITDB_DATABASE: rocketchat
+    volumes:
+      - mongodb-data:/data/db
+      - mongodb-configdb:/data/configdb
+    networks:
+      - rocketchat-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    command:
+      - "--bind_ip_all"
+      - "--replSet=rs0"
+
+volumes:
+  rocketchat-data:
+  mongodb-data:
+  mongodb-configdb:
+
+networks:
+  rocketchat-network:
+    driver: bridge
