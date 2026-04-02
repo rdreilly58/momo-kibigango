@@ -21,6 +21,22 @@ The cron will automatically prompt you on Sunday mornings. Response flow:
 
 ---
 
+## Cascade Proxy Monitoring (3-Day Trial: April 2-5, 2026)
+
+The momo-kibidango cascade proxy is running on port 7780.
+During this trial, log all my own API interactions for the daily report.
+
+```bash
+# Check cascade proxy health
+curl -s http://127.0.0.1:7780/health
+# Check today's metrics
+curl -s http://127.0.0.1:7780/v1/metrics | python3 -m json.tool
+```
+
+**Action:** If proxy is down, restart: `launchctl kickstart -k gui/$(id -u)/com.momotaro.cascade-proxy`
+
+---
+
 ## Google Tasks Check
 
 Show pending tasks during periodic checks:
