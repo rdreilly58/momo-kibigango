@@ -8,8 +8,17 @@ set -e
 echo "🚀 Starting OpenClaw Gateway with Brave Search API..."
 echo ""
 
-# Set the API key
+# Set APIs and local embeddings
 export BRAVE_API_KEY="REDACTED_BRAVE_API_TOKEN"
+export MEMORY_SEARCH_PROVIDER="local"
+export MEMORY_SEARCH_MODEL="all-MiniLM-L6-v2"
+export MEMORY_SEARCH_SCRIPT="~/.openclaw/workspace/scripts/memory_search_local.py"
+export MEMORY_SEARCH_PYTHON_PATH="~/.openclaw/workspace/venv/bin/python3"
+export EMBEDDINGS_PROVIDER="local"
+export EMBEDDINGS_LOCAL_MODELPATH="~/.openclaw/workspace/venv/lib/python3.11/site-packages"
+
+# Enable memory search interceptor (prevents accidental use of broken built-in tool)
+export USE_MEMORY_SEARCH_INTERCEPTOR=1
 
 # Kill any existing Gateway process
 pkill -f "openclaw.*gateway" 2>/dev/null || true
