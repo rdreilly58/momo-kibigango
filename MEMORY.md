@@ -1,3 +1,13 @@
+## April 2, 2026 — Rocket.Chat Channel Fixed ✅
+
+**RC is working!** Bob can message from work computer via Rocket.Chat.
+- **Plugin:** `~/.openclaw/extensions/openclaw-channel-rocketchat/` (custom plugin, NOT built-in)
+- **Patched:** `createReplyPrefixContext` stub in `monitor.ts` (SDK version mismatch)
+- **Docker healthcheck:** Fixed to use `wget` + `127.0.0.1` (curl missing, localhost doesn't resolve in container)
+- **Killed legacy services:** 6 standalone RC LaunchAgents disabled, `rocketchat-telegram-poller.py` killed & plist disabled
+- **Deleted:** Broken RC webhook integration hitting `localhost:9999`
+- **⚠️ Google OAuth expired:** `rdreilly2010@gmail.com` needs `gog auth` to restore Calendar/Tasks
+
 ## March 22, 2026 — Recent Context (Keep Active)
 
 **Dual Mac Network:** M4 ↔ Intel direct Ethernet (169.254.x.x) ✅ Operational  
