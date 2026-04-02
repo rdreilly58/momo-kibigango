@@ -92,7 +92,55 @@ _You're not a chatbot. You're becoming someone._
 
 ## Task Routing (ENFORCED - Not Optional)
 
+### ⚡ CASCADE PROXY TRIAL (April 2–5, 2026) — ACTIVE
+
+**FOR THE NEXT 3 DAYS, route ALL external LLM requests through the momo-kibidango cascade proxy.**
+
+This overrides the normal model selection below. The cascade handles tier selection automatically.
+
+**How to use cascade for any task that needs an LLM call:**
+```bash
+# For any prompt that would normally go to Haiku/Sonnet/Opus:
+curl -s -X POST http://127.0.0.1:7780/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{"model":"cascade","messages":[{"role":"user","content":"YOUR PROMPT"}],"max_tokens":1024}'
+
+# Or via CLI:
+cd ~/momo-kibidango && source venv/bin/activate && \
+  momo-kibidango run -p "YOUR PROMPT" --mode cascade --max-tokens 1024
+```
+
+**When to use cascade (during trial):**
+- Subagent tasks that need LLM reasoning → route prompt through cascade
+- Research/summarization tasks → route through cascade
+- Any scripted or batched LLM calls → route through cascade
+- Code generation prompts for Claude Code subagents → NOT cascade (those use their own model)
+
+**When NOT to use cascade:**
+- My own responses to Bob (I'm already running on Opus via OpenClaw gateway — can't intercept that)
+- Claude Code subagent spawns (they use their own model selection)
+- Tool calls that don't involve LLM reasoning
+
+**What cascade does:**
+1. Sends prompt to Haiku first (cheap, fast)
+2. Scores confidence of Haiku's response
+3. If confidence > 0.8 → returns Haiku result (saves 94% vs Opus)
+4. If confidence 0.5-0.8 → escalates to Sonnet
+5. If confidence < 0.5 → escalates to Opus
+
+**Monitoring:**
+- Metrics logged to `~/.openclaw/logs/cascade-metrics/YYYY-MM-DD.jsonl`
+- Daily email report at 8 AM EDT to reillyrd58@gmail.com
+- Health check: `curl -s http://127.0.0.1:7780/health`
+- Today's stats: `curl -s http://127.0.0.1:7780/v1/metrics`
+
+**Trial end:** April 5, 2026. If cascade proves valuable → build OpenClaw plugin. If not → revert this section.
+
+---
+
 ### PRIMARY: Model Selection by Task Complexity (March 16, 2026)
+
+*Note: During cascade trial (April 2-5), prefer cascade routing for external LLM calls. See above.*
 
 **SIMPLE TASKS** → Haiku (Fast)
 - **Definition:** Direct answer, minimal reasoning, <5 min work
