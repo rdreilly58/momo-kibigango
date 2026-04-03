@@ -1,187 +1,207 @@
-# Simple Hash Table Implementation in Java
+# 🍑 Momotaro — AI Agent Workspace
 
-This is a comprehensive, production-quality implementation of a hash table data structure in Java, designed for both educational purposes and practical use.
+Personal AI agent workspace powered by [OpenClaw](https://openclaw.ai), running on an M4 Mac Mini. Momotaro is a persistent AI assistant with memory, tools, and multi-channel communication (Telegram, Rocket.Chat, Discord).
 
 ## Overview
 
-A hash table (also called hash map) is a data structure that implements an associative array abstract data type, a structure that can map keys to values. It uses a hash function to compute an index into an array of buckets or slots, from which the desired value can be found.
+This workspace is the operational home for Momotaro — an AI agent that manages daily tasks, coding projects, system automation, and communication across multiple platforms. It includes custom skills, automation scripts, memory systems, and several active R&D projects.
 
-### Key Concepts Demonstrated
-
-1. **Hashing**: Converting keys into array indices using a hash function
-2. **Collision Resolution**: Using separate chaining (linked lists) to handle multiple keys hashing to the same index
-3. **Dynamic Resizing**: Automatically growing the table when the load factor exceeds a threshold
-4. **Generic Implementation**: Works with any key-value types using Java generics
-5. **Performance Analysis**: O(1) average-case time complexity for basic operations
-
-## Files
-
-- **`SimpleHashTable.java`**: The main hash table implementation
-- **`HashTableExample.java`**: Comprehensive examples showing various use cases
-- **`README.md`**: This documentation file
-
-## How to Compile and Run
-
-```bash
-# Compile both files
-javac SimpleHashTable.java HashTableExample.java
-
-# Run the examples
-java HashTableExample
-```
-
-## Implementation Details
-
-### Internal Structure
-
-The hash table uses an array of linked lists (chains) to store key-value pairs:
+## Architecture
 
 ```
-buckets[] array:
-[0] -> null
-[1] -> [key1:value1] -> [key5:value5] -> null
-[2] -> [key2:value2] -> null
-[3] -> null
-[4] -> [key3:value3] -> [key4:value4] -> [key6:value6] -> null
+┌─────────────────────────────────────────────────┐
+│                  OpenClaw Gateway                │
+│         (Claude Opus 4.0 / Haiku 4.5)           │
+├────────────┬──────────────┬─────────────────────┤
+│  Telegram  │  Rocket.Chat │  Discord (planned)  │
+├────────────┴──────────────┴─────────────────────┤
+│              Momotaro Agent Core                 │
+│  ┌──────────┬──────────┬──────────┬──────────┐  │
+│  │ Memory   │ Skills   │ Scripts  │ Projects │  │
+│  │ System   │ (30+)    │ (40+)    │ (6+)     │  │
+│  └──────────┴──────────┴──────────┴──────────┘  │
+├─────────────────────────────────────────────────┤
+│          M4 Mac Mini (24GB RAM)                  │
+│    macOS • Homebrew • Docker • Node.js v25       │
+└─────────────────────────────────────────────────┘
 ```
 
-### Hash Function
+## Key Projects
 
-The implementation uses a two-step hashing process:
-1. Get the key's `hashCode()`
-2. Improve distribution by XORing high bits with low bits
-3. Map to bucket index using bitwise AND with (capacity - 1)
+### [momo-kibidango](https://github.com/rdreilly58/momo-kibidango) — Cascade Proxy
+API cost optimization proxy that routes LLM requests through a tiered cascade (Haiku → Sonnet → Opus). Scores response confidence and escalates only when needed.
+- **Status:** Running on port 7780, in 3-day trial (April 2–5, 2026)
+- **Results:** Threshold tuning complete (10/10 test suite), but surface-level confidence scoring can't detect "wrong but well-written" — core limitation identified
 
-```java
-int h = key.hashCode();
-h ^= (h >>> 16);  // Mix high and low bits
-return h & (buckets.length - 1);  // Fast modulo for power-of-2 sizes
+### [momo-akira](https://github.com/rdreilly58/momo-akira) — Token-Level Speculative Decoding
+Correct implementation of PyramidSD (arxiv:2510.12966) for 2x faster local LLM inference. Uses nested draft→qualifier→target loop with logit divergence scoring.
+- **Status:** v2 built (31 tests, 81% coverage), OOM issues with 3-model loading on 16GB — needs quantization or MLX backend
+- **Branch:** `v2-token-level`
+
+### [momo-kiji](https://github.com/rdreilly58/momo-kiji) — Apple Neural Engine Research
+ANE-optimized inference engine based on the Orion paper (arxiv:2603.06728).
+- **Status:** Research phase, featured on ReillyDesignStudio portfolio
+
+### [ReillyDesignStudio](https://reillydesignstudio.com) — Portfolio Website
+Next.js 16 site deployed on Vercel. Includes blog, project showcase, and Stripe integration.
+- **Status:** Production, auto-deploys from `main` branch
+
+### Momotaro iOS App
+Native iOS app with WebSocket gateway connection to OpenClaw.
+- **Status:** Build succeeds (zero errors), ready for TestFlight
+
+### Roblox Game Automation
+Automated pipeline: GitHub clone → Roblox Studio launch → 15s capture → error analysis.
+- **Status:** Complete, fully automated via `scripts/roblox-full-automation.sh`
+
+## Workspace Structure
+
+```
+├── SOUL.md              # Agent personality & behavior rules
+├── USER.md              # Human profile (Bob / Robert Reilly)
+├── AGENTS.md            # Workspace conventions & guidelines
+├── MEMORY.md            # Long-term curated memory
+├── MEMORY.CORE.md       # Lightweight startup context
+├── HEARTBEAT.md         # Periodic task checklist
+├── TOOLS.md             # Local tool configuration & notes
+│
+├── memory/              # Daily logs (YYYY-MM-DD.md)
+├── scripts/             # 40+ automation scripts
+├── skills/              # Custom OpenClaw skills
+├── leidos/              # Work-related materials
+├── docs/                # OpenClaw documentation mirror
+│
+├── momo-kibidango/      # Cascade proxy project
+├── momo-kiji/           # ANE inference project
+├── momotaro-ios/        # iOS app source
+├── reillydesignstudio/  # Portfolio website
+└── OnigashimaDashboard/ # macOS dashboard app
 ```
 
-### Load Factor and Resizing
+## Memory System
 
-- **Load Factor**: The ratio of size to capacity (number of elements / number of buckets)
-- **Default Load Factor**: 0.75 (resize when table is 75% full)
-- **Resizing**: When load factor is exceeded, the table doubles in size and all elements are rehashed
+Momotaro wakes up fresh each session. Continuity is maintained through files:
 
-### Time Complexity
+- **`MEMORY.CORE.md`** — Lightweight startup context (loaded every session)
+- **`MEMORY.md`** — Detailed curated memory (loaded on demand, ~22KB)
+- **`memory/YYYY-MM-DD.md`** — Raw daily logs of events, decisions, and work
+- **Local embeddings search** — Sentence Transformers (`all-MiniLM-L6-v2`) for semantic memory search, replacing broken OpenAI embeddings
 
-| Operation | Average Case | Worst Case |
-|-----------|--------------|------------|
-| put()     | O(1)         | O(n)       |
-| get()     | O(1)         | O(n)       |
-| remove()  | O(1)         | O(n)       |
+## Automation & Scripts
 
-The worst case occurs when all keys hash to the same bucket, creating a single long chain.
+Key scripts in `scripts/`:
 
-## API Reference
+| Script | Purpose |
+|--------|---------|
+| `start-gateway-with-brave.sh` | Start OpenClaw gateway with Brave Search API |
+| `memory_search_local.py` | Local semantic memory search |
+| `roblox-full-automation.sh` | GitHub → Roblox Studio → test pipeline |
+| `gpu-health-check-full.sh` | GPU offload health monitoring |
+| `telegraph_heartbeat.py` | Publish status reports to Telegraph |
+| `classify-coding-task.sh` | Smart model selection for coding subagents |
+| `api-quota-monitor.sh` | API quota monitoring |
+| `auto-update-system.sh` | Automated Homebrew/npm/macOS updates |
+| `pdf-from-markdown.sh` | Markdown → PDF conversion |
 
-### Constructor
+## Communication Channels
 
-```java
-SimpleHashTable()  // Default capacity: 16, load factor: 0.75
-SimpleHashTable(int initialCapacity, float loadFactor)
-```
+| Channel | Status | Notes |
+|---------|--------|-------|
+| Telegram | ✅ Active | Primary channel, fully operational |
+| Rocket.Chat | ✅ Active | Work channel, custom plugin (fixed April 2) |
+| Discord | 🔲 Planned | Setup pending |
 
-### Core Methods
+## Cost Optimization
 
-```java
-V put(K key, V value)      // Insert or update key-value pair
-V get(K key)               // Retrieve value for key
-V remove(K key)            // Remove key-value pair
-boolean containsKey(K key) // Check if key exists
-int size()                 // Number of key-value pairs
-boolean isEmpty()          // Check if table is empty
-void clear()               // Remove all entries
-```
+Three-tier model routing for subagent coding tasks:
 
-### Utility Methods
+- **Haiku** — Trivial fixes (typos, formatting): 150x cheaper than Opus
+- **Opus** — Medium complexity (features, refactoring): baseline
+- **GPT-4** — Complex architecture: fallback for hardest problems
 
-```java
-List<K> keys()             // Get all keys
-List<V> values()           // Get all values
-int getCapacity()          // Current bucket array size
-float getCurrentLoadFactor() // Current load factor
-void printBucketStructure() // Visual representation of internal structure
-```
+Smart classifier (`scripts/classify-coding-task.sh`) analyzes task description and selects optimal model. Expected 64–78% cost reduction vs always using Opus.
 
-## Usage Examples
+---
 
-### Basic Usage
+## Lessons Learned
 
-```java
-SimpleHashTable<String, Integer> ages = new SimpleHashTable<>();
-ages.put("Alice", 25);
-ages.put("Bob", 30);
+### 1. Speculative Decoding ≠ Model Routing (April 2026)
+**The biggest lesson.** v1 of momo-akira implemented response-level cascade routing (generate full response → score quality → maybe regenerate with bigger model) and called it "speculative decoding." It wasn't. Speculative decoding is a specific token-level algorithm: a draft model proposes K tokens, a verifier checks them in a single parallel forward pass via logit divergence, and accepted tokens skip expensive autoregressive generation. The speedup comes from GPU parallelism (verifying K tokens costs the same as generating 1), not from choosing cheaper models. API models (Claude, GPT) **cannot** do this — they don't expose logits or support parallel verification. This requires local models with shared tokenizers. v2 implements the actual algorithm correctly.
 
-Integer aliceAge = ages.get("Alice");  // Returns 25
-ages.remove("Bob");                     // Removes Bob's entry
-```
+### 2. Surface-Level Confidence Scoring Is Insufficient (April 2026)
+The cascade proxy (momo-kibidango) scores response quality based on length, coherence, and complexity. In a 100-request load test, 100% of requests stayed at Haiku tier because Haiku produces well-structured, confident-sounding responses — even when they're wrong. Detecting "wrong but well-written" requires ground truth or domain-specific validation, not surface-level heuristics. The scorer needs fundamental rethinking.
 
-### Custom Objects as Keys
+### 3. Memory Is Only as Good as the Files (March 2026)
+"Mental notes" don't survive session restarts. Every decision, lesson, and context that matters must be written to a file. The memory system (MEMORY.md + daily logs + local embeddings search) is the agent's only continuity mechanism. When we lost the OpenAI embeddings API (quota exceeded), we built local search with Sentence Transformers in 15 minutes — because the files themselves were intact. **Text > Brain. 📝**
 
-Keys must properly implement `equals()` and `hashCode()`:
+### 4. Never Infer Dates or Times (March 2026)
+Made a serious mistake updating a recurring calendar event by assuming Thursday instead of reading the Friday date from message metadata. This deleted all future instances of the event. **Always read timestamps from metadata. Never calculate or infer.** This is now an enforced rule.
 
-```java
-class Point {
-    int x, y;
-    
-    @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof Point)) return false;
-        Point other = (Point) obj;
-        return x == other.x && y == other.y;
-    }
-    
-    @Override
-    public int hashCode() {
-        return 31 * x + y;
-    }
-}
+### 5. Config File Rewrites Are Dangerous (April 2026)
+A Python script that read `openclaw.json`, modified one field, and wrote it back silently dropped the entire `channels.rocketchat` section — breaking the Rocket.Chat channel completely. JSON5 → JSON conversion lost data. **Rule:** Never do full-file read-modify-write on config files. Use `openclaw config set` for single-field changes, and always backup first.
 
-SimpleHashTable<Point, String> map = new SimpleHashTable<>();
-map.put(new Point(1, 2), "Location A");
-```
+### 6. LaunchAgents Accumulate and Conflict (April 2026)
+Found 6+ standalone Rocket.Chat LaunchAgent services running simultaneously, each intercepting messages differently. Legacy scripts from earlier experiments were still active, causing message duplication and routing failures. **Clean up old LaunchAgents aggressively.** Rename unused plists to `.disabled`, don't just unload them.
 
-### Word Frequency Counter
+### 7. Docker Healthchecks Need Container-Aware Tooling (April 2026)
+Rocket.Chat Docker container was perpetually "unhealthy" because the healthcheck used `curl` (not installed in the container) and `localhost` (doesn't resolve inside containers). Fixed by switching to `wget --spider -q http://127.0.0.1:3000/health`. **Always verify that healthcheck tools exist inside the container.**
 
-```java
-SimpleHashTable<String, Integer> wordCount = new SimpleHashTable<>();
-for (String word : text.split(" ")) {
-    Integer count = wordCount.get(word);
-    wordCount.put(word, count == null ? 1 : count + 1);
-}
-```
+### 8. Local Models on 16GB Need Quantization (April 2026)
+Attempted to load 3 Qwen2.5 models (0.5B + 1.5B + 3B) in float16 for speculative decoding — OOM killed repeatedly. Even the smallest trio at float16 plus PyTorch overhead plus OS takes ~16GB. **Lesson:** On consumer hardware, always plan for int4/int8 quantization or use MLX backend (more memory efficient on Apple Silicon).
 
-## Performance Considerations
+### 9. Sudo Access Is a Feature, Not a Risk (March 2026)
+Passwordless sudo for whitelisted commands (`/etc/sudoers.d/momotaro`) dramatically improved productivity — system updates, Homebrew installs, service management all happen without interruption. The whitelist approach maintains security (only approved commands) with full audit trail. **Use it freely; that's why it exists.**
 
-1. **Initial Capacity**: Choose based on expected size to minimize resizing
-2. **Load Factor**: Lower values = more memory but better performance
-3. **Hash Function Quality**: Poor hash functions lead to clustering and degraded performance
-4. **Key equals() and hashCode()**: Must be properly implemented for custom key types
+### 10. Environment Variables Must Be Set Where the Process Starts (March 2026)
+Brave Search API key was in the config file but the Gateway couldn't find it. Root cause: the Gateway reads environment variables at startup, and the launchctl plist didn't pass them through. Created a startup script that explicitly sets `BRAVE_API_KEY` before launching the Gateway. **Config files ≠ environment variables.** Know which one your process expects.
 
-## Educational Value
+---
 
-This implementation teaches:
-- How hash tables achieve O(1) average performance
-- The importance of good hash functions
-- Trade-offs between memory usage and performance
-- How dynamic data structures handle growth
-- Real-world applications of hash tables
+## Current Status (April 3, 2026)
 
-## Comparison with Java's HashMap
+### ✅ Operational
+- **OpenClaw Gateway** — Running, Claude Opus 4.0 default
+- **Telegram channel** — Primary comms, fully functional
+- **Rocket.Chat channel** — Work comms via custom plugin, fixed April 2
+- **Memory system** — Local embeddings search + daily logs + curated memory
+- **ReillyDesignStudio** — Production on Vercel, auto-deploying
+- **Roblox automation** — Full pipeline operational
+- **Momotaro iOS app** — Builds clean, ready for TestFlight
+- **Cost optimization** — Smart model classifier active (Haiku/Opus/GPT-4 tiering)
+- **System automation** — Auto-updates, API monitoring, Telegraph reports
 
-This implementation is simpler than `java.util.HashMap` but demonstrates the same core concepts:
-- Both use separate chaining for collisions
-- Both use power-of-2 sizing for fast modulo operations
-- Both implement dynamic resizing
-- Java's HashMap has additional optimizations (tree-based buckets for long chains, better hash spreading)
+### 🔬 In Progress
+- **momo-kibidango cascade proxy** — 3-day trial (April 2–5), confidence scorer needs rework
+- **momo-akira v2** — Token-level speculative decoding built, needs quantized model loading to fit in 16GB RAM
+- **momo-kiji** — ANE inference research, early stage
 
-## Further Learning
+### ⏳ Pending
+- **AWS Mac instance** — Quota request submitted, awaiting approval
+- **Discord channel** — Setup not yet started
+- **robert@reillydesignstudio.com** — Needs Google Workspace app password for Himalaya
+- **Google OAuth** — `rdreilly2010@gmail.com` token expired, needs `gog auth`
 
-To extend this implementation, consider:
-1. Implementing other collision resolution methods (open addressing, Robin Hood hashing)
-2. Adding iterator support
-3. Thread-safety with synchronization
-4. Implementing the full Java Map interface
-5. Performance optimizations (caching hash codes, tree-based buckets)
+### 📊 Infrastructure
+- **Hardware:** M4 Mac Mini, 24GB RAM, macOS 25.3.0
+- **Runtime:** Node.js v25.9.0, Python 3.x, Docker
+- **Models:** Claude Opus 4.0 (primary), Claude Haiku 4.5 (fast/fallback)
+- **DNS:** Cloudflare (reillydesignstudio.com, momo-kibidango.org)
+- **Hosting:** Vercel (websites), AWS Route 53 (DNS), Docker (Rocket.Chat)
+
+---
+
+## Setup
+
+This workspace is designed for [OpenClaw](https://openclaw.ai). To run your own:
+
+1. Install OpenClaw: `npm install -g openclaw`
+2. Initialize workspace: `openclaw init`
+3. Configure your `SOUL.md`, `USER.md`, and `AGENTS.md`
+4. Connect channels (Telegram, Rocket.Chat, etc.)
+5. Start the gateway: `openclaw gateway start`
+
+See [OpenClaw docs](https://docs.openclaw.ai) for full setup guide.
+
+## License
+
+Personal workspace — not intended for redistribution. Individual projects (momo-kibidango, momo-akira, momo-kiji) have their own licenses in their respective repositories.

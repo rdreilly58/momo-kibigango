@@ -98,10 +98,10 @@ update_macos() {
         return 0
     fi
     
-    # Check for updates
-    local updates=$(softwareupdate -l 2>/dev/null | grep -c "^Software Update:" || echo 0)
+    local updates=$(softwareupdate -l 2>/dev/null | grep -c "Software Update:" || echo 0)
+    updates_num=$(echo "$updates" | awk '{print $1}')
     
-    if [[ "$updates" -gt 0 ]]; then
+    if [[ "$updates_num" -gt 0 ]]; then
         log_info "Found $updates macOS updates"
         
         # Install all updates (requires sudo, but whitelisted)
@@ -154,7 +154,18 @@ update_brew() {
         log_info "✅ Homebrew packages upgraded"
     else
         log_error "Failed to upgrade packages"
-        return 1
+        # Attempt to fix common link issues
+        if grep -q "brew link --overwrite" "$LOG_FILE"; then
+            log_warn "Detected link issue. Attempting to force link pillow..."
+            if brew link --overwrite pillow 2>&1 | tee -a "$LOG_FILE"; then
+                log_info "✅ Forced link for pillow successful"
+            else
+                log_error "Failed to force link pillow"
+                return 1
+            fi
+        else
+            return 1
+        fi
     fi
     
     # Upgrade casks (if enabled)
