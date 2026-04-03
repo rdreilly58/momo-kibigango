@@ -164,7 +164,7 @@ main() {
   echo ""
   
   # Check if any critical quotas exceeded
-  if grep -q "EXCEEDED\|ERROR" "$LOG_DIR/quota.log" 2>/dev/null; then
+  if grep -q "EXCEEDED\|ERROR" "$LOG_DIR/quota.log" 2>/dev/null || true; then
     if [ $SEND_ALERT -eq 1 ]; then
       echo -e "${RED}⚠️ ALERT: API quota issues detected${NC}"
       echo "See $LOG_DIR/quota.log for details"
