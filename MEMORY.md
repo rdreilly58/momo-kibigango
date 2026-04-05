@@ -1,3 +1,47 @@
+## April 4, 2026 — Password Manager Consolidation ✅
+
+**Project:** Removed all non-Apple password managers to consolidate on Apple Passwords exclusively.
+- **Removed:**
+  - 1Password application (via Homebrew cask)
+  - 1Password CLI (`op`)
+  - 1Password Chrome extension
+  - All associated data files and group containers (`~/Library/Group Containers/2BUA8C4S2C.com.agilebits`).
+- **Outcome:** System is now 100% on Apple Passwords. No other managers (Bitwarden, LastPass, etc.) were found. This simplifies the security stack and aligns with the user's preference.
+
+---
+
+## April 3, 2026 — ReDrafter Training on Colab A100 ✅
+
+### Project: momo-akira (v2-token-level branch)
+
+**Goal:** Implement Apple's ReDrafter (arxiv:2403.09919) for token-level speculative decoding on Apple Silicon to achieve 1.3-1.5x speedup.
+
+**Background:**
+- Previous 3-model PyramidSD approach failed on 16GB M4 Mac due to excessive memory overhead. Benchmarks showed it was slower than the baseline.
+- Realized a fundamental difference between two papers:
+  1. **ReDrafter (Apple):** Uses a small, trained RNN head to propose draft tokens. The correct approach for this hardware.
+  2. **LayerSkip (Meta):** Uses early-exit from the main model, but requires special pre-training that Qwen2.5 doesn't have.
+
+**Training Progress:**
+- Subscribed to Colab Pro ($10/month) to access A100 GPU.
+- Built a full training pipeline (`train_drafter.py`, Colab notebook) adapted from Apple's reference implementation.
+- Hit and fixed several issues to get training running:
+  - **Transformers v5 compatibility:** Patched deprecated `TrainingArguments` and `compute_loss` function signatures.
+  - **CUDA Out of Memory (OOM):** The initial configuration with a 1.2B parameter drafter was too large for the 40GB A100.
+  - **Solution:**
+    - Reduced training sequence length from 2048 to **512**.
+    - Switched to **8-bit Adam optimizer** (`adamw_bnb_8bit`) to halve optimizer state memory.
+    - Implemented a memory-efficient forward pass that computes loss incrementally instead of stacking large logit tensors.
+- **Status:** ✅ **Training is running successfully on Colab.** Loss values are decreasing, indicating the drafter is learning. Expected completion in ~4-5 hours.
+
+**Next Steps:**
+1.  Wait for Colab training to finish.
+2.  Download the trained drafter weights (`drafter_output_redrafter_qwen25-7b.tar.gz`).
+3.  Build the MLX inference engine on the M4 Mac, integrating the new drafter head.
+4.  Benchmark against the baseline to measure the speedup.
+
+---
+
 ## April 2, 2026 — Rocket.Chat Channel Fixed ✅
 
 **RC is working!** Bob can message from work computer via Rocket.Chat.
