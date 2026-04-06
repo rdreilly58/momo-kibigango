@@ -294,20 +294,22 @@ def train():
     vocab_size = len(tokenizer)
     logger.info(f"Vocab size: {vocab_size}")
 
-    # ---- Base model (frozen) ----
-    logger.info(f"Loading base model: {cfg.base_model} (frozen, bfloat16)")
+    # ---- Base model (frozen, stays on CPU) ----
+    # IMPORTANT: Keep base model on CPU. It's frozen and 14GB — putting it on
+    # the 16GB TPU alongside the draft head would OOM. We run inference on CPU
+    # and only transfer the last hidden state to TPU for the draft head.
+    logger.info(f"Loading base model: {cfg.base_model} (frozen, CPU, bfloat16)")
+    cpu_device = torch.device("cpu")
     base_model = AutoModelForCausalLM.from_pretrained(
         cfg.base_model,
         torch_dtype=cfg.dtype,
-        device_map="auto" if not TPU_AVAILABLE else None,
+        device_map="cpu",
         trust_remote_code=True,
     )
-    if TPU_AVAILABLE:
-        base_model = base_model.to(device)
-
     base_model.eval()
     for p in base_model.parameters():
         p.requires_grad_(False)
+    logger.info("Base model loaded on CPU")
 
     # Get base model hidden size
     hidden_size = base_model.config.hidden_size
@@ -378,17 +380,19 @@ def train():
             max_start = seq_len - cfg.num_draft_tokens - 1
             start = torch.randint(1, max(2, max_start), (1,)).item()
 
-            context_ids = input_ids[:, :start]   # [B, start]
-            target_ids  = input_ids[:, start:start + cfg.num_draft_tokens]  # [B, K]
+            context_ids = input_ids[:, :start]   # [B, start] — used on CPU
+            target_ids  = input_ids[:, start:start + cfg.num_draft_tokens].to(device)  # [B, K] on TPU
 
-            # Forward pass through frozen base model to get hidden state
+            # Forward pass through frozen base model (on CPU) to get hidden state
             with torch.no_grad():
+                cpu_context = context_ids.cpu()
                 outputs = base_model(
-                    input_ids=context_ids,
+                    input_ids=cpu_context,
                     output_hidden_states=True,
                     use_cache=False,
                 )
-                last_hidden = outputs.hidden_states[-1][:, -1, :]  # [B, H]
+                # Transfer only the small hidden state vector to TPU
+                last_hidden = outputs.hidden_states[-1][:, -1, :].to(device)  # [B, H]
 
             # Forward pass through draft head
             draft_logits = draft_head(last_hidden, target_ids=target_ids)  # [B, K, V]
