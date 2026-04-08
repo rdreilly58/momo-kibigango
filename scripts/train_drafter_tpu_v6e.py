@@ -67,17 +67,17 @@ class TrainingConfig:
     dataset_name: str = "anon8231489123/ShareGPT_Vicuna_unfiltered"
     dataset_split: str = "train"
     max_seq_len: int = 512             # Reduced from 2048 (OOM fix — proven on A100)
-    max_samples: int = 50_000          # Subset for speed
+    max_samples: int = 5_000           # Small subset for quick validation
 
     # Training
-    batch_size: int = 8                # Per TPU chip; v6e-1 has 16GB HBM
+    batch_size: int = 2                # Reduced for faster CPU base model inference
     grad_accumulation_steps: int = 4   # Effective batch = 32
     learning_rate: float = 2e-4
     weight_decay: float = 0.01
     warmup_steps: int = 200
     max_steps: int = 3000
     save_every: int = 500
-    log_every: int = 50
+    log_every: int = 10
 
     # Optimizer — 8-bit Adam not available on TPU; use standard AdamW with bfloat16
     dtype: torch.dtype = torch.bfloat16  # v6e native dtype

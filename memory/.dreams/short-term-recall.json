@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "updatedAt": "2026-04-07T10:31:57.669Z",
+  "entries": {
+    "memory:memory/2026-04-03.md:37:58": {
+      "key": "memory:memory/2026-04-03.md:37:58",
+      "path": "memory/2026-04-03.md",
+      "startLine": 37,
+      "endLine": 58,
+      "source": "memory",
+      "snippet": "- **Next step:** Try int4/int8 quantization for qualifier + target, OR use MLX backend (more memory efficient on Apple Silicon) ### MLX Breakthrough (05:20-06:16 EDT) - Switched to MLX backend — all 3 models load at **5.56 GB** peak (vs OOM with PyTorch) - Models: Qwen2.5-0.5B/1.5B/7B-Instruct-4bit via mlx-community - 2-model spec dec works via mlx-lm built-in: 67.6 tok/s (3B), 25 tok/s (7B) - 3-model PyramidSD loop runs but **KV cache desync bug** — rejected draft tokens advance the draft cache but not qualifier/target caches - Result: 2.4% draft acceptance, garbage output - Fix needed: proper cache trim/rollback on rejection - Pushed to GitHub: `e33467f` on v2-token-level branch - README",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "totalScore": 0.7299288075981443,
+      "maxScore": 0.7299288075981443,
+      "firstRecalledAt": "2026-04-07T10:31:57.669Z",
+      "lastRecalledAt": "2026-04-07T10:31:57.669Z",
+      "queryHashes": [
+        "a33eccbb219f"
+      ],
+      "recallDays": [
+        "2026-04-07"
+      ],
+      "conceptTags": [
+        "int4/int8",
+        "20-06",
+        "5.56",
+        "mlx-community",
+        "2-model",
+        "mlx-lm",
+        "built-in",
+        "67.6"
+      ]
+    }
+  }
+}

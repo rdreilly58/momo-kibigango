@@ -34,25 +34,35 @@ report_quota() {
   local used=$2
   local limit=$3
   local unit=$4
-  
-  # Handle non-numeric limits
-  if [ -z "$limit" ] || [ "$limit" = "unknown" ] || [ "$limit" = "Unlimited" ]; then
-    echo "[$TIMESTAMP] $service: $used $unit" >> "$LOG_DIR/quota.log"
-    [ $VERBOSE -eq 1 ] && echo "✅ $service: $used $unit"
-    return
+  local log_output="[$TIMESTAMP] $service:"
+
+  # Determine if 'used' is numeric
+  local is_used_numeric=0
+  if [[ "$used" =~ ^[0-9]+$ ]]; then
+    is_used_numeric=1
   fi
-  
-  # Only calculate percentage if both are numeric
-  if ! [[ "$used" =~ ^[0-9]+$ ]] || ! [[ "$limit" =~ ^[0-9]+$ ]]; then
-    echo "[$TIMESTAMP] $service: $used/$limit $unit" >> "$LOG_DIR/quota.log"
+
+  # Determine if 'limit' is numeric
+  local is_limit_numeric=0
+  if [[ "$limit" =~ ^[0-9]+$ ]]; then
+    is_limit_numeric=1
+  fi
+
+  # Handle non-numeric or special limits/usages first
+  if [ "$is_used_numeric" -eq 0 ] || [ "$is_limit_numeric" -eq 0 ] || \
+     [ -z "$limit" ] || [ "$limit" = "unknown" ] || [ "$limit" = "Unlimited" ] || \
+     [ "$limit" = "OK" ] || [ "$limit" = "N/A" ] || [ "$limit" = "FAILED" ]; then
+    log_output+=" $used/$limit $unit"
+    echo "$log_output" >> "$LOG_DIR/quota.log"
     [ $VERBOSE -eq 1 ] && echo "✅ $service: $used/$limit $unit"
     return
   fi
-  
+
+  # If we reach here, both 'used' and 'limit' are numeric
   local percentage=$((used * 100 / limit))
   local status="OK"
   local symbol="✅"
-  
+
   if [ "$percentage" -ge 100 ]; then
     status="EXCEEDED"
     symbol="❌"
@@ -60,20 +70,30 @@ report_quota() {
     status="CRITICAL"
     symbol="⚠️"
   fi
-  
+
   if [ $VERBOSE -eq 1 ]; then
     echo -e "${symbol} $service: $used/$limit $unit ($percentage%)"
   fi
-  
-  echo "[$TIMESTAMP] $service: $used/$limit $unit ($percentage%) — $status" >> "$LOG_DIR/quota.log"
+
+  log_output+=" $used/$limit $unit ($percentage%) — $status"
+  echo "$log_output" >> "$LOG_DIR/quota.log"
 }
+
 
 # Check Brave Search API quota
 check_brave_quota() {
+  # Retrieve Brave API key from1 Keychain
+  local BRAVE_API_KEY=$(security find-generic-password -s BraveSearchAPI -a openclaw -w 2>/dev/null)
+  if [ -z "$BRAVE_API_KEY" ]; then
+    report_quota "Brave Search API" "Not configured" "N/A" "status"
+    return
+  fi
+
   # Note: Brave doesn't expose quota via API, so we estimate based on daily limits
   # 1000 queries/month = ~33/day
   
   # For now, just indicate status
+  # Use the retrieved BRAVE_API_KEY
   if [ -n "$BRAVE_API_KEY" ]; then
     # Try a test query to see if API is working
     if curl -s "https://api.search.brave.com/res/v1/web/search?q=test&count=1" \
@@ -152,12 +172,12 @@ main() {
   [ $VERBOSE -eq 1 ] && echo "Checking API quotas..."
   echo ""
   
-  check_brave_quota
-  check_openai_quota
-  check_huggingface_quota
-  check_local_embeddings
-  check_cloudflare_quota
-  check_aws_quota
+  check_brave_quota || true
+  check_openai_quota || true
+  check_huggingface_quota || true
+  check_local_embeddings || true
+  check_cloudflare_quota || true
+  check_aws_quota || true
   
   echo ""
   echo "Log: $LOG_DIR/quota.log"

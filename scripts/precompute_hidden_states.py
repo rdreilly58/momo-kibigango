@@ -46,24 +46,22 @@ for p in model.parameters():
     p.requires_grad_(False)
 logger.info("Model loaded.")
 
-logger.info("Loading ShareGPT dataset...")
-ds = load_dataset(
-    "anon8231489123/ShareGPT_Vicuna_unfiltered",
-    data_files="ShareGPT_V3_unfiltered_cleaned_split.json",
-    split="train",
-)
+# Use wikitext-2 — tiny (4MB), no auth, downloads in seconds
+logger.info("Loading wikitext-2 dataset...")
+ds = load_dataset("wikitext", "wikitext-2-raw-v1", split="train")
 
 samples = []
-for row in ds.select(range(min(MAX_SAMPLES * 2, len(ds)))):
-    text = " ".join(t.get("value", "") for t in row.get("conversations", []))
-    if len(text) < 100:
-        continue
-    ids = tokenizer(text, truncation=True, max_length=MAX_SEQ_LEN + 1,
-                    return_tensors="pt").input_ids.squeeze(0)
-    if len(ids) >= NUM_DRAFT + 2:
-        samples.append(ids)
+full_text = " ".join(row["text"] for row in ds if len(row["text"]) > 50)
+# Chunk into MAX_SEQ_LEN windows
+all_ids = tokenizer(full_text, return_tensors="pt").input_ids.squeeze(0)
+for i in range(0, len(all_ids) - MAX_SEQ_LEN - NUM_DRAFT, MAX_SEQ_LEN // 2):
+    chunk = all_ids[i:i + MAX_SEQ_LEN + NUM_DRAFT + 1]
+    if len(chunk) >= NUM_DRAFT + 2:
+        samples.append(chunk)
     if len(samples) >= MAX_SAMPLES:
         break
+
+logger.info(f"Created {len(samples)} chunks from wikitext-2")
 
 logger.info(f"Tokenized {len(samples)} samples. Starting hidden state extraction...")
 

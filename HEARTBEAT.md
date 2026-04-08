@@ -21,19 +21,10 @@ The cron will automatically prompt you on Sunday mornings. Response flow:
 
 ---
 
-## Cascade Proxy Monitoring (3-Day Trial: April 2-5, 2026)
+## Cascade Proxy Monitoring (TRIAL ENDED April 5, 2026 — DISABLED)
 
-The momo-kibidango cascade proxy is running on port 7780.
-During this trial, log all my own API interactions for the daily report.
-
-```bash
-# Check cascade proxy health
-curl -s http://127.0.0.1:7780/health
-# Check today's metrics
-curl -s http://127.0.0.1:7780/v1/metrics | python3 -m json.tool
-```
-
-**Action:** If proxy is down, restart: `launchctl kickstart -k gui/$(id -u)/com.momotaro.cascade-proxy`
+<!-- Trial ended with zero requests routed. Proxy can be stopped. -->
+<!-- To fully decommission: launchctl bootout gui/$(id -u)/com.momotaro.cascade-proxy -->
 
 ---
 
@@ -87,13 +78,12 @@ python3 ~/.openclaw/workspace/scripts/telegraph_heartbeat.py
 
 ---
 
-## GPU Offload Health Check
+## GPU Offload Health Check (DISABLED)
 
-Run full GPU health test every heartbeat (detect issues early):
-
-```bash
-/Users/rreilly/.openclaw/workspace/scripts/gpu-health-check-full.sh
-```
+# Run full GPU health test every heartbeat (detect issues early):
+# ```bash
+# /Users/rreilly/.openclaw/workspace/scripts/gpu-health-check-full.sh
+# ```
 
 **What it does:**
 - Tests SSH connectivity to GPU instance (54.81.20.218)

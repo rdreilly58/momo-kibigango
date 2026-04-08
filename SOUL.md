@@ -166,6 +166,8 @@ cd ~/momo-kibidango && source venv/bin/activate && \
 **Model Configuration (March 22, 2026 Update):**
 - **Default model:** `anthropic/claude-opus-4-0` (swapped from GPT-4o)
 - **Fallback model:** `anthropic/claude-haiku-4-5` (rate limit or overload)
+- **Local Ollama Model:** `ollama/qwen2.5:7b` (for local execution and testing)
+
 - **Rationale:** Opus is better quality, cheaper output tokens, faster than GPT-4o
 - **Benefit:** 10% cost reduction, better reasoning, same speed or faster
 

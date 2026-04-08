@@ -30,7 +30,7 @@ trap 'echo "[briefing] ❌ ERROR: $BRIEFING_TYPE briefing failed"; \
       if [ -n "${TELEGRAM_BOT_TOKEN:-}" ] && [ -n "${TELEGRAM_CHAT_ID:-}" ]; then \
         curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
           -d "chat_id=${TELEGRAM_CHAT_ID}" \
-          -d "text=⚠️ BRIEFING FAILED: ${BRIEFING_TYPE} briefing error at $(date '+%H:%M %Z')" > /dev/null 2>&1 || true; \
+          -d "text=⚠️ BRIEFING FAILED: ${BRIEFING_TYPE} briefing error at $(date '+%H:%M %z')" > /dev/null 2>&1 || true; \
       fi' ERR
 
 echo "[briefing] =========================================="
