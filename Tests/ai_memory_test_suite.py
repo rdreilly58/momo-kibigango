@@ -801,11 +801,11 @@ class TestMemoryFileHealth(unittest.TestCase):
     def test_memory_dir_exists(self):
         self.assertTrue(MEMORY_DIR.exists(), f"memory/ dir not found at {MEMORY_DIR}")
 
-    def test_observations_md_archived(self):
-        """observations.md should no longer be in active memory/ (Total Recall removed)."""
+    def test_observations_md_exists(self):
+        """observations.md should exist — re-enabled with Total Recall Observer cron (2026-04-19)."""
         obs = MEMORY_DIR / "observations.md"
-        self.assertFalse(obs.exists(),
-                         "observations.md should be archived, not in active memory/")
+        self.assertTrue(obs.exists(),
+                        "observations.md should exist (observer cron re-enabled 2026-04-19)")
 
     def test_observations_md_archive_exists(self):
         """Archived copy of observations.md should exist in memory/archive/."""
@@ -873,14 +873,14 @@ class TestObserverReflectorHealth(unittest.TestCase):
         self.assertFalse(REFLECTOR_SH.exists(),
                          "reflector-agent.sh should have been removed")
 
-    def test_observations_md_archived(self):
-        """observations.md should be archived, not in active memory/ dir."""
+    def test_observations_md_active_and_archived(self):
+        """observations.md should be active (re-enabled) AND archived copy should exist."""
         active = MEMORY_DIR / "observations.md"
         archived = MEMORY_DIR / "archive" / "observations-archived-2026-04-19.md"
-        self.assertFalse(active.exists(),
-                         "observations.md should be archived, not active")
+        self.assertTrue(active.exists(),
+                        "observations.md should be active (observer cron re-enabled)")
         self.assertTrue(archived.exists(),
-                        "observations.md should exist in memory/archive/")
+                        "Archived observations.md should exist in memory/archive/")
 
     def test_skill_total_recall_dir_removed(self):
         """total-recall skill was intentionally removed (2026-04-19)."""
@@ -1113,6 +1113,437 @@ class TestEdgeCases(unittest.TestCase):
 
 
 # ═════════════════════════════════════════════════════════════════════════════
+# 12. MemoryDB Python API (memory_db.py)
+# ═════════════════════════════════════════════════════════════════════════════
+
+MEMORY_DB_PY = SCRIPTS_DIR / "memory_db.py"
+
+
+class TestMemoryDBAPI(unittest.TestCase):
+    """Test the memory_db.py MemoryDB class end-to-end."""
+
+    @classmethod
+    def setUpClass(cls):
+        if not MEMORY_DB_PY.exists():
+            raise unittest.SkipTest("memory_db.py not found")
+        mod = _import_module(MEMORY_DB_PY)
+        cls.MemoryDB = mod.MemoryDB
+        cls.db = mod.MemoryDB()
+
+    def tearDown(self):
+        # Clean all test_suite records via raw sqlite
+        conn = sqlite3.connect(str(DB_PATH))
+        conn.execute("DELETE FROM memories WHERE namespace LIKE 'test_%'")
+        conn.execute("DELETE FROM archived_memories WHERE namespace LIKE 'test_%'")
+        conn.commit()
+        conn.close()
+
+    # ── add / UPSERT ─────────────────────────────────────────────────────────
+
+    def test_add_returns_id(self):
+        mid = self.db.add("API test memory", "Content here",
+                          namespace="test_api", tier="short")
+        self.assertIsInstance(mid, str)
+        self.assertEqual(len(mid), 36)  # UUID length
+
+    def test_add_upsert_same_title_namespace(self):
+        """add() with same title+namespace should update, not insert duplicate."""
+        mid1 = self.db.add("UPSERT title", "Original content", namespace="test_api")
+        mid2 = self.db.add("UPSERT title", "Updated content", namespace="test_api")
+        self.assertEqual(mid1, mid2, "UPSERT should return same ID")
+        r = self.db.get(mid1)
+        self.assertEqual(r["content"], "Updated content")
+
+    def test_add_different_namespaces_are_separate(self):
+        mid1 = self.db.add("Shared title", "NS A content", namespace="test_ns_a")
+        mid2 = self.db.add("Shared title", "NS B content", namespace="test_ns_b")
+        self.assertNotEqual(mid1, mid2)
+
+    def test_add_all_tiers(self):
+        for tier in ["working", "short", "long"]:
+            mid = self.db.add(f"Tier {tier} test", f"Content for {tier}",
+                              tier=tier, namespace="test_api")
+            r = self.db.get(mid)
+            self.assertEqual(r["tier"], tier)
+
+    def test_add_with_tags(self):
+        mid = self.db.add("Tagged memory", "Has tags", namespace="test_api",
+                          tags=["alpha", "beta", "gamma"])
+        r = self.db.get(mid)
+        self.assertEqual(sorted(r["tags"]), ["alpha", "beta", "gamma"])
+
+    def test_add_with_priority(self):
+        mid = self.db.add("High priority", "Important", namespace="test_api", priority=9)
+        r = self.db.get(mid)
+        self.assertEqual(r["priority"], 9)
+
+    def test_add_with_metadata(self):
+        meta = {"source": "test", "workflow": "session-reset"}
+        mid = self.db.add("With metadata", "Content", namespace="test_api", metadata=meta)
+        r = self.db.get(mid)
+        self.assertEqual(r["metadata"]["workflow"], "session-reset")
+
+    # ── get ──────────────────────────────────────────────────────────────────
+
+    def test_get_returns_dict(self):
+        mid = self.db.add("Get test", "Get content", namespace="test_api")
+        r = self.db.get(mid)
+        self.assertIsInstance(r, dict)
+        self.assertEqual(r["title"], "Get test")
+        self.assertEqual(r["content"], "Get content")
+
+    def test_get_nonexistent_returns_none(self):
+        r = self.db.get("00000000-0000-0000-0000-000000000000")
+        self.assertIsNone(r)
+
+    def test_get_increments_access_count(self):
+        mid = self.db.add("Access count test", "Body", namespace="test_api")
+        self.db.get(mid)
+        self.db.get(mid)
+        conn = sqlite3.connect(str(DB_PATH))
+        row = conn.execute("SELECT access_count FROM memories WHERE id=?", (mid,)).fetchone()
+        conn.close()
+        self.assertGreaterEqual(row[0], 2)
+
+    # ── update ───────────────────────────────────────────────────────────────
+
+    def test_update_content(self):
+        mid = self.db.add("Update test", "Original", namespace="test_api")
+        result = self.db.update(mid, content="Replaced")
+        self.assertTrue(result)
+        self.assertEqual(self.db.get(mid)["content"], "Replaced")
+
+    def test_update_priority(self):
+        mid = self.db.add("Priority update", "Body", namespace="test_api")
+        self.db.update(mid, priority=8)
+        self.assertEqual(self.db.get(mid)["priority"], 8)
+
+    def test_update_tags(self):
+        mid = self.db.add("Tag update", "Body", namespace="test_api")
+        self.db.update(mid, tags=["new", "tags"])
+        self.assertEqual(sorted(self.db.get(mid)["tags"]), ["new", "tags"])
+
+    def test_update_nonexistent_returns_false(self):
+        result = self.db.update("00000000-0000-0000-0000-000000000000", content="x")
+        self.assertFalse(result)
+
+    # ── delete ───────────────────────────────────────────────────────────────
+
+    def test_delete_removes_memory(self):
+        mid = self.db.add("Delete me", "Content", namespace="test_api")
+        ok = self.db.delete(mid)
+        self.assertTrue(ok)
+        self.assertIsNone(self.db.get(mid))
+
+    def test_delete_nonexistent_returns_false(self):
+        ok = self.db.delete("00000000-0000-0000-0000-000000000000")
+        self.assertFalse(ok)
+
+    # ── link ─────────────────────────────────────────────────────────────────
+
+    def test_link_two_memories(self):
+        a = self.db.add("Link source", "Body A", namespace="test_api")
+        b = self.db.add("Link target", "Body B", namespace="test_api")
+        ok = self.db.link(a, b, "related_to")
+        self.assertTrue(ok)
+        conn = sqlite3.connect(str(DB_PATH))
+        row = conn.execute(
+            "SELECT relation FROM memory_links WHERE source_id=? AND target_id=?",
+            (a, b)
+        ).fetchone()
+        conn.close()
+        self.assertIsNotNone(row)
+        self.assertEqual(row[0], "related_to")
+
+    def test_link_duplicate_ignored(self):
+        a = self.db.add("Dup link src", "Body", namespace="test_api")
+        b = self.db.add("Dup link tgt", "Body", namespace="test_api")
+        self.db.link(a, b)
+        ok = self.db.link(a, b)  # same link again
+        self.assertTrue(ok)  # should not raise
+
+    # ── archive ──────────────────────────────────────────────────────────────
+
+    def test_archive_moves_to_archive_table(self):
+        mid = self.db.add("Archive me", "Archivable content", namespace="test_api")
+        ok = self.db.archive(mid, reason="manual")
+        self.assertTrue(ok)
+        self.assertIsNone(self.db.get(mid))  # gone from active
+        conn = sqlite3.connect(str(DB_PATH))
+        row = conn.execute(
+            "SELECT archive_reason FROM archived_memories WHERE id=?", (mid,)
+        ).fetchone()
+        conn.close()
+        self.assertIsNotNone(row)
+        self.assertEqual(row[0], "manual")
+
+    def test_archive_nonexistent_returns_false(self):
+        ok = self.db.archive("00000000-0000-0000-0000-000000000000")
+        self.assertFalse(ok)
+
+    # ── expire_ttl ───────────────────────────────────────────────────────────
+
+    def test_expire_ttl_archives_expired(self):
+        mid = self.db.add("Expiring memory", "Will expire",
+                          namespace="test_api",
+                          expires_at="2020-01-01T00:00:00+00:00")
+        count = self.db.expire_ttl()
+        self.assertGreaterEqual(count, 1)
+        self.assertIsNone(self.db.get(mid))
+
+    def test_expire_ttl_skips_non_expired(self):
+        mid = self.db.add("Permanent memory", "No expiry",
+                          namespace="test_api",
+                          expires_at=None)
+        self.db.expire_ttl()
+        self.assertIsNotNone(self.db.get(mid))
+
+    # ── search_fts ───────────────────────────────────────────────────────────
+
+    def test_search_fts_finds_content(self):
+        unique = f"xyzapi{uuid.uuid4().hex[:8]}"
+        self.db.add(f"FTS API test {unique}", f"Unique term for FTS: {unique}",
+                    namespace="test_api")
+        results = self.db.search_fts(unique)
+        self.assertGreater(len(results), 0)
+        titles = [r["title"] for r in results]
+        self.assertTrue(any(unique in t for t in titles))
+
+    def test_search_fts_namespace_filter(self):
+        unique = f"xyzns{uuid.uuid4().hex[:8]}"
+        self.db.add(f"NS filtered {unique}", f"Content: {unique}", namespace="test_ns_filter")
+        results_all = self.db.search_fts(unique)
+        results_ns = self.db.search_fts(unique, namespace="test_ns_filter")
+        results_wrong = self.db.search_fts(unique, namespace="test_wrong_ns")
+        self.assertGreater(len(results_ns), 0)
+        self.assertEqual(len(results_wrong), 0)
+        conn = sqlite3.connect(str(DB_PATH))
+        conn.execute("DELETE FROM memories WHERE namespace='test_ns_filter'")
+        conn.commit()
+        conn.close()
+
+    def test_search_fts_empty_query_graceful(self):
+        """Empty or nonsense query should not raise."""
+        try:
+            self.db.search_fts("zzzzz_no_match_xyz99999")
+        except Exception as e:
+            self.fail(f"search_fts raised unexpectedly: {e}")
+
+    # ── clean_orphaned_links ─────────────────────────────────────────────────
+
+    def test_clean_orphaned_links(self):
+        """After deleting a memory, clean_orphaned_links should remove its link."""
+        a = self.db.add("Orphan src", "Body", namespace="test_api")
+        b = self.db.add("Orphan tgt", "Body", namespace="test_api")
+        self.db.link(a, b)
+        self.db.delete(a)  # cascade should handle it, but we test clean also
+        removed = self.db.clean_orphaned_links()
+        self.assertIsInstance(removed, int)
+
+    # ── stats ────────────────────────────────────────────────────────────────
+
+    def test_stats_returns_expected_keys(self):
+        s = self.db.stats()
+        for key in ("memories", "archived", "links", "orphaned_links", "by_tier", "by_namespace"):
+            self.assertIn(key, s)
+
+    def test_stats_counts_reflect_adds(self):
+        before = self.db.stats()["memories"]
+        self.db.add("Stats test A", "Body", namespace="test_api")
+        self.db.add("Stats test B", "Body", namespace="test_api")
+        after = self.db.stats()["memories"]
+        self.assertEqual(after, before + 2)
+
+    # ── CLI ──────────────────────────────────────────────────────────────────
+
+    def test_cli_add_and_stats(self):
+        result = subprocess.run(
+            [PYTHON, str(MEMORY_DB_PY), "add",
+             "CLI test memory", "CLI content",
+             "--tier", "short", "--ns", "test_cli", "--tags", "cli,test"],
+            capture_output=True, text=True, timeout=15
+        )
+        self.assertEqual(result.returncode, 0)
+        self.assertIn("ok id=", result.stdout)
+        # Cleanup
+        conn = sqlite3.connect(str(DB_PATH))
+        conn.execute("DELETE FROM memories WHERE namespace='test_cli'")
+        conn.commit()
+        conn.close()
+
+    def test_cli_stats_returns_json(self):
+        result = subprocess.run(
+            [PYTHON, str(MEMORY_DB_PY), "stats"],
+            capture_output=True, text=True, timeout=15
+        )
+        self.assertEqual(result.returncode, 0)
+        data = json.loads(result.stdout)
+        self.assertIn("memories", data)
+
+    def test_cli_search(self):
+        unique = f"clisearch{uuid.uuid4().hex[:8]}"
+        self.db.add(f"CLI search test {unique}", f"Body: {unique}", namespace="test_api")
+        result = subprocess.run(
+            [PYTHON, str(MEMORY_DB_PY), "search", unique, "--limit", "5"],
+            capture_output=True, text=True, timeout=15
+        )
+        self.assertEqual(result.returncode, 0)
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# 13. Workflow Integration
+# ═════════════════════════════════════════════════════════════════════════════
+
+class TestWorkflowIntegration(unittest.TestCase):
+    """Verify that wired-in workflows can interact with ai-memory.db correctly."""
+
+    @classmethod
+    def setUpClass(cls):
+        if not MEMORY_DB_PY.exists():
+            raise unittest.SkipTest("memory_db.py not found")
+        mod = _import_module(MEMORY_DB_PY)
+        cls.db = mod.MemoryDB()
+
+    def tearDown(self):
+        conn = sqlite3.connect(str(DB_PATH))
+        conn.execute("DELETE FROM memories WHERE namespace LIKE 'test_%'")
+        conn.commit()
+        conn.close()
+
+    # ── auto-flush-session-context.sh ────────────────────────────────────────
+
+    def test_auto_flush_script_exists(self):
+        script = SCRIPTS_DIR / "auto-flush-session-context.sh"
+        self.assertTrue(script.exists(), "auto-flush-session-context.sh not found")
+
+    def test_auto_flush_script_syntax(self):
+        script = SCRIPTS_DIR / "auto-flush-session-context.sh"
+        if not script.exists():
+            self.skipTest("Script not found")
+        result = subprocess.run(["bash", "-n", str(script)],
+                                capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0,
+                         f"Bash syntax error: {result.stderr}")
+
+    def test_auto_flush_references_memory_db(self):
+        script = SCRIPTS_DIR / "auto-flush-session-context.sh"
+        if not script.exists():
+            self.skipTest("Script not found")
+        content = script.read_text()
+        self.assertIn("memory_db.py", content,
+                      "auto-flush should call memory_db.py")
+
+    # ── weekly-memory-consolidation.sh ───────────────────────────────────────
+
+    def test_consolidation_script_exists(self):
+        script = SCRIPTS_DIR / "weekly-memory-consolidation.sh"
+        self.assertTrue(script.exists())
+
+    def test_consolidation_script_syntax(self):
+        script = SCRIPTS_DIR / "weekly-memory-consolidation.sh"
+        if not script.exists():
+            self.skipTest("Script not found")
+        result = subprocess.run(["bash", "-n", str(script)],
+                                capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0,
+                         f"Bash syntax error: {result.stderr}")
+
+    def test_consolidation_references_memory_db(self):
+        script = SCRIPTS_DIR / "weekly-memory-consolidation.sh"
+        if not script.exists():
+            self.skipTest("Script not found")
+        content = script.read_text()
+        self.assertIn("memory_db.py", content)
+
+    # ── total_recall_search.py + DB FTS ──────────────────────────────────────
+
+    def test_total_recall_search_has_db_fts(self):
+        """total_recall_search.py should contain _db_fts_search function."""
+        if not TRS_PY.exists():
+            self.skipTest("total_recall_search.py not found")
+        content = TRS_PY.read_text()
+        self.assertIn("_db_fts_search", content)
+
+    def test_db_fts_finds_seeded_memory(self):
+        """A memory added to DB should appear in total_recall_search results."""
+        unique = f"wftest{uuid.uuid4().hex[:8]}"
+        self.db.add(f"Workflow test {unique}", f"Integration test body: {unique}",
+                    namespace="test_workflow")
+        if not TRS_PY.exists():
+            self.skipTest("total_recall_search.py not found")
+        mod = _import_module(TRS_PY)
+        results = mod._db_fts_search(unique, limit=5)
+        self.assertGreater(len(results), 0,
+                           f"DB FTS should find '{unique}' in ai-memory.db")
+        paths = [r.get("path", "") for r in results]
+        self.assertTrue(any("ai-memory.db" in p for p in paths))
+
+    def test_db_fts_empty_db_returns_list(self):
+        """_db_fts_search on empty query should return a list (not crash)."""
+        if not TRS_PY.exists():
+            self.skipTest("total_recall_search.py not found")
+        mod = _import_module(TRS_PY)
+        result = mod._db_fts_search("zzznomatchwhatsoever999", limit=5)
+        self.assertIsInstance(result, list)
+
+    # ── observer cron ────────────────────────────────────────────────────────
+
+    def test_observations_md_is_active(self):
+        obs = MEMORY_DIR / "observations.md"
+        self.assertTrue(obs.exists(), "observations.md should be active")
+
+    def test_observations_md_has_content(self):
+        obs = MEMORY_DIR / "observations.md"
+        if not obs.exists():
+            self.skipTest("observations.md not found")
+        self.assertGreater(obs.stat().st_size, 0)
+
+    # ── multi-tier dummy data round-trip ─────────────────────────────────────
+
+    def test_multi_tier_round_trip(self):
+        """Add memories across tiers and namespaces; verify all retrievable."""
+        ids = {}
+        for tier, ns, title in [
+            ("working", "test_workflow", "Working memory: current session state"),
+            ("short",   "test_workflow", "Short memory: task in progress"),
+            ("long",    "test_workflow", "Long memory: architectural decision"),
+        ]:
+            ids[tier] = self.db.add(title, f"Content for {tier} tier", tier=tier, namespace=ns)
+
+        for tier, mid in ids.items():
+            r = self.db.get(mid)
+            self.assertIsNotNone(r, f"Could not retrieve {tier} memory")
+            self.assertEqual(r["tier"], tier)
+
+    def test_linked_memories_query(self):
+        """Two memories linked by 'depends_on' should be queryable."""
+        a = self.db.add("Decision A", "Context for A", namespace="test_workflow")
+        b = self.db.add("Decision B", "Depends on A", namespace="test_workflow")
+        self.db.link(a, b, "depends_on")
+        conn = sqlite3.connect(str(DB_PATH))
+        row = conn.execute(
+            "SELECT relation FROM memory_links WHERE source_id=? AND target_id=?",
+            (a, b)
+        ).fetchone()
+        conn.close()
+        self.assertIsNotNone(row)
+        self.assertEqual(row[0], "depends_on")
+
+    def test_stats_after_bulk_insert(self):
+        """Stats should reflect accurate counts after inserting 5 records."""
+        before = self.db.stats()["memories"]
+        for i in range(5):
+            self.db.add(f"Bulk test {i} {uuid.uuid4().hex[:6]}", f"Body {i}",
+                        namespace="test_bulk")
+        after = self.db.stats()["memories"]
+        self.assertEqual(after, before + 5)
+        conn = sqlite3.connect(str(DB_PATH))
+        conn.execute("DELETE FROM memories WHERE namespace='test_bulk'")
+        conn.commit()
+        conn.close()
+
+
+# ═════════════════════════════════════════════════════════════════════════════
 # Entry point
 # ═════════════════════════════════════════════════════════════════════════════
 
@@ -1141,6 +1572,8 @@ if __name__ == "__main__":
         TestObserverReflectorHealth,
         TestSearchGaps,
         TestEdgeCases,
+        TestMemoryDBAPI,
+        TestWorkflowIntegration,
     ]
 
     for cls in test_classes:

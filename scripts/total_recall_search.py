@@ -703,7 +703,7 @@ def _db_fts_search(query: str, limit: int = 10) -> List[Dict]:
             """SELECT m.id, m.tier, m.namespace, m.title, m.content,
                       snippet(memories_fts, 1, '[', ']', '...', 20) AS snippet
                FROM memories_fts
-               JOIN memories m ON m.id = memories_fts.rowid
+               JOIN memories m ON m.rowid = memories_fts.rowid
                WHERE memories_fts MATCH ?
                ORDER BY rank LIMIT ?""",
             (query, limit),

@@ -159,12 +159,12 @@ class MemoryDB:
                 """INSERT OR REPLACE INTO archived_memories
                    (id, tier, namespace, title, content, tags, priority, confidence,
                     source, access_count, created_at, updated_at, last_accessed_at,
-                    expires_at, metadata, embedding, archived_at, archive_reason)
-                   VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                    expires_at, metadata, archived_at, archive_reason)
+                   VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
                 (*[row[k] for k in (
                     "id","tier","namespace","title","content","tags","priority",
                     "confidence","source","access_count","created_at","updated_at",
-                    "last_accessed_at","expires_at","metadata","embedding",
+                    "last_accessed_at","expires_at","metadata",
                 )], now, reason),
             )
             con.execute("DELETE FROM memories WHERE id=?", (mem_id,))
@@ -201,7 +201,7 @@ class MemoryDB:
                 rows = con.execute(
                     """SELECT m.*, snippet(memories_fts, 1, '[', ']', '...', 20) AS snippet
                        FROM memories_fts
-                       JOIN memories m ON m.id = memories_fts.rowid
+                       JOIN memories m ON m.rowid = memories_fts.rowid
                        WHERE memories_fts MATCH ? AND m.namespace=?
                        ORDER BY rank LIMIT ?""",
                     (query, namespace, limit),
@@ -210,7 +210,7 @@ class MemoryDB:
                 rows = con.execute(
                     """SELECT m.*, snippet(memories_fts, 1, '[', ']', '...', 20) AS snippet
                        FROM memories_fts
-                       JOIN memories m ON m.id = memories_fts.rowid
+                       JOIN memories m ON m.rowid = memories_fts.rowid
                        WHERE memories_fts MATCH ?
                        ORDER BY rank LIMIT ?""",
                     (query, limit),
