@@ -1,0 +1,19 @@
+{
+  "sites": {
+    "reillydesignstudio": {
+      "property_id": "526836321",
+      "domain": "reillydesignstudio.com"
+    },
+    "momo-kiji": {
+      "property_id": "531031250",
+      "domain": "momo-kiji.dev",
+      "measurement_id": "G-BNT4ZK56GH"
+    },
+    "momo-kibidango": {
+      "property_id": "531033893",
+      "domain": "momo-kibidango.org",
+      "measurement_id": "G-NK2JGX3FQH"
+    }
+  },
+  "service_account": "/Users/rreilly/.openclaw/workspace/secrets/ga4-service-account.json"
+}

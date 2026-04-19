@@ -1,0 +1,45 @@
+{
+  "test_id": "config4-hybrid-3tier",
+  "duration_days": 3,
+  "start_date": "2026-03-28",
+  "end_date": "2026-03-30",
+  
+  "baseline": {
+    "type": "2tier",
+    "draft": "Qwen2.5-0.5B",
+    "target": "Qwen2.5-3B (equivalent)",
+    "startup_seconds": 5,
+    "expected_throughput_tokpers": 15.55,
+    "expected_quality_pct": 85
+  },
+  
+  "candidate": {
+    "type": "3tier-hybrid",
+    "draft": "Qwen2.5-0.5B",
+    "qualifier": "Phi-2-2.7B",
+    "target_api": "Claude-Opus",
+    "startup_seconds": 6,
+    "expected_throughput_tokpers": 12,
+    "expected_quality_pct": 92,
+    "expected_acceptance_rate_pct": 70,
+    "expected_cost_per_1000": 6
+  },
+  
+  "success_criteria": {
+    "startup_acceptable": true,
+    "acceptance_rate_pct_min": 65,
+    "quality_pct_min": 88,
+    "cost_per_1000_max": 10
+  },
+  
+  "metrics_tracked": [
+    "startup_time",
+    "requests_total",
+    "local_accepted_count",
+    "api_fallback_count",
+    "acceptance_rate_pct",
+    "average_latency_ms",
+    "quality_score",
+    "total_cost_usd"
+  ]
+}

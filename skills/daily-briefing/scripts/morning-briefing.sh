@@ -1,33 +1,58 @@
 #!/bin/bash
-# morning-briefing.sh — Generate and send morning briefing
+# morning-briefing.sh — Generate morning briefing with dynamic data
 #
-# Usage: bash morning-briefing.sh [--send]
+# Usage: bash morning-briefing.sh
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-SEND_EMAIL="${1:-}"
 
 # Load config
 source ~/.openclaw/workspace/config/briefing.env 2>/dev/null || {
   echo "[briefing] Error: briefing.env not found"
-  echo "Run: bash setup-briefing.sh first"
   exit 1
 }
 
 # Fetch live data
-BRIEFING_DATA=$(python3 "$SCRIPT_DIR/scripts/populate-briefing.py" 2>/dev/null || echo '{"ga4":{"sessions":"--","users":"--","bounce":"--","html":"","sources_html":"","pages_html":""},"gmail":{"unread":"--","flagged":"--"}}')
-GA4_SESSIONS=$(echo "$BRIEFING_DATA" | jq -r '.ga4.sessions // "--"')
-GA4_USERS=$(echo "$BRIEFING_DATA" | jq -r '.ga4.users // "--"')
-GA4_BOUNCE=$(echo "$BRIEFING_DATA" | jq -r '.ga4.bounce // "--"')
+BRIEFING_DATA=$(python3 "$SCRIPT_DIR/scripts/populate-briefing.py" 2>/dev/null || echo '{"ga4":{"sessions":"—","users":"—","bounce":"—","html":"","sources_html":"","pages_html":""},"gmail":{"unread":"—"}}')
+GA4_SESSIONS=$(echo "$BRIEFING_DATA" | jq -r '.ga4.sessions // "—"')
+GA4_USERS=$(echo "$BRIEFING_DATA" | jq -r '.ga4.users // "—"')
+GA4_BOUNCE=$(echo "$BRIEFING_DATA" | jq -r '.ga4.bounce // "—"')
 GA4_HTML=$(echo "$BRIEFING_DATA" | jq -r '.ga4.html // ""')
 GA4_SOURCES_HTML=$(echo "$BRIEFING_DATA" | jq -r '.ga4.sources_html // ""')
 GA4_PAGES_HTML=$(echo "$BRIEFING_DATA" | jq -r '.ga4.pages_html // ""')
-GMAIL_UNREAD=$(echo "$BRIEFING_DATA" | jq -r '.gmail.unread // "--"')
-GMAIL_FLAGGED=$(echo "$BRIEFING_DATA" | jq -r '.gmail.flagged // "--"')
+GMAIL_UNREAD=$(echo "$BRIEFING_DATA" | jq -r '.gmail.unread // "—"')
 
-# Create HTML content
-cat > /tmp/morning-briefing.html << EOF
+# Fetch calendar events
+CALENDAR_DATA=$(python3 "$SCRIPT_DIR/scripts/get-calendar-events.py" 2>/dev/null || echo '{"html":"<div class=\"item\"><em>Calendar unavailable</em></div>"}')
+CALENDAR_HTML=$(echo "$CALENDAR_DATA" | jq -r '.html // ""')
+
+# Fetch today's priorities
+PRIORITIES_DATA=$(python3 "$SCRIPT_DIR/scripts/get-todays-priorities.py" 2>/dev/null || echo '{"html":"<div class=\"item\"><em>Set priorities in MEMORY.md</em></div>"}')
+PRIORITIES_HTML=$(echo "$PRIORITIES_DATA" | jq -r '.html // ""')
+
+# Fetch Google Tasks
+TASKS_DATA=$(python3 "$SCRIPT_DIR/scripts/get-tasks.py" 2>/dev/null || echo '{"pending_count":0,"tasks":[]}')
+TASKS_COUNT=$(echo "$TASKS_DATA" | jq -r '.pending_count // 0')
+TASKS_LIST=$(echo "$TASKS_DATA" | jq -r '.tasks[] | "      <div class=\"item\">• \(.title)</div>"' | head -5 || echo '<div class="item"><em>No pending tasks</em></div>')
+
+# Fetch memory system health
+MEMORY_DATA=$(python3 "$SCRIPT_DIR/scripts/get-memory-health.py" --mode morning 2>/dev/null || echo '{"html":"<div class=\"item\"><em>Memory health unavailable</em></div>"}')
+MEMORY_HEALTH_HTML=$(echo "$MEMORY_DATA" | jq -r '.html // ""')
+
+# Export for envsubst
+export GMAIL_UNREAD
+export CALENDAR_HTML
+export PRIORITIES_HTML
+export TASKS_COUNT
+export TASKS_LIST
+export GA4_HTML
+export GA4_SOURCES_HTML
+export GA4_PAGES_HTML
+export MEMORY_HEALTH_HTML
+
+# Create HTML template and substitute variables
+envsubst << 'HTMLEOF'
 <!DOCTYPE html>
 <html>
 <head>
@@ -40,17 +65,6 @@ cat > /tmp/morning-briefing.html << EOF
         .item { padding: 8px 0; border-bottom: 1px solid #eee; }
         .item:last-child { border-bottom: none; }
         .time { color: #999; font-size: 12px; }
-        .stat { display: inline-block; background: white; padding: 10px 15px; margin: 5px 5px 5px 0; border-radius: 4px; font-weight: bold; }
-        .priority { background: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; margin-bottom: 15px; border-radius: 4px; }
-        .metric-item { padding: 8px 0; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
-        .metric-item:last-child { border-bottom: none; }
-        .metric-label { flex: 1; }
-        .metric-value { font-weight: bold; color: #667eea; min-width: 60px; text-align: right; }
-        .metric-change { color: #28a745; font-size: 12px; min-width: 80px; text-align: right; }
-        .source-item { padding: 8px 0; border-bottom: 1px solid #eee; font-size: 13px; }
-        .source-item:last-child { border-bottom: none; }
-        .page-item { padding: 8px 0; border-bottom: 1px solid #eee; font-size: 13px; }
-        .page-item:last-child { border-bottom: none; }
         .footer { text-align: center; color: #999; font-size: 12px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; }
     </style>
 </head>
@@ -58,58 +72,43 @@ cat > /tmp/morning-briefing.html << EOF
     <div class="container">
         <div class="header">
             <h1>☀️ Good Morning</h1>
-            <p>Daily Briefing — <span id="date"></span></p>
-        </div>
-
-        <div class="priority">
-            <strong>📋 Today's Focus:</strong> Momotaro iOS development • ReillyDesignStudio optimization • GA4 integration
+            <p>Daily Briefing — Wednesday, March 18</p>
         </div>
 
         <div class="section">
-            <h2>📅 Calendar (Next 48h)</h2>
-            <div class="item">
-                <strong>Gabe's Wedding Planning</strong>
-                <br><span class="time">April 18, 2026 @ 2:00 PM</span>
-                <br>📍 Saint Anne's Episcopal Church, Reston, VA
-            </div>
+            <h2>📧 Email Status</h2>
+            <div class="item"><strong>Unread:</strong> ${GMAIL_UNREAD}</div>
         </div>
 
         <div class="section">
-            <h2>📧 Email Activity</h2>
-            <div class="stat">Unread: <strong>$GMAIL_UNREAD</strong></div>
-            <div class="stat">Flagged: <strong>$GMAIL_FLAGGED</strong></div>
+            <h2>📅 Today's Calendar</h2>
+            ${CALENDAR_HTML}
         </div>
-
-        $GA4_HTML
-        
-        $GA4_SOURCES_HTML
-        
-        $GA4_PAGES_HTML
 
         <div class="section">
-            <h2>🎯 Top Priorities</h2>
-            <div class="item">1. Complete Momotaro iOS WebSocket integration</div>
-            <div class="item">2. Resolve GA4 Cloud project linking issue</div>
-            <div class="item">3. Review ReillyDesignStudio analytics</div>
+            <h2>📋 Pending Tasks</h2>
+            <div class="item"><strong>${TASKS_COUNT}</strong> pending tasks</div>
+            ${TASKS_LIST}
         </div>
+
+        <div class="section">
+            <h2>🎯 Today's Priorities</h2>
+            ${PRIORITIES_HTML}
+        </div>
+
+        ${GA4_HTML}
+
+        ${GA4_SOURCES_HTML}
+
+        ${GA4_PAGES_HTML}
+
+        ${MEMORY_HEALTH_HTML}
 
         <div class="footer">
             <p>🍑 Momotaro Daily Briefing System</p>
-            <p><small>Generated at $(date +"%I:%M %p") EDT</small></p>
+            <p><small>Generated at 06:00 AM EDT</small></p>
         </div>
     </div>
 </body>
 </html>
-EOF
-
-# Send email
-if [[ "$SEND_EMAIL" == "--send" ]]; then
-  gog gmail send \
-    --to "$BRIEFING_EMAIL" \
-    --subject "☀️ Morning Briefing — $(date +%A, %B %d)" \
-    --body-html "$(cat /tmp/morning-briefing.html)" 2>&1 | head -3
-  echo "[briefing] ✓ Morning briefing sent"
-else
-  cat /tmp/morning-briefing.html
-  echo "[briefing] Morning briefing generated (use --send to email)"
-fi
+HTMLEOF

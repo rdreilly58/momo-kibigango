@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mac mini M4 Pro vs AWS EC2 - Financial Analysis</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        @page {
+            size: letter;
+            margin: 0.75in;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #2c3e50;
+            background: white;
+            padding: 40px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #3498db;
+        }
+        
+        h1 {
+            font-size: 28px;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        
+        .subtitle {
+            font-size: 14px;
+            color: #7f8c8d;
+            font-style: italic;
+        }
+        
+        h2 {
+            font-size: 18px;
+            color: #2980b9;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+        
+        h3 {
+            font-size: 14px;
+            color: #34495e;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        
+        p {
+            margin-bottom: 12px;
+            text-align: justify;
+        }
+        
+        .highlight-box {
+            background: #ecf8ff;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 13px;
+        }
+        
+        thead {
+            background: #34495e;
+            color: white;
+        }
+        
+        th {
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        td {
+            padding: 11px 12px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        
+        tbody tr:nth-child(odd) {
+            background: #f8f9fa;
+        }
+        
+        tbody tr:hover {
+            background: #f0f7ff;
+        }
+        
+        .price {
+            color: #27ae60;
+            font-weight: 600;
+        }
+        
+        .total {
+            background: #fef9e7;
+            font-weight: 600;
+        }
+        
+        .recommendation {
+            background: #e8f8f5;
+            border-left: 4px solid #27ae60;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        
+        ul {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+        
+        li {
+            margin-bottom: 8px;
+        }
+        
+        .breakeven {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 15px;
+            text-align: center;
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+        
+        .breakeven strong {
+            display: block;
+            font-size: 24px;
+            color: #ff6b00;
+            margin: 10px 0;
+        }
+        
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #bdc3c7;
+            font-size: 11px;
+            color: #7f8c8d;
+            text-align: center;
+        }
+        
+        .specs-table {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .spec-item {
+            background: #f8f9fa;
+            padding: 12px;
+            border-left: 3px solid #3498db;
+        }
+        
+        .spec-label {
+            font-size: 11px;
+            color: #7f8c8d;
+            text-transform: uppercase;
+        }
+        
+        .spec-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Mac mini M4 Pro Analysis</h1>
+        <p class="subtitle">AWS EC2 vs. Home Purchase: Total Cost of Ownership Comparison</p>
+    </div>
+    
+    <h2>Executive Summary</h2>
+    <p>This comprehensive analysis evaluates the financial feasibility of purchasing an Apple Mac mini M4 Pro with 48GB RAM and 1TB storage versus utilizing AWS EC2 mac-m4pro.metal instances for development and computational workloads.</p>
+    
+    <div class="highlight-box">
+        <strong>Key Finding:</strong> Home purchase becomes cost-effective after 18 months of continuous use; AWS is preferable for short-term or variable workloads.
+    </div>
+    
+    <h2>System Specifications</h2>
+    <div class="specs-table">
+        <div class="spec-item">
+            <div class="spec-label">Processor</div>
+            <div class="spec-value">14-core M4 Pro</div>
+        </div>
+        <div class="spec-item">
+            <div class="spec-label">Graphics</div>
+            <div class="spec-value">20-core GPU</div>
+        </div>
+        <div class="spec-item">
+            <div class="spec-label">Memory</div>
+            <div class="spec-value">48GB Unified RAM</div>
+        </div>
+        <div class="spec-item">
+            <div class="spec-label">Storage</div>
+            <div class="spec-value">1TB NVMe SSD</div>
+        </div>
+        <div class="spec-item">
+            <div class="spec-label">Neural Engine</div>
+            <div class="spec-value">16-core</div>
+        </div>
+        <div class="spec-item">
+            <div class="spec-label">Form Factor</div>
+            <div class="spec-value">Desktop</div>
+        </div>
+    </div>
+    
+    <h2>Pricing Analysis</h2>
+    
+    <h3>Apple Mac mini M4 Pro (Home Purchase)</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Configuration</th>
+                <th>Price</th>
+                <th style="width: 35%;">Notes</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Base M4 Pro System</td>
+                <td class="price">$1,399</td>
+                <td>12-core CPU, 16-core GPU, 24GB base RAM</td>
+            </tr>
+            <tr>
+                <td>Memory Upgrade (24GB → 48GB)</td>
+                <td class="price">+$600</td>
+                <td>Double unified memory capacity</td>
+            </tr>
+            <tr>
+                <td>Storage Upgrade (512GB → 1TB)</td>
+                <td class="price">+$200</td>
+                <td>Expand SSD capacity</td>
+            </tr>
+            <tr class="total">
+                <td><strong>TOTAL PURCHASE PRICE</strong></td>
+                <td class="price"><strong>$2,199</strong></td>
+                <td><strong>One-time investment</strong></td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <h3>AWS EC2 mac-m4pro.metal (Cloud Pricing)</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Time Period</th>
+                <th>Hourly Rate</th>
+                <th>Monthly/Total Cost</th>
+                <th>Details</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Hourly Rate</td>
+                <td class="price">$1.97</td>
+                <td>—</td>
+                <td>On-Demand, us-east-1</td>
+            </tr>
+            <tr>
+                <td>Daily (24 hours)</td>
+                <td>—</td>
+                <td class="price">$47.28</td>
+                <td>Minimum allocation</td>
+            </tr>
+            <tr>
+                <td>Monthly (730 hours)</td>
+                <td>—</td>
+                <td class="price">$1,438</td>
+                <td>Continuous operation</td>
+            </tr>
+            <tr>
+                <td>Annual (8,760 hours)</td>
+                <td>—</td>
+                <td class="price">$17,252</td>
+                <td>Full 12-month period</td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <h2>Total Cost Comparison</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Usage Duration</th>
+                <th>AWS EC2 Cost</th>
+                <th>Home Purchase</th>
+                <th>More Economical Option</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1 Month</td>
+                <td>$1,438</td>
+                <td class="price">$2,199</td>
+                <td><strong>AWS (30% savings)</strong></td>
+            </tr>
+            <tr>
+                <td>3 Months</td>
+                <td>$4,314</td>
+                <td class="price">$2,199</td>
+                <td><strong>Home (49% savings)</strong></td>
+            </tr>
+            <tr>
+                <td>6 Months</td>
+                <td>$8,628</td>
+                <td class="price">$2,199</td>
+                <td><strong>Home (75% savings)</strong></td>
+            </tr>
+            <tr>
+                <td>12 Months</td>
+                <td>$17,256</td>
+                <td class="price">$2,199</td>
+                <td><strong>Home (87% savings)</strong></td>
+            </tr>
+            <tr class="total">
+                <td><strong>18 Months</strong></td>
+                <td><strong>$25,884</strong></td>
+                <td class="price"><strong>$2,199</strong></td>
+                <td><strong>Home (92% savings)</strong></td>
+            </tr>
+            <tr>
+                <td>24 Months</td>
+                <td>$34,512</td>
+                <td class="price">$2,199</td>
+                <td><strong>Home (94% savings)</strong></td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <div class="breakeven">
+        <p style="margin: 0; color: #333;">Break-Even Analysis</p>
+        <strong>18 Months</strong>
+        <p style="margin: 10px 0 0 0; font-size: 12px;">After 18 months of continuous use, home purchase pays for itself</p>
+    </div>
+    
+    <h2>Recommendations</h2>
+    
+    <h3>Choose AWS EC2 if:</h3>
+    <ul>
+        <li>Your workload is sporadic or bursty (not continuous)</li>
+        <li>You need flexibility to rapidly scale resources up or down</li>
+        <li>Your project duration is anticipated under 12 months</li>
+        <li>You prefer to avoid hardware maintenance responsibilities</li>
+        <li>You want to minimize upfront capital investment</li>
+    </ul>
+    
+    <h3>Choose Home Purchase if:</h3>
+    <ul>
+        <li>You require continuous or near-continuous access for 18+ months</li>
+        <li>You want complete control and ownership of your hardware</li>
+        <li>You can integrate it into your home or office infrastructure</li>
+        <li>You view it as a long-term productivity investment</li>
+        <li>You prefer to eliminate recurring monthly cloud expenses</li>
+    </ul>
+    
+    <h2>Additional Considerations</h2>
+    
+    <h3>AWS EC2 Advantages:</h3>
+    <ul>
+        <li>On-demand scalability for resource optimization</li>
+        <li>No hardware maintenance or repair responsibilities</li>
+        <li>Access to global AWS infrastructure and services</li>
+        <li>Seamless integration with other AWS cloud services</li>
+    </ul>
+    
+    <h3>Home Purchase Advantages:</h3>
+    <ul>
+        <li>Complete hardware ownership with no recurring fees</li>
+        <li>Zero marginal cost after initial purchase</li>
+        <li>Immediate local access without network latency</li>
+        <li>Strong resale value on secondary market</li>
+    </ul>
+    
+    <div class="footer">
+        <p><strong>Analysis Date:</strong> March 20, 2026</p>
+        <p>Pricing based on current AWS On-Demand rates (us-east-1) and Apple official retail pricing. AWS Savings Plans and equipment depreciation not factored into analysis.</p>
+        <p><em>Note: AWS EC2 Mac instances require a 24-hour minimum allocation period per instance reservation.</em></p>
+    </div>
+</body>
+</html>

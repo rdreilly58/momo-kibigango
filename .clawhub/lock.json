@@ -4,6 +4,78 @@
     "resiliant-connections": {
       "version": "1.0.0",
       "installedAt": 1773067346307
+    },
+    "invoice-generator": {
+      "version": "1.0.0",
+      "installedAt": 1773522782372
+    },
+    "slack": {
+      "version": "1.0.0",
+      "installedAt": 1773522783285
+    },
+    "linkedin-automation": {
+      "version": "1.0.0",
+      "installedAt": 1773522842993
+    },
+    "time-tracker": {
+      "version": "2.3.0",
+      "installedAt": 1773522846915
+    },
+    "notion": {
+      "version": "1.0.0",
+      "installedAt": 1773522902581
+    },
+    "sovereign-aws-cost-optimizer": {
+      "version": "1.0.0",
+      "installedAt": 1773523324953
+    },
+    "s3": {
+      "version": "1.0.0",
+      "installedAt": 1773523326415
+    },
+    "database-operations": {
+      "version": "1.0.0",
+      "installedAt": 1773523328936
+    },
+    "website-monitor": {
+      "version": "1.1.0",
+      "installedAt": 1773524101593
+    },
+    "web-perf": {
+      "version": "1.0.0",
+      "installedAt": 1773524160984
+    },
+    "agent-browser": {
+      "version": "0.2.0",
+      "installedAt": 1773524162009
+    },
+    "security-monitor": {
+      "version": "1.0.0",
+      "installedAt": 1773524163365
+    },
+    "uptime-kuma": {
+      "version": "1.0.0",
+      "installedAt": 1773524164566
+    },
+    "swift-expert": {
+      "version": "0.1.0",
+      "installedAt": 1773634621880
+    },
+    "porteden-email": {
+      "version": "1.0.4",
+      "installedAt": 1773713941724
+    },
+    "email-best-practices": {
+      "version": "1.0.0",
+      "installedAt": 1773713949915
+    },
+    "email-daily-summary": {
+      "version": "0.1.0",
+      "installedAt": 1773714061421
+    },
+    "total-recall": {
+      "version": "1.5.1",
+      "installedAt": 1775647046754
     }
   }
 }

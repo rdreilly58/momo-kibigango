@@ -1,0 +1,881 @@
+system:
+  name: Momotaro iOS
+  version: "0.1"
+  description: "iOS native application for controlling OpenClaw agents and running commands remotely"
+  owner: "Robert Reilly"
+  created_date: "2026-03-14"
+  last_modified: "2026-03-15"
+  status: active
+
+# ============================================================================
+# REQUIREMENTS
+# ============================================================================
+requirements:
+  # Core Connectivity
+  - id: REQ-CONNECT-001
+    title: "WebSocket Connection to OpenClaw Gateway"
+    description: "App must establish persistent WebSocket connection to OpenClaw Gateway"
+    category: Functional
+    priority: CRITICAL
+    status: implemented
+    owner: "Robert Reilly"
+    traces_to:
+      - ARCH-WEBSOCKET
+      - TEST-CONNECT-001
+    acceptance_criteria:
+      - "Connect to gateway.openclaw.ai:18789"
+      - "Establish persistent WebSocket"
+      - "Handle reconnection on network loss"
+      - "Receive heartbeat messages"
+    risk_level: HIGH
+    notes: "Critical for all app functionality"
+
+  - id: REQ-CONNECT-002
+    title: "Authentication with OpenClaw Gateway"
+    description: "Authenticate app session with gateway via credentials"
+    category: Security
+    priority: CRITICAL
+    status: in-progress
+    owner: "Robert Reilly"
+    traces_to:
+      - ARCH-AUTH
+      - TEST-CONNECT-002
+    acceptance_criteria:
+      - "Send auth credentials on connect"
+      - "Receive and store session token"
+      - "Auto-refresh token on expiration"
+    risk_level: CRITICAL
+
+  # User Interface Requirements
+  - id: REQ-UI-001
+    title: "Command Input Interface"
+    description: "Users can input commands and send to OpenClaw agents"
+    category: Functional
+    priority: HIGH
+    status: in-progress
+    owner: "Robert Reilly"
+    traces_to:
+      - ARCH-UI
+      - TEST-UI-001
+    acceptance_criteria:
+      - "Text input field for commands"
+      - "Send button submits command"
+      - "Command history visible"
+      - "Auto-complete for common commands"
+    risk_level: MEDIUM
+
+  - id: REQ-UI-002
+    title: "Response Display"
+    description: "Display responses from OpenClaw agents in real-time"
+    category: Functional
+    priority: HIGH
+    status: in-progress
+    owner: "Robert Reilly"
+    traces_to:
+      - ARCH-UI
+      - ARCH-REALTIME
+      - TEST-UI-002
+    acceptance_criteria:
+      - "Stream response text as received"
+      - "Format code blocks with syntax highlighting"
+      - "Handle long responses with scrolling"
+      - "Display response timestamps"
+    risk_level: MEDIUM
+
+  - id: REQ-UI-003
+    title: "Session Management UI"
+    description: "Users can view and switch between OpenClaw sessions"
+    category: Functional
+    priority: MEDIUM
+    status: proposed
+    owner: "Robert Reilly"
+    traces_to:
+      - ARCH-UI
+      - TEST-UI-003
+    acceptance_criteria:
+      - "List available sessions"
+      - "Switch between sessions"
+      - "View session details (duration, messages)"
+      - "Create new session"
+    risk_level: MEDIUM
+
+  # Data Handling
+  - id: REQ-DATA-001
+    title: "Persistent Message History"
+    description: "Store message history locally for offline access"
+    category: Functional
+    priority: MEDIUM
+    status: proposed
+    owner: "Robert Reilly"
+    traces_to:
+      - ARCH-STORAGE
+      - TEST-DATA-001
+    acceptance_criteria:
+      - "Store messages in local database"
+      - "Sync with cloud on reconnect"
+      - "Search historical messages"
+    risk_level: LOW
+
+  - id: REQ-DATA-002
+    title: "File Transfer Support"
+    description: "Users can upload/download files via the app"
+    category: Functional
+    priority: MEDIUM
+    status: proposed
+    owner: "Robert Reilly"
+    traces_to:
+      - ARCH-FILEOPS
+      - TEST-DATA-002
+    acceptance_criteria:
+      - "Select files from device"
+      - "Upload to OpenClaw session"
+      - "Download response files"
+      - "Progress indicators"
+    risk_level: MEDIUM
+
+  # Performance Requirements
+  - id: REQ-PERF-001
+    title: "Low Latency Message Delivery"
+    description: "Messages delivered to gateway with <500ms latency"
+    category: Performance
+    priority: HIGH
+    status: in-progress
+    owner: "Robert Reilly"
+    traces_to:
+      - ARCH-WEBSOCKET
+      - TEST-PERF-001
+    acceptance_criteria:
+      - "Message latency <500ms"
+      - "WebSocket connection <1s to establish"
+      - "Reconnection <2s"
+    risk_level: MEDIUM
+
+  - id: REQ-PERF-002
+    title: "Battery & Network Efficiency"
+    description: "App minimizes battery drain and network usage"
+    category: Performance
+    priority: HIGH
+    status: proposed
+    owner: "Robert Reilly"
+    traces_to:
+      - ARCH-REALTIME
+      - TEST-PERF-002
+    acceptance_criteria:
+      - "Background tasks use minimal battery"
+      - "WebSocket idle messages <5/min"
+      - "Local caching reduces network requests"
+    risk_level: MEDIUM
+
+  # Security Requirements
+  - id: REQ-SEC-001
+    title: "Secure Credential Storage"
+    description: "API keys and credentials stored securely in Keychain"
+    category: Security
+    priority: CRITICAL
+    status: proposed
+    owner: "Robert Reilly"
+    traces_to:
+      - ARCH-SECURITY
+      - TEST-SEC-001
+    acceptance_criteria:
+      - "Credentials in iOS Keychain"
+      - "Encryption at rest"
+      - "No credentials in logs/memory dumps"
+    risk_level: CRITICAL
+
+  - id: REQ-SEC-002
+    title: "TLS for All Connections"
+    description: "All network connections use TLS 1.3"
+    category: Security
+    priority: CRITICAL
+    status: implemented
+    owner: "Robert Reilly"
+    traces_to:
+      - ARCH-WEBSOCKET
+      - TEST-SEC-002
+    acceptance_criteria:
+      - "WSS (WebSocket Secure) only"
+      - "TLS 1.3 minimum"
+      - "Certificate pinning (optional)"
+    risk_level: CRITICAL
+
+  # Offline Support
+  - id: REQ-OFFLINE-001
+    title: "Offline Mode with Sync"
+    description: "App works offline and syncs on reconnect"
+    category: Non-Functional
+    priority: MEDIUM
+    status: proposed
+    owner: "Robert Reilly"
+    traces_to:
+      - ARCH-STORAGE
+      - ARCH-SYNC
+      - TEST-OFFLINE-001
+    acceptance_criteria:
+      - "Queue commands while offline"
+      - "Sync on network return"
+      - "Indicate offline status"
+    risk_level: MEDIUM
+
+# ============================================================================
+# ARCHITECTURE
+# ============================================================================
+architecture:
+  components:
+    - id: ARCH-WEBSOCKET
+      name: "WebSocket Client"
+      type: Module
+      description: "Manages WebSocket connection to OpenClaw Gateway"
+      realizes:
+        - REQ-CONNECT-001
+        - REQ-PERF-001
+        - REQ-SEC-002
+      depends_on:
+        - ARCH-AUTH
+        - ARCH-SECURITY
+      interfaces:
+        - name: WebSocket
+          protocol: WSS
+          port: 18789
+      responsibilities:
+        - "Establish persistent WebSocket connection"
+        - "Handle reconnection logic"
+        - "Encode/decode messages"
+        - "Route incoming messages"
+      technology_stack:
+        - "URLSessionWebSocketTask"
+        - "Starscream (WebSocket library)"
+        - "Swift Concurrency"
+      owner: "Robert Reilly"
+
+    - id: ARCH-AUTH
+      name: "Authentication Module"
+      type: Module
+      description: "Handles authentication with OpenClaw Gateway"
+      realizes:
+        - REQ-CONNECT-002
+        - REQ-SEC-001
+      depends_on:
+        - ARCH-SECURITY
+      interfaces:
+        - name: Auth API
+          protocol: WSS
+      responsibilities:
+        - "Store credentials securely"
+        - "Generate auth tokens"
+        - "Manage token refresh"
+        - "Handle auth errors"
+      technology_stack:
+        - "Keychain (iOS)"
+        - "CryptoKit"
+        - "JWT decoding"
+      owner: "Robert Reilly"
+
+    - id: ARCH-UI
+      name: "SwiftUI Views"
+      type: UI
+      description: "Native iOS UI built with SwiftUI"
+      realizes:
+        - REQ-UI-001
+        - REQ-UI-002
+        - REQ-UI-003
+      depends_on:
+        - ARCH-STATE
+        - ARCH-REALTIME
+      interfaces:
+        - name: SwiftUI Views
+          protocol: Direct
+      responsibilities:
+        - "Render command input"
+        - "Display responses"
+        - "Show session list"
+        - "Manage navigation"
+      technology_stack:
+        - "SwiftUI"
+        - "Combine"
+      owner: "Robert Reilly"
+
+    - id: ARCH-STATE
+      name: "State Management"
+      type: Module
+      description: "Manages app state and data flow"
+      realizes:
+        - REQ-CONNECT-001
+      depends_on:
+        - ARCH-STORAGE
+        - ARCH-WEBSOCKET
+      interfaces:
+        - name: Observable
+          protocol: Direct
+      responsibilities:
+        - "Store connection state"
+        - "Track active session"
+        - "Queue commands"
+        - "Cache responses"
+      technology_stack:
+        - "MVVM Pattern"
+        - "ObservableObject"
+        - "Combine Publishers"
+      owner: "Robert Reilly"
+
+    - id: ARCH-REALTIME
+      name: "Real-time Message Streaming"
+      type: Service
+      description: "Handles streaming responses from gateway"
+      realizes:
+        - REQ-UI-002
+        - REQ-PERF-001
+      depends_on:
+        - ARCH-WEBSOCKET
+        - ARCH-UI
+      interfaces:
+        - name: Message Stream
+          protocol: WSS
+      responsibilities:
+        - "Stream message chunks to UI"
+        - "Parse streaming responses"
+        - "Handle partial messages"
+        - "Update UI in real-time"
+      technology_stack:
+        - "URLSessionDataTask"
+        - "Swift async/await"
+      owner: "Robert Reilly"
+
+    - id: ARCH-STORAGE
+      name: "Local Storage"
+      type: Module
+      description: "Persistent local storage for messages and state"
+      realizes:
+        - REQ-DATA-001
+        - REQ-OFFLINE-001
+      depends_on: []
+      interfaces:
+        - name: Database API
+          protocol: Direct
+      responsibilities:
+        - "Store message history"
+        - "Cache session data"
+        - "Queue offline commands"
+        - "Manage local files"
+      technology_stack:
+        - "SwiftData (iOS 17+)"
+        - "SQLite (fallback)"
+        - "FileManager"
+      owner: "Robert Reilly"
+
+    - id: ARCH-FILEOPS
+      name: "File Operations"
+      type: Module
+      description: "Handle file uploads and downloads"
+      realizes:
+        - REQ-DATA-002
+      depends_on:
+        - ARCH-WEBSOCKET
+        - ARCH-STORAGE
+      interfaces:
+        - name: File Transfer
+          protocol: WSS
+      responsibilities:
+        - "Upload files to gateway"
+        - "Download response files"
+        - "Show progress"
+        - "Handle errors"
+      technology_stack:
+        - "FileManager"
+        - "URLSessionUploadTask"
+        - "Progress APIs"
+      owner: "Robert Reilly"
+
+    - id: ARCH-SECURITY
+      name: "Security Module"
+      type: Module
+      description: "Encryption and secure credential storage"
+      realizes:
+        - REQ-SEC-001
+        - REQ-SEC-002
+      depends_on: []
+      interfaces:
+        - name: Security API
+          protocol: Direct
+      responsibilities:
+        - "Store credentials in Keychain"
+        - "TLS certificate validation"
+        - "Encrypt sensitive data"
+        - "Clear sensitive memory"
+      technology_stack:
+        - "Keychain Services"
+        - "CryptoKit"
+        - "URLSession TLS"
+      owner: "Robert Reilly"
+
+    - id: ARCH-SYNC
+      name: "Sync Engine"
+      type: Service
+      description: "Sync local changes with OpenClaw when online"
+      realizes:
+        - REQ-OFFLINE-001
+      depends_on:
+        - ARCH-STORAGE
+        - ARCH-WEBSOCKET
+      interfaces:
+        - name: Sync API
+          protocol: WSS
+      responsibilities:
+        - "Queue offline changes"
+        - "Sync on reconnection"
+        - "Handle conflicts"
+        - "Retry failed syncs"
+      technology_stack:
+        - "Background Tasks"
+        - "Reachability"
+      owner: "Robert Reilly"
+
+  interactions:
+    - from: ARCH-UI
+      to: ARCH-STATE
+      protocol: Direct
+      frequency: sync
+      description: "UI updates trigger state changes"
+
+    - from: ARCH-STATE
+      to: ARCH-WEBSOCKET
+      protocol: WSS
+      frequency: async
+      description: "State sends commands to gateway"
+
+    - from: ARCH-WEBSOCKET
+      to: ARCH-REALTIME
+      protocol: WSS
+      frequency: async
+      description: "Gateway sends responses to be streamed"
+
+    - from: ARCH-REALTIME
+      to: ARCH-UI
+      protocol: Direct
+      frequency: async
+      description: "Stream updates UI with responses"
+
+    - from: ARCH-STATE
+      to: ARCH-STORAGE
+      protocol: Direct
+      frequency: sync
+      description: "Persist state changes locally"
+
+    - from: ARCH-WEBSOCKET
+      to: ARCH-AUTH
+      protocol: Direct
+      frequency: sync
+      description: "Verify authentication before sending"
+
+# ============================================================================
+# BEHAVIORS
+# ============================================================================
+behaviors:
+  - id: BEHAV-CONNECT
+    name: "Initial Connection Flow"
+    description: "App launches and connects to OpenClaw Gateway"
+    type: Workflow
+    actors:
+      - User
+      - App
+      - OpenClaw Gateway
+    steps:
+      - step: 1
+        description: "App launches"
+        component: ARCH-UI
+        action: "Show splash screen"
+      - step: 2
+        description: "Load credentials from Keychain"
+        component: ARCH-SECURITY
+        action: "Retrieve stored credentials"
+      - step: 3
+        description: "Establish WebSocket"
+        component: ARCH-WEBSOCKET
+        action: "Connect to gateway"
+      - step: 4
+        description: "Send auth credentials"
+        component: ARCH-AUTH
+        action: "Authenticate"
+        condition: "WebSocket connected"
+      - step: 5
+        description: "Receive session token"
+        component: ARCH-AUTH
+        action: "Store token"
+        condition: "Auth successful"
+      - step: 6
+        description: "Load session list"
+        component: ARCH-STATE
+        action: "Fetch available sessions"
+      - step: 7
+        description: "Display UI"
+        component: ARCH-UI
+        action: "Show command interface"
+    success_criteria:
+      - "WebSocket connected"
+      - "Authenticated with gateway"
+      - "Session list loaded"
+      - "UI responsive and ready"
+    failure_handling: "Show connection error, allow retry with different credentials"
+
+  - id: BEHAV-COMMAND
+    name: "Send Command to Agent"
+    description: "User sends command to OpenClaw agent and receives response"
+    type: Use-Case
+    actors:
+      - User
+      - App
+      - OpenClaw Gateway
+      - Claude Agent
+    steps:
+      - step: 1
+        description: "User types command"
+        component: ARCH-UI
+        action: "Input in text field"
+      - step: 2
+        description: "User taps send"
+        component: ARCH-UI
+        action: "Trigger send action"
+      - step: 3
+        description: "Command queued"
+        component: ARCH-STATE
+        action: "Add to command queue"
+      - step: 4
+        description: "Send via WebSocket"
+        component: ARCH-WEBSOCKET
+        action: "Transmit command JSON"
+        condition: "Online"
+      - step: 5
+        description: "Agent processes"
+        component: "OpenClaw Gateway"
+        action: "Execute command"
+      - step: 6
+        description: "Stream response"
+        component: ARCH-REALTIME
+        action: "Receive chunks"
+      - step: 7
+        description: "Display to user"
+        component: ARCH-UI
+        action: "Update response UI in real-time"
+      - step: 8
+        description: "Store in history"
+        component: ARCH-STORAGE
+        action: "Save message"
+    success_criteria:
+      - "Command sent successfully"
+      - "Response received and displayed"
+      - "History saved locally"
+      - "Latency <500ms"
+    failure_handling: "Queue for retry, show error message"
+
+  - id: BEHAV-OFFLINE
+    name: "Offline Command Handling"
+    description: "App queues commands while offline, syncs on reconnect"
+    type: Workflow
+    actors:
+      - User
+      - App
+    steps:
+      - step: 1
+        description: "Network goes down"
+        component: ARCH-WEBSOCKET
+        action: "Detect disconnection"
+      - step: 2
+        description: "Update status"
+        component: ARCH-STATE
+        action: "Mark as offline"
+      - step: 3
+        description: "Queue command"
+        component: ARCH-STORAGE
+        action: "Store pending command"
+      - step: 4
+        description: "Show offline indicator"
+        component: ARCH-UI
+        action: "Display 'offline' badge"
+      - step: 5
+        description: "Network returns"
+        component: ARCH-WEBSOCKET
+        action: "Detect reconnection"
+      - step: 6
+        description: "Re-establish connection"
+        component: ARCH-WEBSOCKET
+        action: "Reconnect to gateway"
+      - step: 7
+        description: "Sync queued commands"
+        component: ARCH-SYNC
+        action: "Send pending commands"
+      - step: 8
+        description: "Update UI"
+        component: ARCH-UI
+        action: "Show 'synced' status"
+    success_criteria:
+      - "Commands not lost during offline period"
+      - "Syncs automatically on reconnect"
+      - "User aware of offline status"
+
+# ============================================================================
+# TESTS
+# ============================================================================
+tests:
+  - id: TEST-CONNECT-001
+    name: "WebSocket Connection Establishment"
+    description: "App successfully connects to OpenClaw Gateway via WebSocket"
+    type: Integration
+    verifies:
+      - REQ-CONNECT-001
+    exercises:
+      - ARCH-WEBSOCKET
+    priority: CRITICAL
+    status: in-progress
+    coverage_percentage: 80
+    test_procedure:
+      - "Launch app"
+      - "Verify WebSocket handshake"
+      - "Check connection status in UI"
+      - "Send heartbeat message"
+      - "Verify received heartbeat response"
+    expected_result: "WebSocket connected, heartbeat confirmed"
+    owner: "Robert Reilly"
+    last_run: "2026-03-15"
+
+  - id: TEST-CONNECT-002
+    name: "Gateway Authentication"
+    description: "App authenticates with gateway using credentials"
+    type: Integration
+    verifies:
+      - REQ-CONNECT-002
+    exercises:
+      - ARCH-AUTH
+      - ARCH-SECURITY
+    priority: CRITICAL
+    status: in-progress
+    coverage_percentage: 70
+    test_procedure:
+      - "Load credentials from Keychain"
+      - "Send auth message"
+      - "Verify token received"
+      - "Check token validity"
+      - "Verify token stored securely"
+    expected_result: "Authenticated, token stored in Keychain"
+    owner: "Robert Reilly"
+
+  - id: TEST-UI-001
+    name: "Command Input & Send"
+    description: "User can input command and send via UI"
+    type: Unit
+    verifies:
+      - REQ-UI-001
+    exercises:
+      - ARCH-UI
+      - ARCH-STATE
+    priority: HIGH
+    status: proposed
+    coverage_percentage: 0
+    test_procedure:
+      - "Render command input view"
+      - "Type command text"
+      - "Tap send button"
+      - "Verify state updated"
+      - "Verify command queued"
+    expected_result: "Command input accepted and queued"
+    owner: "Robert Reilly"
+
+  - id: TEST-UI-002
+    name: "Response Streaming Display"
+    description: "App displays streamed responses in real-time"
+    type: Integration
+    verifies:
+      - REQ-UI-002
+    exercises:
+      - ARCH-UI
+      - ARCH-REALTIME
+    priority: HIGH
+    status: proposed
+    coverage_percentage: 0
+    test_procedure:
+      - "Send command"
+      - "Simulate chunked response"
+      - "Verify chunks displayed incrementally"
+      - "Check syntax highlighting"
+      - "Verify scrolling works"
+    expected_result: "Response displayed in real-time with proper formatting"
+    owner: "Robert Reilly"
+
+  - id: TEST-SEC-001
+    name: "Secure Credential Storage"
+    description: "Credentials stored securely in Keychain"
+    type: Security
+    verifies:
+      - REQ-SEC-001
+    exercises:
+      - ARCH-SECURITY
+    priority: CRITICAL
+    status: proposed
+    coverage_percentage: 0
+    test_procedure:
+      - "Store credentials"
+      - "Verify in Keychain (not in UserDefaults)"
+      - "Check encryption status"
+      - "Attempt to access from other app (should fail)"
+    expected_result: "Credentials stored securely, inaccessible to other apps"
+    owner: "Robert Reilly"
+
+  - id: TEST-SEC-002
+    name: "TLS Connection Validation"
+    description: "All connections use TLS 1.3"
+    type: Security
+    verifies:
+      - REQ-SEC-002
+    exercises:
+      - ARCH-WEBSOCKET
+    priority: CRITICAL
+    status: proposed
+    coverage_percentage: 0
+    test_procedure:
+      - "Connect to gateway"
+      - "Inspect TLS version"
+      - "Verify certificate validity"
+      - "Attempt HTTP (should fail)"
+    expected_result: "WSS only, TLS 1.3 confirmed"
+    owner: "Robert Reilly"
+
+  - id: TEST-PERF-001
+    name: "Message Latency"
+    description: "Message latency <500ms"
+    type: Performance
+    verifies:
+      - REQ-PERF-001
+    exercises:
+      - ARCH-WEBSOCKET
+      - ARCH-STATE
+    priority: HIGH
+    status: proposed
+    coverage_percentage: 0
+    test_procedure:
+      - "Send command from app"
+      - "Measure round-trip time"
+      - "Send 100 messages"
+      - "Calculate average latency"
+    expected_result: "Average latency <500ms, 95th percentile <1s"
+    owner: "Robert Reilly"
+
+  - id: TEST-OFFLINE-001
+    name: "Offline Queue & Sync"
+    description: "Commands queued offline, synced on reconnect"
+    type: Integration
+    verifies:
+      - REQ-OFFLINE-001
+    exercises:
+      - ARCH-STORAGE
+      - ARCH-SYNC
+      - ARCH-WEBSOCKET
+    priority: MEDIUM
+    status: proposed
+    coverage_percentage: 0
+    test_procedure:
+      - "Disable network"
+      - "Send command"
+      - "Verify queued locally"
+      - "Re-enable network"
+      - "Verify auto-sync"
+      - "Verify response received"
+    expected_result: "Command queued, synced, executed after reconnect"
+    owner: "Robert Reilly"
+
+# ============================================================================
+# RISKS
+# ============================================================================
+risks:
+  - id: RISK-001
+    title: "WebSocket Connection Instability"
+    description: "Unreliable network could cause frequent disconnections"
+    probability: HIGH
+    impact: HIGH
+    related_requirement: REQ-CONNECT-001
+    mitigation_strategy: "Implement exponential backoff retry, heartbeat detection, graceful degradation to polling"
+    owner: "Robert Reilly"
+    status: identified
+
+  - id: RISK-002
+    title: "Credential Theft"
+    description: "Credentials could be compromised if device jailbroken"
+    probability: LOW
+    impact: CRITICAL
+    related_requirement: REQ-SEC-001
+    mitigation_strategy: "Use Keychain, implement app attestation, disable on jailbroken devices"
+    owner: "Robert Reilly"
+    status: identified
+
+  - id: RISK-003
+    title: "Battery Drain"
+    description: "Persistent WebSocket could significantly drain battery"
+    probability: MEDIUM
+    impact: MEDIUM
+    related_requirement: REQ-PERF-002
+    mitigation_strategy: "Implement idle timeout, background task optimization, smart reconnection"
+    owner: "Robert Reilly"
+    status: identified
+
+  - id: RISK-004
+    title: "Large Response Handling"
+    description: "Large responses could crash app or consume too much memory"
+    probability: MEDIUM
+    impact: HIGH
+    related_requirement: REQ-UI-002
+    mitigation_strategy: "Implement streaming parser, memory-efficient UI updates, response size limits"
+    owner: "Robert Reilly"
+    status: identified
+
+# ============================================================================
+# ARCHITECTURE DECISIONS
+# ============================================================================
+decisions:
+  - id: ADR-001
+    title: "Use SwiftUI for UI Framework"
+    date: "2026-03-14"
+    status: accepted
+    context: "Need modern, maintainable iOS UI for rapid development"
+    decision: "Use SwiftUI for entire UI"
+    rationale: "Native, declarative, better performance, MVVM-friendly, iOS 15+ support"
+    consequences: "iOS 15+ requirement, steeper learning curve initially, fewer StackOverflow examples"
+    alternatives_considered:
+      - "UIKit (more mature but more verbose)"
+      - "React Native (cross-platform but less native)"
+      - "Flutter (cross-platform but not native feel)"
+    related_requirements:
+      - REQ-UI-001
+      - REQ-UI-002
+    owner: "Robert Reilly"
+
+  - id: ADR-002
+    title: "WebSocket over HTTP Polling"
+    date: "2026-03-14"
+    status: accepted
+    context: "Need real-time bidirectional communication with OpenClaw Gateway"
+    decision: "Use WebSocket (WSS) for persistent connection"
+    rationale: "Lower latency, real-time streaming, efficient bandwidth, persistent connection"
+    consequences: "More complex state management, requires heartbeat logic, fallback polling needed"
+    alternatives_considered:
+      - "HTTP Polling (simpler but higher latency/battery drain)"
+      - "gRPC (overkill complexity for this use case)"
+      - "MQTT (overkill, more for IoT)"
+    related_requirements:
+      - REQ-CONNECT-001
+      - REQ-PERF-001
+    owner: "Robert Reilly"
+
+  - id: ADR-003
+    title: "SwiftData for Local Storage"
+    date: "2026-03-14"
+    status: accepted
+    context: "Need persistent local storage for messages and offline support"
+    decision: "Use SwiftData (iOS 17+) with SQLite fallback"
+    rationale: "Native Swift, type-safe, integrates with MVVM, automatic migrations"
+    consequences: "iOS 17+ for primary path, need SQLite fallback for older devices"
+    alternatives_considered:
+      - "Core Data (more mature but verbose)"
+      - "Realm (multiplatform but third-party)"
+      - "UserDefaults (too limited)"
+    related_requirements:
+      - REQ-DATA-001
+      - REQ-OFFLINE-001
+    owner: "Robert Reilly"

@@ -1,0 +1,25 @@
+`torch_dtype` is deprecated! Use `dtype` instead!
+[test] Created dummy drafter for 1.5B model at /var/folders/q8/4n1j8yv17j5fdzc0c2wfbm4r0000gn/T/tmp0h4r2f1y.pt
+[test] base model : Qwen/Qwen2.5-1.5B-Instruct
+[test] drafter    : /var/folders/q8/4n1j8yv17j5fdzc0c2wfbm4r0000gn/T/tmp0h4r2f1y.pt (dummy)
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]Loading weights:   0%|          | 1/338 [00:03<19:39,  3.50s/it]Loading weights:  51%|█████     | 171/338 [00:03<00:02, 65.90it/s]Loading weights:  72%|███████▏  | 243/338 [00:04<00:01, 65.31it/s]Loading weights:  84%|████████▍ | 285/338 [00:05<00:00, 63.97it/s]Loading weights:  93%|█████████▎| 313/338 [00:05<00:00, 64.37it/s]Loading weights:  99%|█████████▉| 334/338 [00:06<00:00, 64.05it/s]Loading weights: 100%|██████████| 338/338 [00:06<00:00, 54.36it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[test] device     : mps
+[test] drafter cfg: DrafterConfig(vocab_size=151665, llm_hidden_size=1536, drafter_hidden_size=1024, num_gru_layers=4)
+
+=== prompt ===
+Explain ReDrafter speculative decoding in two sentences.
+
+=== generated ===
+ReDrafter speculative decoding is a technique used in deep learning models, particularly in natural language processing, where it allows the model to generate multiple hypotheses simultaneously and select the most likely one based on the context and the quality of the generated text.
+
+=== metrics ===
+           prompt_tokens: 41
+        generated_tokens: 50
+        drafter_proposed: 245
+        drafter_accepted: 0
+         acceptance_rate: 0.0
+          verifier_calls: 50
+   avg_accepted_per_step: 0.0
+               elapsed_s: 11.803
+          tokens_per_sec: 4.24

@@ -1,0 +1,22 @@
+# CUI and sensitive content
+cui/
+*.cui
+*.fouo
+*.itar
+*.export-controlled
+
+# Personal/sensitive
+personal/
+1-on-1s/
+performance-reviews/
+
+# System files
+.DS_Store
+.env.local
+*.key
+*.pem
+
+# Backups
+*.bak
+*.backup
+*~

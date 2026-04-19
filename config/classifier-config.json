@@ -1,0 +1,95 @@
+{
+  "routing": {
+    "classifier": {
+      "enabled": true,
+      "strategy": "keyword",
+
+      "simple_keywords": [
+        "weather",
+        "date",
+        "time",
+        "status",
+        "list",
+        "check",
+        "remind",
+        "what is",
+        "how many",
+        "how much",
+        "current",
+        "latest",
+        "next",
+        "today",
+        "tomorrow",
+        "this week",
+        "search for",
+        "heartbeat"
+      ],
+      "simple_model": "anthropic/claude-haiku-4-5-20251001",
+      "simple_max_words": 50,
+
+      "medium_model": "anthropic/claude-sonnet-4-6",
+
+      "complex_keywords": [
+        "build",
+        "refactor",
+        "analyze",
+        "debug",
+        "write",
+        "create",
+        "design",
+        "implement",
+        "fix",
+        "troubleshoot",
+        "optimize",
+        "improve",
+        "review",
+        "evaluate",
+        "strategy",
+        "decision",
+        "plan",
+        "architecture",
+        "examine",
+        "recommend",
+        "recommendations"
+      ],
+      "complex_model": "anthropic/claude-opus-4-6",
+
+      "context_simple": {
+        "max_chars": 5000,
+        "files": ["SOUL.md", "USER.md"]
+      },
+      "context_medium": {
+        "max_chars": 40000,
+        "files": ["SOUL.md", "USER.md", "MEMORY.md"]
+      },
+      "context_complex": {
+        "max_chars": 135000,
+        "files": ["SOUL.md", "USER.md", "MEMORY.md", "TOOLS.md"]
+      },
+
+      "word_count_min_medium": 50,
+      "token_threshold": 50,
+      "line_count_threshold": 3,
+
+      "default_model": "anthropic/claude-sonnet-4-6",
+
+      "rules": [
+        {
+          "pattern": "code|javascript|python|swift|java",
+          "classification": "complex",
+          "reason": "Code-related always complex"
+        },
+        {
+          "pattern": "simple|quick|fast|easy",
+          "classification": "simple",
+          "reason": "User hints simplicity"
+        },
+        {
+          "pattern": "analyze|understand|explain|why",
+          "classification": "complex",
+          "reason": "Analysis requires reasoning"
+        }
+      ]
+    }
+  }
+}

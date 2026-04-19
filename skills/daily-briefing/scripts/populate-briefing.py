@@ -11,11 +11,17 @@ import json
 import os
 from datetime import datetime, timedelta
 
-def get_ga4_data():
-    """Fetch comprehensive GA4 analytics for last 7 days"""
+# GA4 Property IDs for all sites
+GA4_SITES = {
+    "reillydesignstudio.com": "526836321",
+    "momo-kiji.dev": "531031250",
+    "momo-kibidango.org": "531033893",
+}
+
+def get_ga4_data_for_site(site_name, property_id):
+    """Fetch GA4 analytics for a single site (last 7 days)"""
     try:
         script_dir = os.path.dirname(os.path.abspath(__file__))
-        property_id = "526836321"
         
         # Fetch comprehensive analytics
         cmd = f"python3 {script_dir}/ga4-query.py --property-id={property_id} --comprehensive 2>/dev/null"
@@ -24,44 +30,51 @@ def get_ga4_data():
         if result.returncode == 0 and result.stdout.strip():
             try:
                 analytics_data = json.loads(result.stdout)
-                
-                # Format the HTML
-                format_cmd = f"python3 {script_dir}/format-analytics.py"
-                format_result = subprocess.run(
-                    format_cmd, shell=True, input=json.dumps(analytics_data),
-                    capture_output=True, text=True, timeout=5
-                )
-                
-                if format_result.returncode == 0:
-                    formatted = json.loads(format_result.stdout)
-                    return {
-                        "metrics_html": formatted.get("metrics_html", ""),
-                        "sources_html": formatted.get("sources_html", ""),
-                        "pages_html": formatted.get("pages_html", ""),
-                        "raw": analytics_data
-                    }
-                
-                # Fallback to raw data
                 current = analytics_data.get("current_metrics", {})
                 return {
-                    "sessions": str(current.get("sessions", "—")),
-                    "users": str(current.get("activeUsers", "—")),
-                    "bounce": str(current.get("bounceRate", "—")),
-                    "pages": []
+                    "site": site_name,
+                    "sessions": str(int(current.get("sessions", 0))),
+                    "users": str(int(current.get("activeUsers", 0))),
+                    "bounce": f"{float(current.get('bounceRate', 0)):.1f}",
+                    "raw": analytics_data
                 }
-            except json.JSONDecodeError:
+            except (json.JSONDecodeError, ValueError):
                 pass
         
-        # Fallback: return placeholder
-        return {
-            "sessions": "—",
-            "users": "—", 
-            "bounce": "—",
-            "pages": []
-        }
+        return {"site": site_name, "sessions": "0", "users": "0", "bounce": "—"}
     except Exception as e:
-        print(f"[GA4] Error: {e}", file=__import__('sys').stderr)
-        return {"sessions": "—", "users": "—", "bounce": "—", "pages": []}
+        print(f"[GA4:{site_name}] Error: {e}", file=__import__('sys').stderr)
+        return {"site": site_name, "sessions": "0", "users": "0", "bounce": "—"}
+
+def get_ga4_data():
+    """Fetch GA4 analytics for ALL sites (last 7 days)"""
+    all_sites = []
+    total_sessions = 0
+    total_users = 0
+    
+    for site_name, prop_id in GA4_SITES.items():
+        data = get_ga4_data_for_site(site_name, prop_id)
+        all_sites.append(data)
+        try:
+            total_sessions += int(data.get("sessions", 0))
+            total_users += int(data.get("users", 0))
+        except ValueError:
+            pass
+    
+    # Build combined HTML for briefing
+    sites_html = ""
+    for s in all_sites:
+        sites_html += f'<div class="item"><strong>{s["site"]}</strong>: {s["sessions"]} sessions, {s["users"]} users</div>\n'
+    
+    return {
+        "sessions": str(total_sessions),
+        "users": str(total_users),
+        "bounce": "—",
+        "html": sites_html,
+        "sources_html": "",
+        "pages_html": "",
+        "sites": all_sites
+    }
 
 def get_gmail_data():
     """Fetch Gmail statistics"""
@@ -71,36 +84,37 @@ def get_gmail_data():
         result = subprocess.run(cmd_unread, shell=True, capture_output=True, text=True, timeout=10)
         unread = result.stdout.strip() if result.returncode == 0 else "--"
         
-        # Get flagged count
-        cmd_flagged = "gog gmail search 'is:starred' --json 2>/dev/null | jq '.threads | length'"
-        result = subprocess.run(cmd_flagged, shell=True, capture_output=True, text=True, timeout=10)
-        flagged = result.stdout.strip() if result.returncode == 0 else "--"
+        # Get flagged/starred count
+        cmd_starred = "gog gmail search 'is:starred' --json 2>/dev/null | jq '.threads | length'"
+        result = subprocess.run(cmd_starred, shell=True, capture_output=True, text=True, timeout=10)
+        starred = result.stdout.strip() if result.returncode == 0 else "--"
         
-        return {"unread": unread, "flagged": flagged}
+        # Get today's email count
+        cmd_today = "gog gmail search 'after:" + datetime.now().strftime('%Y-%m-%d') + "' --json 2>/dev/null | jq '.threads | length'"
+        result = subprocess.run(cmd_today, shell=True, capture_output=True, text=True, timeout=10)
+        today = result.stdout.strip() if result.returncode == 0 else "--"
+        
+        # Get urgent/important count
+        cmd_urgent = "gog gmail search 'is:important OR is:starred after:" + datetime.now().strftime('%Y-%m-%d') + "' --json 2>/dev/null | jq '.threads | length'"
+        result = subprocess.run(cmd_urgent, shell=True, capture_output=True, text=True, timeout=10)
+        urgent = result.stdout.strip() if result.returncode == 0 else "--"
+        
+        return {
+            "unread": unread,
+            "starred": starred,
+            "today": today,
+            "urgent": urgent
+        }
     except Exception as e:
         print(f"[Gmail] Error: {e}", file=__import__('sys').stderr)
-        return {"unread": "--", "flagged": "--"}
+        return {"unread": "--", "starred": "--", "today": "--", "urgent": "--"}
 
 def main():
     ga4 = get_ga4_data()
     gmail = get_gmail_data()
     
-    # Extract summary metrics if we got HTML
-    if "metrics_html" in ga4:
-        ga4_summary = ga4.get("raw", {}).get("current_metrics", {})
-        metrics = {
-            "sessions": str(int(ga4_summary.get("sessions", 0))),
-            "users": str(int(ga4_summary.get("activeUsers", 0))),
-            "bounce": f"{float(ga4_summary.get('bounceRate', 0)):.1f}",
-            "html": ga4.get("metrics_html", ""),
-            "sources_html": ga4.get("sources_html", ""),
-            "pages_html": ga4.get("pages_html", "")
-        }
-    else:
-        metrics = ga4
-    
     output = {
-        "ga4": metrics,
+        "ga4": ga4,
         "gmail": gmail,
         "timestamp": datetime.now().isoformat()
     }

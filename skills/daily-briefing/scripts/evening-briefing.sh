@@ -5,6 +5,14 @@
 
 set -euo pipefail
 
+# Idempotency guard: only run once per calendar day
+LOCK_FILE="/tmp/evening-briefing-$(date +%Y-%m-%d).lock"
+if [ -f "$LOCK_FILE" ]; then
+  echo "[briefing] Already ran today (lock: $LOCK_FILE). Skipping duplicate trigger."
+  exit 0
+fi
+touch "$LOCK_FILE"
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SEND_EMAIL="${1:-}"
 
@@ -24,6 +32,31 @@ GA4_HTML=$(echo "$BRIEFING_DATA" | jq -r '.ga4.html // ""')
 GA4_SOURCES_HTML=$(echo "$BRIEFING_DATA" | jq -r '.ga4.sources_html // ""')
 GA4_PAGES_HTML=$(echo "$BRIEFING_DATA" | jq -r '.ga4.pages_html // ""')
 GMAIL_UNREAD=$(echo "$BRIEFING_DATA" | jq -r '.gmail.unread // "—"')
+
+# Fetch today's completions from memory
+COMPLETIONS_DATA=$(python3 "$SCRIPT_DIR/scripts/get-todays-completions.py" 2>/dev/null || echo '{"html":"<div class=\"item\"><em>Unable to load completions</em></div>"}')
+COMPLETIONS_HTML=$(echo "$COMPLETIONS_DATA" | jq -r '.html // ""')
+
+# Fetch project progress from git and projects
+PROJECT_DATA=$(python3 "$SCRIPT_DIR/scripts/get-project-progress.py" 2>/dev/null || echo '{"html":"<div class=\"item\"><em>Unable to load projects</em></div>"}')
+PROJECT_HTML=$(echo "$PROJECT_DATA" | jq -r '.html // ""')
+
+# Fetch blockers from memory and GitHub
+BLOCKERS_DATA=$(python3 "$SCRIPT_DIR/scripts/get-blockers.py" 2>/dev/null || echo '{"html":"<div class=\"item\"><em>No blockers</em></div>"}')
+BLOCKERS_HTML=$(echo "$BLOCKERS_DATA" | jq -r '.html // ""')
+
+# Fetch tomorrow's prep
+PREP_DATA=$(python3 "$SCRIPT_DIR/scripts/get-tomorrow-prep.py" 2>/dev/null || echo '{"html":"<div class=\"item\"><em>Check MEMORY.md</em></div>"}')
+PREP_HTML=$(echo "$PREP_DATA" | jq -r '.html // ""')
+
+# Fetch Google Tasks (remaining tasks for tomorrow)
+TASKS_DATA=$(python3 "$SCRIPT_DIR/scripts/get-tasks.py" 2>/dev/null || echo '{"pending_count":0,"total_count":0,"tasks":[]}')
+TASKS_COUNT=$(echo "$TASKS_DATA" | jq -r '.pending_count // 0')
+TASKS_LIST=$(echo "$TASKS_DATA" | jq -r '.tasks[] | "      <div class=\"item\">• \(.title)</div>"' | head -5 || echo '<div class="item"><em>All caught up!</em></div>')
+
+# Fetch memory system activity (also runs TTL expiry + orphan cleanup)
+MEMORY_DATA=$(python3 "$SCRIPT_DIR/scripts/get-memory-health.py" --mode evening 2>/dev/null || echo '{"html":"<div class=\"item\"><em>Memory health unavailable</em></div>"}')
+MEMORY_ACTIVITY_HTML=$(echo "$MEMORY_DATA" | jq -r '.html // ""')
 
 # Create HTML content
 cat > /tmp/evening-briefing.html << EOF
@@ -64,25 +97,12 @@ cat > /tmp/evening-briefing.html << EOF
 
         <div class="section">
             <h2>✅ Completed Today</h2>
-            <div class="item"><span class="success">✓</span> Created 7 new OpenClaw skills</div>
-            <div class="item"><span class="success">✓</span> Deployed ReillyDesignStudio to AWS Amplify</div>
-            <div class="item"><span class="success">✓</span> Built Momotaro iOS project (SwiftUI)</div>
-            <div class="item"><span class="success">✓</span> Pushed momotaro-ios to GitHub</div>
-            <div class="item"><span class="success">✓</span> Configured GA4 analytics</div>
+            $COMPLETIONS_HTML
         </div>
 
         <div class="section">
             <h2>📈 Project Progress</h2>
-            <div class="item">
-                <strong>ReillyDesignStudio</strong><br>
-                Status: <span class="success">Deployed ✓</span><br>
-                Live: https://dev.d24p2wkrfuex3c.amplifyapp.com
-            </div>
-            <div class="item">
-                <strong>Momotaro iOS</strong><br>
-                Status: <span class="success">Build Successful ✓</span><br>
-                GitHub: rdreilly58/momotaro-ios
-            </div>
+            $PROJECT_HTML
         </div>
 
         $GA4_HTML
@@ -93,24 +113,20 @@ cat > /tmp/evening-briefing.html << EOF
 
         <div class="section">
             <h2>⚠️ Blockers / Issues</h2>
-            <div class="item">
-                <span class="warning">GA4 Cloud Project Mismatch</span><br>
-                Service account in rds-analytics-489420, but property may be linked to different project.<br>
-                Action: Verify GA4 property Cloud project linking
-            </div>
+            $BLOCKERS_HTML
         </div>
+
+        <div class="section">
+            <h2>📋 Pending Tasks</h2>
+            <div class="item"><strong>$TASKS_COUNT</strong> pending tasks to carry forward</div>
+            $TASKS_LIST
+        </div>
+
+        $MEMORY_ACTIVITY_HTML
 
         <div class="tomorrow">
             <h2>📋 Tomorrow's Prep</h2>
-            <div class="item">
-                <strong>Momotaro iOS:</strong> Add external dependencies (Starscream, Crypto, SQLite)
-            </div>
-            <div class="item">
-                <strong>GA4 Fix:</strong> Check and resolve Cloud project linking
-            </div>
-            <div class="item">
-                <strong>ReillyDesignStudio:</strong> Setup custom domain and environment variables
-            </div>
+            $PREP_HTML
         </div>
 
         <div class="section">

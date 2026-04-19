@@ -1,0 +1,17 @@
+{
+  "name": "total-recall-search",
+  "version": "1.0.0",
+  "description": "Comprehensive search across memory (semantic) and local disk (keyword), intelligently routed.",
+  "emoji": "🔍",
+  "author": "Momotaro",
+  "created": "2026-04-09",
+  "requires": {
+    "bins": ["python3", "momo-kioku-search"],
+    "python_packages": ["sentence-transformers"]
+  },
+  "files": {
+    "cli": "~/bin/total-recall-search",
+    "core": "~/.openclaw/workspace/scripts/total_recall_search.py",
+    "semantic_backend": "~/.openclaw/workspace/scripts/memory_search_local.py"
+  }
+}

@@ -11,18 +11,27 @@ class GatewayClient: ObservableObject {
     
     init(url: URL) {
         self.url = url
+        log.info("GatewayClient initialized", ["url": url.absoluteString])
         connect()
     }
     
     func connect() {
+        log.info("Attempting WebSocket connection", [
+            "url": url.absoluteString,
+            "attempt": backoffAttempts
+        ])
+        
         let session = URLSession(configuration: .default)
         webSocketTask = session.webSocketTask(with: url)
         webSocketTask?.resume()
         isConnected = true
+        
+        log.info("✅ WebSocket connected")
         listenForMessages()
     }
     
     func disconnect() {
+        log.info("Disconnecting from WebSocket")
         webSocketTask?.cancel(with: .goingAway, reason: nil)
         isConnected = false
     }
@@ -33,15 +42,18 @@ class GatewayClient: ObservableObject {
             case .success(let message):
                 switch message {
                 case .data(let data):
+                    self?.log.info("Received data", ["bytes": data.count])
                     self?.handleData(data)
                 case .string(let text):
-                    print("Received string: \(text)")
+                    self?.log.info("Received string", ["length": text.count])
                 @unknown default:
                     break
                 }
                 self?.listenForMessages()
             case .failure(let error):
-                self?.errorMessage = "Connection error: \(error)"
+                let errorMsg = "❌ Connection error: \(error.localizedDescription)"
+                self?.log.error(errorMsg, error)
+                self?.errorMessage = errorMsg
                 self?.isConnected = false
                 self?.attemptReconnect()
             }
@@ -53,19 +65,35 @@ class GatewayClient: ObservableObject {
     }
     
     private func attemptReconnect() {
-        guard backoffAttempts < maxBackoffAttempts else { return }
+        guard backoffAttempts < maxBackoffAttempts else {
+            log.warning("Max reconnection attempts reached")
+            return
+        }
         backoffAttempts += 1
         let delay = Double(backoffAttempts * backoffAttempts)
+        log.warning("Attempting reconnect", [
+            "attempt": backoffAttempts,
+            "delay_seconds": delay
+        ])
+        
         DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
             self?.connect()
         }
     }
     
     func send(message: String) {
-        let message = URLSessionWebSocketTask.Message.string(message)
-        webSocketTask?.send(message) { [weak self] error in
+        guard isConnected else {
+            log.warning("Send attempted while disconnected", ["message_length": message.count])
+            return
+        }
+        
+        let wsMessage = URLSessionWebSocketTask.Message.string(message)
+        webSocketTask?.send(wsMessage) { [weak self] error in
             if let error = error {
-                self?.errorMessage = "Send error: \(error)"
+                self?.log.error("Send failed", error)
+                self?.errorMessage = "Send error: \(error.localizedDescription)"
+            } else {
+                self?.log.info("Message sent", ["length": message.count])
             }
         }
     }

@@ -1,160 +1,75 @@
-# TOOLS.md - Local Notes
 
-Skills define _how_ tools work. This file is for _your_ specifics — the stuff that's unique to your setup.
+## Git Commit Author (ENFORCED)
 
-## Email Operations (STANDARD METHOD)
+**Always use:** `robert.reilly@peraton.com` / `Robert Reilly`  
+Vercel only builds reillydesignstudio with this author. Set globally: `git config --global user.email "robert.reilly@peraton.com"`
 
-**Default method:** `gog gmail search` (Google CLI with Gmail API)
+---
 
-**Why:** 10-12x faster than Himalaya, already authenticated, supports combined filters
+## Email Operations
 
-**Usage:**
+**Primary account:** `reillyrd58@gmail.com` — use `gog` CLI for all Gmail ops.  
+- **Send:** `gog gmail send -a "reillyrd58@gmail.com" --to "..." --subject "..." --body-file <(cat file.txt)`  
+- **Read:** `gog gmail search -a reillyrd58@gmail.com "is:inbox"` (supports `from:X AND subject:Y AND after:DATE`)  
+- **Never use:** Himalaya for Gmail, `mail` command, `rdreilly2010@gmail.com` (expired)  
+
+**ReillyDesignStudio** (`robert@reillydesignstudio.com`): Routed via reillyrd58@gmail.com (forwarding + send-as)  
+- **Receive:** forwards to reillyrd58 inbox — read with `gog gmail search -a reillyrd58@gmail.com "is:inbox"`  
+- **Send as robert@:** `gog gmail send -a reillyrd58@gmail.com --from robert@reillydesignstudio.com --to "..." --subject "..." --body "..."`
+
+---
+
+## Total Recall Search — Unified Memory + Disk Search (Added April 9, 2026)
+
+**Tool:** `total-recall-search`
+**Location:** `~/bin/total-recall-search` → `~/.openclaw/workspace/scripts/total_recall_search.py`
+**Skill:** `~/.openclaw/workspace/skills/total-recall-search/SKILL.md`
+**Usage:** `total-recall-search <query> [--type auto|semantic|keyword] [--limit N] [--path /dir] [--json]`
+**Purpose:** Unified search across semantic memory (Sentence Transformers over memory files) and local disk (momo-kioku-search/Spotlight). Auto-routes: file/path queries → keyword; prose/concept queries → semantic.
+**Examples:**
 ```bash
-# Find emails from sender
-gog gmail search 'from:rdreilly2010@gmail.com'
-
-# Find by subject
-gog gmail search 'subject:OpenClaw iOS'
-
-# Date range
-gog gmail search 'after:2026-02-10 before:2026-03-12'
-
-# Combined filters
-gog gmail search 'from:rdreilly2010@gmail.com AND subject:briefing AND after:2026-03-10'
-
-# Export to JSON for processing
-gog gmail search 'QUERY' --json | jq '.threads[] | ...'
+total-recall-search "cascade proxy savings"          # auto-route (semantic)
+total-recall-search "SOUL.md" --type keyword         # file search
+total-recall-search "Leidos job" --type semantic     # memory recall
+total-recall-search "config" --json --limit 5        # JSON output
 ```
-
-**Performance:**
-- Himalaya: 30-60s per query (pagination-limited)
-- gog: 2-5s per query (Gmail API)
-- Notmuch: <1s (if local index needed)
-
-**When to use alternatives:**
-- Himalaya: Single email reads, interactive use
-- Notmuch: If doing heavy local analysis (set up with `notmuch new`)
-- Python IMAP: For building comprehensive email database
+**Output:** JSON array with `type`, `path`, `snippet`, `score`, `source_line` fields.
+**Note:** Semantic search requires `sentence-transformers` in workspace venv (~5-15s first run).
 
 ---
 
-## PDF Extraction from Emails
+## Compute Fallback Hierarchy (Updated April 2026)
 
-**Complete pipeline to read email with PDF attachment:**
+When GPU/inference compute is needed, use this priority order:
 
-```bash
-# Step 1: Search for email and get thread ID
-THREAD_ID=$(gog gmail search 'subject:"YOUR_SUBJECT"' --json | jq -r '.threads[0].id')
+| Priority | Resource | Status | Notes |
+|----------|----------|--------|-------|
+| 1 | Local M4 Mac Mini GPU (MLX) | ✅ Active | Best for everyday inference |
+| 2 | Google Colab H100 | ✅ Available | Manual setup; use notebooks in repo |
+| 3 | AWS EC2 `54.81.20.218` | ❌ DOWN | Down since April 5 — restart in AWS console |
 
-# Step 2: Read email content
-gog gmail thread get $THREAD_ID
-
-# Step 3: Download PDF attachment
-cd /tmp && gog gmail thread attachments $THREAD_ID --download --out-dir /tmp
-
-# Step 4: Extract PDF text
-pdftotext /tmp/*_*.pdf - | less
-```
-
-**Quick commands:**
-```bash
-# Get thread ID for a search
-gog gmail search 'subject:"App Store"' --json | jq -r '.threads[0].id'
-
-# Download all attachments from thread
-gog gmail thread attachments THREAD_ID --download --out-dir /tmp
-
-# Extract and read PDF
-pdftotext /tmp/FILE.pdf - | head -200
-```
-
-**Requirements:**
-- `gog` (Google CLI) — already configured
-- `jq` — for JSON parsing
-- `pdftotext` — for PDF extraction (part of poppler-utils)
+**GPU health check scripts** archived to `scripts/_archive/` — do not use until AWS instance is back.
 
 ---
 
-## Current Date & Time (Updated via session_status)
+## Known API Reliability Issues
 
-**Always run `session_status` to get the current date and time from the computer. Never infer or hardcode.**
+**Anthropic Sonnet `:01` timeout:** Sonnet times out at exactly :01 past the hour (61s). Gemini fallback succeeds. Manual retry is rarely needed now.
 
-Current: Friday, March 13th, 2026 — 5:18 AM (America/New_York)
+**Retry config (applied April 19, 2026):**
+- `channels.telegram.retry`: attempts=3, minDelayMs=5000, maxDelayMs=30000
+- `cron.retry`: maxAttempts=3, backoffMs=[5000,15000,30000], retryOn all transient types
 
-## Location
+Gateway restart required to activate (or restart automatically next gateway cycle).
 
-**Default location:** Reston, VA
-
-## Email
-
-**Default email:** rdreilly2010@gmail.com
-
-## What Goes Here
-
-Things like:
-
-- Camera names and locations
-- SSH hosts and aliases
-- Preferred voices for TTS
-- Speaker/room names
-- Device nicknames
-- Anything environment-specific
-
-## Examples
-
-```markdown
-### Cameras
-
-- living-room → Main area, 180° wide angle
-- front-door → Entrance, motion-triggered
-
-### SSH
-
-- home-server → 192.168.1.100, user: admin
-
-### TTS
-
-- Preferred voice: "Nova" (warm, slightly British)
-- Default speaker: Kitchen HomePod
-```
-
-## Why Separate?
-
-Skills are shared. Your setup is yours. Keeping them apart means you can update skills without losing your notes, and share skills without leaking your infrastructure.
+**OpenRouter credits:** Monitor at `openrouter.ai/settings/credits`. Credits exhausted ~April 11 — Total Recall Observer fell back to Anthropic Haiku silently. The `api-quota-monitor.sh` now checks and alerts when below $1.
 
 ---
 
-## AA Meetings
+## Fast Disk Search (via mdfind) - Added April 8, 2026
 
-**Bob's regular AA meetings:**
-
-| Meeting | Day/Time | Notes |
-|---------|----------|-------|
-| **GMG AA Meeting** | Daily, 8:00 AM EDT | Calendar: "GMG AA Meeting" (recurring daily) |
-| **Tech host** | Thu 8:00 AM EDT | Bob hosts tech for GMG AA |
-| **Life is Beautiful AA** | Sat 10:00 AM EDT | Calendar: "Life is Beautiful AA Meeting" |
-| **St Annes AA** | Sun 7:00 PM EDT | Calendar: "St Annes AA meeting" |
-
-**When Bob says "start my AA meeting":**
-1. Search calendar for entries with "AA" in title
-2. Find today's upcoming AA meeting (use `gog calendar list`)
-3. Extract Zoom link from event description (gog calendar get EVENT_ID)
-4. Open Zoom link in browser
-5. Remember: This is a recurring pattern, repeat for future requests
-
-**Zoom Links (extract from calendar event description):**
-- GMG AA Meeting: [need to extract from event]
-- Life is Beautiful: [need to extract from event]
-- St Annes AA: [need to extract from event]
-
----
-
-Add whatever helps you do your job. This is your cheat sheet.
-
-## Zoom Meeting Links (Extracted from Calendar)
-
-### GMG AA Meeting
-- **Zoom Link:** https://us06web.zoom.us/j/89378046012?pwd=UmRzSDZKREQ4bTcrb2ZSUHVBK2trUT09
-- **Meeting ID:** 893 7804 6012
-- **Time:** Daily 8:00-9:00 AM EDT
-- **When requested:** Open this link automatically
+**Tool:** `fast-find.sh`
+**Location:** `~/.openclaw/workspace/scripts/fast-find.sh`
+**Usage:** `bash ~/.openclaw/workspace/scripts/fast-find.sh "your query" [limit]`
+**Purpose:** Leverages macOS Spotlight (`mdfind`) for very fast keyword searching across the entire disk.
+**Example:** `bash ~/.openclaw/workspace/scripts/fast-find.sh "momo-akira" 20`

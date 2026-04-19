@@ -1,0 +1,46 @@
+{
+  "deployment_timestamp": "2026-03-21 13:20:03",
+  "account": {
+    "username": "reillyrdai",
+    "api_key_last_chars": "bXdYYkZncmUzWXNjZw=="
+  },
+  "universe": {
+    "id": 12353896,
+    "place_id": 12353896,
+    "name": "Momotaro's RPG"
+  },
+  "scripts": [
+    {
+      "name": "PlayerManager.lua",
+      "path": "/tmp/roblox_rpg_project/scripts/PlayerManager.lua",
+      "status": "deployed"
+    },
+    {
+      "name": "CombatSystem.lua",
+      "path": "/tmp/roblox_rpg_project/scripts/CombatSystem.lua",
+      "status": "deployed"
+    },
+    {
+      "name": "NPCSpawner.lua",
+      "path": "/tmp/roblox_rpg_project/scripts/NPCSpawner.lua",
+      "status": "deployed"
+    },
+    {
+      "name": "MainGameScript.lua",
+      "path": "/tmp/roblox_rpg_project/scripts/MainGameScript.lua",
+      "status": "deployed"
+    },
+    {
+      "name": "ClientGUI.lua",
+      "path": "/tmp/roblox_rpg_project/scripts/ClientGUI.lua",
+      "status": "deployed"
+    }
+  ],
+  "game_url": "https://www.roblox.com/games/12353896/",
+  "url_test": {
+    "tested": true,
+    "result": false,
+    "timestamp": "2026-03-21 13:20:03"
+  },
+  "status": "DEPLOYED_UNVERIFIED"
+}

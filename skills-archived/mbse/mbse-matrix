@@ -1,0 +1,136 @@
+#!/usr/bin/env python3
+"""
+mbse-matrix — Requirements Traceability Matrix (RTM)
+Shows all requirement→architecture→test relationships
+"""
+
+import sys
+import csv
+from pathlib import Path
+from collections import defaultdict
+
+try:
+    import yaml
+except ImportError:
+    print("❌ PyYAML not installed. Install with: pip3 install pyyaml")
+    sys.exit(1)
+
+def load_model(model_path):
+    """Load YAML model"""
+    path = Path(model_path)
+    if not path.exists():
+        print(f"❌ Model not found: {model_path}")
+        sys.exit(1)
+    
+    with open(path, 'r') as f:
+        return yaml.safe_load(f)
+
+def build_matrix(model):
+    """Build Requirements Traceability Matrix"""
+    
+    requirements = {r['id']: r for r in model.get('requirements', [])}
+    architecture = {c['id']: c for c in model.get('architecture', {}).get('components', [])}
+    tests = {t['id']: t for t in model.get('tests', [])}
+    
+    matrix = []
+    
+    for req_id in sorted(requirements.keys()):
+        req = requirements[req_id]
+        arch_ids = req.get('traces_to', [])
+        arch_str = ', '.join(arch_ids) if arch_ids else '—'
+        
+        # Find tests
+        test_ids = [t['id'] for t in model.get('tests', []) if req_id in t.get('verifies', [])]
+        test_str = ', '.join(test_ids) if test_ids else '—'
+        
+        # Calculate coverage
+        test_count = len(test_ids)
+        total_arch = len(arch_ids)
+        coverage = f"{sum(t.get('coverage_percentage', 0) for t in [tests.get(tid) for tid in test_ids] if t) / max(len(test_ids), 1):.0f}%" if test_ids else "0%"
+        
+        matrix.append({
+            'REQ_ID': req_id,
+            'Title': req.get('title', ''),
+            'Status': req.get('status', ''),
+            'Priority': req.get('priority', ''),
+            'Architecture': arch_str,
+            'Tests': test_str,
+            'Test_Count': str(test_count),
+            'Coverage%': coverage,
+            'Risk_Level': req.get('risk_level', '—')
+        })
+    
+    return matrix
+
+def output_table(matrix):
+    """Output as formatted table"""
+    print("\n📋 Requirements Traceability Matrix (RTM)")
+    print("=" * 160)
+    
+    # Header
+    print(f"{'REQ_ID':<15} {'Title':<30} {'Status':<12} {'Priority':<9} {'Arch':<20} {'Tests':<25} {'Cov%':<6} {'Risk':<8}")
+    print("-" * 160)
+    
+    for row in matrix:
+        title = row['Title'][:28]
+        arch = row['Architecture'][:18]
+        tests = row['Tests'][:23]
+        
+        print(f"{row['REQ_ID']:<15} {title:<30} {row['Status']:<12} {row['Priority']:<9} {arch:<20} {tests:<25} {row['Coverage%']:<6} {row['Risk_Level']:<8}")
+    
+    print("=" * 160)
+    
+    # Summary
+    passed = sum(1 for r in matrix if r['Status'] == 'implemented')
+    in_progress = sum(1 for r in matrix if r['Status'] == 'in-progress')
+    proposed = sum(1 for r in matrix if r['Status'] == 'proposed')
+    traced = sum(1 for r in matrix if r['Architecture'] != '—')
+    tested = sum(1 for r in matrix if r['Tests'] != '—')
+    
+    print(f"\n📊 Summary:")
+    print(f"   Total: {len(matrix)} | Implemented: {passed} | In-Progress: {in_progress} | Proposed: {proposed}")
+    print(f"   Traced to Architecture: {traced}/{len(matrix)} ({100*traced//len(matrix) if matrix else 0}%)")
+    print(f"   Covered by Tests: {tested}/{len(matrix)} ({100*tested//len(matrix) if matrix else 0}%)")
+    print()
+
+def output_csv(matrix, output_file=None):
+    """Output as CSV"""
+    fieldnames = ['REQ_ID', 'Title', 'Status', 'Priority', 'Architecture', 'Tests', 'Test_Count', 'Coverage%', 'Risk_Level']
+    
+    if output_file:
+        with open(output_file, 'w', newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(matrix)
+        print(f"✅ Exported to: {output_file}")
+    else:
+        writer = csv.DictWriter(sys.stdout, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(matrix)
+
+def main():
+    if len(sys.argv) < 2:
+        print("Usage: mbse-matrix <model.yaml> [--output file.csv]")
+        print("\nOutputs:")
+        print("  Default  — Human-readable table")
+        print("  --output — Export to CSV file")
+        sys.exit(1)
+    
+    model_path = sys.argv[1]
+    output_file = None
+    
+    if "--output" in sys.argv:
+        idx = sys.argv.index("--output")
+        if idx + 1 < len(sys.argv):
+            output_file = sys.argv[idx + 1]
+    
+    model = load_model(model_path)
+    matrix = build_matrix(model)
+    
+    if output_file:
+        output_csv(matrix, output_file)
+    else:
+        output_table(matrix)
+
+if __name__ == '__main__':
+    main()

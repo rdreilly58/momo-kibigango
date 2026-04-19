@@ -1,0 +1,43 @@
+{
+  "schema": "openclaw.acpx.session.v1",
+  "acpxRecordId": "agent:openclaw:acp:4b43725a-53e8-4155-bc83-40c262e6b244",
+  "acpSessionId": "0f0f5553-7a1e-4329-9ee9-a966eb0f23c9",
+  "agentCommand": "openclaw acp",
+  "cwd": "/Users/rreilly/.openclaw/workspace",
+  "name": "agent:openclaw:acp:4b43725a-53e8-4155-bc83-40c262e6b244",
+  "createdAt": "2026-04-07T11:37:27.737Z",
+  "lastUsedAt": "2026-04-07T11:37:27.737Z",
+  "lastSeq": 0,
+  "eventLog": {
+    "active_path": "",
+    "segment_count": 0,
+    "max_segment_bytes": 0,
+    "max_segments": 0,
+    "last_write_error": null
+  },
+  "closed": false,
+  "title": null,
+  "messages": [],
+  "updated_at": "2026-04-07T11:37:27.737Z",
+  "cumulative_token_usage": {},
+  "request_token_usage": {},
+  "acpx": {},
+  "protocolVersion": 1,
+  "agentCapabilities": {
+    "loadSession": true,
+    "promptCapabilities": {
+      "image": true,
+      "audio": false,
+      "embeddedContext": true
+    },
+    "mcpCapabilities": {
+      "http": false,
+      "sse": false
+    },
+    "sessionCapabilities": {
+      "list": {}
+    }
+  },
+  "pid": 9219,
+  "agentStartedAt": "2026-04-07T11:37:23.236Z"
+}

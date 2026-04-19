@@ -100,7 +100,7 @@ himalaya envelope thread "from bob@example.com"
 3. **Email Backups** — Export to Maildir format
 4. **Action Items** — Parse emails for TODO extraction
 5. **VIP Tracking** — Monitor important senders
-6. **1Password Integration** — Replace hardcoded password with op command
+6. **Apple Keychain Integration** — Store secrets in Keychain (active)
 
 ### Advanced Features:
 - Custom email rules/filters
@@ -146,7 +146,7 @@ himalaya envelope thread "from bob@example.com"
 
 1. **Monitor Briefings** — Check quality of morning/evening reports
 2. **Test Email Search** — Try Himalaya queries for custom workflows
-3. **Consider 1Password Integration** — Move credentials to secure storage
+3. **Apple Keychain Integration** — Credentials stored securely (active)
 4. **Plan Advanced Features** — Email categorization, VIP tracking, etc.
 5. **Backup Strategy** — Set up periodic email exports if needed
 

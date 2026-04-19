@@ -18,6 +18,7 @@ Automated morning and evening briefings delivered via email with calendar, tasks
 - 📊 Daily Goals & Focus Areas
 - 📅 Calendar Events (next 48 hours)
 - 📧 Email Summary (unread count, flagged)
+- 📋 **Pending Tasks** (Google Tasks count & highlights)
 - 🔔 Active Reminders
 - 📈 GA4 Traffic (last 24h, last 7d comparison)
 - 🎯 Top Priorities
@@ -32,6 +33,7 @@ Automated morning and evening briefings delivered via email with calendar, tasks
 - ✅ Completed Today
 - 📝 Work Summary
 - 📈 Project Progress
+- 📋 **Pending Tasks** (remaining count, due soon, high priority)
 - ⚠️ Blockers/Issues
 - 💾 GitHub Commits
 - 🚀 Deployments

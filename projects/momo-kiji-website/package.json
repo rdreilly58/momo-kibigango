@@ -1,0 +1,21 @@
+{
+  "name": "momo-kiji-website",
+  "version": "1.0.0",
+  "description": "momo-kiji: CUDA for Apple Neural Engine",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "export": "next export"
+  },
+  "dependencies": {
+    "next": "^14.0.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5",
+    "@types/react": "^18",
+    "@types/node": "^20"
+  }
+}

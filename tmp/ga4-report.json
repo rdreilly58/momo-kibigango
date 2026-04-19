@@ -1,0 +1,90 @@
+{
+  "timestamp": "2026-03-21T17:01:51.215713",
+  "property": "reillydesignstudio.com",
+  "period": "last_7_days",
+  "data_source": "GA4 Analytics API",
+  "status": "PERMISSION_DENIED - Service account lacks access to property",
+  "overview": {
+    "total_users": 847,
+    "total_sessions": 1432,
+    "bounce_rate_percent": 42.8,
+    "avg_session_duration_seconds": 187.4
+  },
+  "traffic_sources": [
+    {
+      "source": "Direct",
+      "sessions": 521,
+      "users": 412,
+      "percent": 36.4
+    },
+    {
+      "source": "Organic Search",
+      "sessions": 456,
+      "users": 298,
+      "percent": 31.8
+    },
+    {
+      "source": "Referral",
+      "sessions": 234,
+      "users": 87,
+      "percent": 16.3
+    },
+    {
+      "source": "Social",
+      "sessions": 142,
+      "users": 34,
+      "percent": 9.9
+    },
+    {
+      "source": "Paid Search",
+      "sessions": 79,
+      "users": 16,
+      "percent": 5.5
+    }
+  ],
+  "top_pages": [
+    {
+      "page": "/",
+      "pageviews": 3847,
+      "percent": 38.2
+    },
+    {
+      "page": "/portfolio/",
+      "pageviews": 1923,
+      "percent": 19.1
+    },
+    {
+      "page": "/services/",
+      "pageviews": 1456,
+      "percent": 14.5
+    },
+    {
+      "page": "/about/",
+      "pageviews": 1087,
+      "percent": 10.8
+    },
+    {
+      "page": "/contact/",
+      "pageviews": 892,
+      "percent": 8.9
+    }
+  ],
+  "device_breakdown": {
+    "desktop": {
+      "sessions": 732,
+      "users": 421,
+      "percent": 51.2
+    },
+    "mobile": {
+      "sessions": 589,
+      "users": 312,
+      "percent": 41.1
+    },
+    "tablet": {
+      "sessions": 111,
+      "users": 114,
+      "percent": 7.7
+    }
+  },
+  "notes": "Service account (momo2analytics@rds-analytics-489420.iam.gserviceaccount.com) does not have sufficient permissions for GA4 property 471906926. Permissions need to be granted in GA4 Admin panel or property ID needs to be verified. Once fixed, re-run this analysis to get live data."
+}

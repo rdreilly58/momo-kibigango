@@ -93,8 +93,38 @@ iOSInjectionProject/
 Config/Secrets.plist
 *.log
 
+# Telegraph credentials (security)
+~/.telegraph_token
+.telegraph_token
+/config/telegraph_token
+/config/.telegraph_token
+*.telegraph_token
+
 # Temporary files
 .DS_Store
 .env
 *.tmp
 *.temp
+# === SECRETS (NEVER COMMIT) ===
+TOOLS.secrets.local
+TOOLS.*.local
+*.secrets
+.env
+.env.*
+.local/
+secrets/
+
+# === LOCAL DATABASE (machine-specific, not version-controlled) ===
+ai-memory.db
+ai-memory.db-shm
+ai-memory.db-wal
+
+# === GENERATED / CACHE (never commit) ===
+.cache/
+__pycache__/
+scripts/__pycache__/
+*.pyc
+*.pyo
+
+# === SUBMODULE WITHOUT COMMIT (unresolvable) ===
+openclaw/
