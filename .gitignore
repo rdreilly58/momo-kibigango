@@ -113,3 +113,18 @@ TOOLS.*.local
 .env.*
 .local/
 secrets/
+
+# === LOCAL DATABASE (machine-specific, not version-controlled) ===
+ai-memory.db
+ai-memory.db-shm
+ai-memory.db-wal
+
+# === GENERATED / CACHE (never commit) ===
+.cache/
+__pycache__/
+scripts/__pycache__/
+*.pyc
+*.pyo
+
+# === SUBMODULE WITHOUT COMMIT (unresolvable) ===
+openclaw/
