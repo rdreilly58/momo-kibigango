@@ -690,6 +690,44 @@ def _cosine(a, b) -> float:
 # Error result
 # ---------------------------------------------------------------------------
 
+def _db_fts_search(query: str, limit: int = 10) -> List[Dict]:
+    """Search ai-memory.db via FTS5. Returns results in total_recall format."""
+    try:
+        import sqlite3 as _sqlite3, json as _json
+        _db_path = Path.home() / ".openclaw" / "workspace" / "ai-memory.db"
+        if not _db_path.exists():
+            return []
+        con = _sqlite3.connect(_db_path)
+        con.row_factory = _sqlite3.Row
+        rows = con.execute(
+            """SELECT m.id, m.tier, m.namespace, m.title, m.content,
+                      snippet(memories_fts, 1, '[', ']', '...', 20) AS snippet
+               FROM memories_fts
+               JOIN memories m ON m.id = memories_fts.rowid
+               WHERE memories_fts MATCH ?
+               ORDER BY rank LIMIT ?""",
+            (query, limit),
+        ).fetchall()
+        con.close()
+        results = []
+        for row in rows:
+            results.append({
+                "source": "ai-memory.db",
+                "path": f"ai-memory.db::{row['namespace']}::{row['id'][:8]}",
+                "score": 0.7,  # FTS rank not numeric; assign a solid default
+                "snippet": row["snippet"] or row["content"][:200],
+                "title": row["title"],
+                "tier": row["tier"],
+                "namespace": row["namespace"],
+                "backend": "db-fts",
+            })
+        _vlog(f"DB FTS: {len(results)} results for '{query}'")
+        return results
+    except Exception as e:
+        _vlog(f"DB FTS error: {e}")
+        return []
+
+
 def _error_result(backend: str, msg: str) -> Dict:
     return {
         "type": backend,
@@ -880,6 +918,12 @@ def total_recall_search(
             else:
                 results = sem_ok[:limit]
                 backend_label = "semantic"
+
+    # Merge ai-memory.db FTS results (always, unless quick mode already returned)
+    db_results = _db_fts_search(query, limit=max(3, limit // 2))
+    if db_results:
+        results = _borda_merge(results, db_results, limit)
+        backend_label = f"{backend_label}+db-fts"
 
     results = _attach_meta(results, backend_label, time.time() - t0)
 

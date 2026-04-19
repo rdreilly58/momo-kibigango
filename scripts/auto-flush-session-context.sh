@@ -81,4 +81,15 @@ Active: Session auto-context from file state — no live session at flush time. 
 SNAPSHOT
 
 echo "[$TIMESTAMP] [auto-flush] Written: $OUT"
+
+# ── 4. Write session context to ai-memory.db ─────────────────────────────────
+CONTEXT_CONTENT=$(cat "$OUT" | grep -v '^#\|^---\|^$\|\*\*Purpose' | head -5 | tr '\n' ' ' | sed 's/  */ /g')
+python3 "$WORKSPACE/scripts/memory_db.py" add \
+  "Session context $(date +%Y-%m-%d)" \
+  "$CONTEXT_CONTENT" \
+  --tier working \
+  --ns workspace \
+  --tags "session,context,auto-flush" \
+  >> "$LOG_DIR/session-context-flush.log" 2>&1 || true
+
 echo "[$TIMESTAMP] [auto-flush] Done."

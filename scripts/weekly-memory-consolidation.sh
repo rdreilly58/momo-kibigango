@@ -36,7 +36,26 @@ echo "   Archived files: $ARCHIVE_COUNT"
 echo "   Total memory: $(du -sh $WORKSPACE/memory/ | cut -f1)"
 echo ""
 
-# 4. Git commit
+# 4. Consolidate recent daily memory files into ai-memory.db
+echo "🧠 Writing weekly summary to ai-memory.db..."
+WEEK_SUMMARY=$(find "$WORKSPACE/memory" -maxdepth 1 -name "*.md" -type f 2>/dev/null | \
+  xargs grep -h "^-\|^##" 2>/dev/null | head -40 | tr '\n' ' ' | sed 's/  */ /g' | cut -c1-2000)
+if [ -n "$WEEK_SUMMARY" ]; then
+  python3 "$WORKSPACE/scripts/memory_db.py" add \
+    "Weekly memory consolidation $(date +%Y-%m-%d)" \
+    "$WEEK_SUMMARY" \
+    --tier long \
+    --ns workspace \
+    --tags "weekly,consolidation,memory" \
+    --priority 6 || true
+  echo "   Written to ai-memory.db"
+fi
+
+# 5. TTL expiry and orphan cleanup
+python3 "$WORKSPACE/scripts/memory_db.py" expire 2>/dev/null || true
+python3 "$WORKSPACE/scripts/memory_db.py" clean-links 2>/dev/null || true
+
+# 6. Git commit
 cd "$WORKSPACE"
 git add -A && git commit -m "chore: Weekly memory consolidation and archival ($(date +%Y-%m-%d))" || true
 
