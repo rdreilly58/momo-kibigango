@@ -12,8 +12,5 @@
     "model": "anthropic/claude-haiku-4-5",
     "reasoning": "off"
   },
-  "overrides": {
-    "coding": "openai/gpt-4o",
-    "complex_analysis": "openai/gpt-4o"
-  }
+  "overrides": {}
 }

@@ -41,6 +41,8 @@ MEMORY_DATA=$(python3 "$SCRIPT_DIR/scripts/get-memory-health.py" --mode morning 
 MEMORY_HEALTH_HTML=$(echo "$MEMORY_DATA" | jq -r '.html // ""')
 
 # Export for envsubst
+BRIEFING_DATE=$(date +"%A, %B %-d")
+export BRIEFING_DATE
 export GMAIL_UNREAD
 export CALENDAR_HTML
 export PRIORITIES_HTML
@@ -72,7 +74,7 @@ envsubst << 'HTMLEOF'
     <div class="container">
         <div class="header">
             <h1>☀️ Good Morning</h1>
-            <p>Daily Briefing — Wednesday, March 18</p>
+            <p>Daily Briefing — ${BRIEFING_DATE}</p>
         </div>
 
         <div class="section">

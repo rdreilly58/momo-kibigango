@@ -49,16 +49,15 @@ things inbox 2>/dev/null | head -5 | sed 's/^/  • /' || true
 
 ## Heartbeat Performance: Isolation Mode
 
-Heartbeats run in isolated sessions with light context to minimize token burn:
+**Current status:** ⏸️ Heartbeat disabled April 19, 2026. The built-in 30-min heartbeat was burning full main session context (no isolation support in v2026.4.15). Disabled until OpenClaw implements `isolatedSession` for built-in heartbeats.
 
-```bash
-openclaw config set agents.defaults.heartbeat.isolatedSession true
-openclaw config set agents.defaults.heartbeat.lightContext true
-```
+Periodic tasks are now handled exclusively by explicit `agentTurn` crons (see sections above), which run in isolated sessions and are significantly cheaper.
 
-**Current status:** ✅ Configured April 19, 2026. Each heartbeat check runs in a fresh isolated session (no main session history loaded). Estimated 60-80% cost reduction vs. main session.
-
-> Note: User-defined `systemEvent` crons always run in the main session (OpenClaw constraint). Isolation applies to the built-in agent heartbeat only. To isolate a cron, it must use `--message` (agentTurn), not `--system-event`.
+> To re-enable: `openclaw config set agents.defaults.heartbeat.enabled true` once isolation is confirmed working. Target config when available:
+> ```bash
+> openclaw config set agents.defaults.heartbeat.isolatedSession true
+> openclaw config set agents.defaults.heartbeat.lightContext true
+> ```
 
 ---
 

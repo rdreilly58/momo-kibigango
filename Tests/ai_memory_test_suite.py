@@ -46,7 +46,7 @@ TESTS_DIR    = WORKSPACE / "Tests"
 
 OBSERVER_SH   = SKILLS_DIR / "total-recall" / "scripts" / "observer-agent.sh"
 REFLECTOR_SH  = SKILLS_DIR / "total-recall" / "scripts" / "reflector-agent.sh"
-INDEX_PY      = SCRIPTS_DIR / "index_files_for_memory.py"
+INDEX_PY      = SCRIPTS_DIR / "archive" / "index_files_for_memory.py"
 TRS_PY        = SCRIPTS_DIR / "total_recall_search.py"
 MEM_SEARCH_PY = SCRIPTS_DIR / "memory_search_local.py"
 
