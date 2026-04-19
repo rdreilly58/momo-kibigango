@@ -79,6 +79,10 @@ class MemoryDB:
         tags = tags or []
         metadata = metadata or {}
         now = _now()
+        # Auto-expire working-tier records after 7 days if no explicit TTL set
+        if tier == "working" and expires_at is None:
+            from datetime import timedelta
+            expires_at = (datetime.now(timezone.utc) + timedelta(days=7)).isoformat()
         mem_id = str(uuid.uuid4())
         with _conn(self.db_path) as con:
             # UPSERT on (title, namespace) — update content if already exists

@@ -51,11 +51,18 @@ if [ -n "$WEEK_SUMMARY" ]; then
   echo "   Written to ai-memory.db"
 fi
 
-# 5. TTL expiry and orphan cleanup
+# 5. SQLite dump backup (weekly snapshot of ai-memory.db)
+DB_PATH="$WORKSPACE/ai-memory.db"
+if [ -f "$DB_PATH" ]; then
+  DUMP_FILE="$ARCHIVE_DIR/ai-memory-$(date +%Y-%m-%d).sql"
+  sqlite3 "$DB_PATH" .dump > "$DUMP_FILE" 2>/dev/null && echo "   DB dump: $DUMP_FILE" || echo "   DB dump skipped (sqlite3 unavailable)"
+fi
+
+# 6. TTL expiry and orphan cleanup
 python3 "$WORKSPACE/scripts/memory_db.py" expire 2>/dev/null || true
 python3 "$WORKSPACE/scripts/memory_db.py" clean-links 2>/dev/null || true
 
-# 6. Git commit
+# 7. Git commit
 cd "$WORKSPACE"
 git add -A && git commit -m "chore: Weekly memory consolidation and archival ($(date +%Y-%m-%d))" || true
 
