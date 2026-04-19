@@ -36,6 +36,10 @@ TASKS_DATA=$(python3 "$SCRIPT_DIR/scripts/get-tasks.py" 2>/dev/null || echo '{"p
 TASKS_COUNT=$(echo "$TASKS_DATA" | jq -r '.pending_count // 0')
 TASKS_LIST=$(echo "$TASKS_DATA" | jq -r '.tasks[] | "      <div class=\"item\">• \(.title)</div>"' | head -5 || echo '<div class="item"><em>No pending tasks</em></div>')
 
+# Fetch memory system health
+MEMORY_DATA=$(python3 "$SCRIPT_DIR/scripts/get-memory-health.py" --mode morning 2>/dev/null || echo '{"html":"<div class=\"item\"><em>Memory health unavailable</em></div>"}')
+MEMORY_HEALTH_HTML=$(echo "$MEMORY_DATA" | jq -r '.html // ""')
+
 # Export for envsubst
 export GMAIL_UNREAD
 export CALENDAR_HTML
@@ -45,6 +49,7 @@ export TASKS_LIST
 export GA4_HTML
 export GA4_SOURCES_HTML
 export GA4_PAGES_HTML
+export MEMORY_HEALTH_HTML
 
 # Create HTML template and substitute variables
 envsubst << 'HTMLEOF'
@@ -92,10 +97,12 @@ envsubst << 'HTMLEOF'
         </div>
 
         ${GA4_HTML}
-        
+
         ${GA4_SOURCES_HTML}
-        
+
         ${GA4_PAGES_HTML}
+
+        ${MEMORY_HEALTH_HTML}
 
         <div class="footer">
             <p>🍑 Momotaro Daily Briefing System</p>

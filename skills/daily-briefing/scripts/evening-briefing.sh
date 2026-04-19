@@ -54,6 +54,10 @@ TASKS_DATA=$(python3 "$SCRIPT_DIR/scripts/get-tasks.py" 2>/dev/null || echo '{"p
 TASKS_COUNT=$(echo "$TASKS_DATA" | jq -r '.pending_count // 0')
 TASKS_LIST=$(echo "$TASKS_DATA" | jq -r '.tasks[] | "      <div class=\"item\">• \(.title)</div>"' | head -5 || echo '<div class="item"><em>All caught up!</em></div>')
 
+# Fetch memory system activity (also runs TTL expiry + orphan cleanup)
+MEMORY_DATA=$(python3 "$SCRIPT_DIR/scripts/get-memory-health.py" --mode evening 2>/dev/null || echo '{"html":"<div class=\"item\"><em>Memory health unavailable</em></div>"}')
+MEMORY_ACTIVITY_HTML=$(echo "$MEMORY_DATA" | jq -r '.html // ""')
+
 # Create HTML content
 cat > /tmp/evening-briefing.html << EOF
 <!DOCTYPE html>
@@ -117,6 +121,8 @@ cat > /tmp/evening-briefing.html << EOF
             <div class="item"><strong>$TASKS_COUNT</strong> pending tasks to carry forward</div>
             $TASKS_LIST
         </div>
+
+        $MEMORY_ACTIVITY_HTML
 
         <div class="tomorrow">
             <h2>📋 Tomorrow's Prep</h2>
