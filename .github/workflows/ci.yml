@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Memory System Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install sentence-transformers numpy 2>/dev/null || true
+
+      - name: Check script syntax
+        run: |
+          bash -n scripts/observer-agent.sh
+          bash -n scripts/weekly-memory-consolidation.sh
+          bash -n scripts/auto-flush-session-context.sh
+          bash -n skills/daily-briefing/scripts/morning-briefing.sh
+          bash -n skills/daily-briefing/scripts/evening-briefing.sh
+
+      - name: Check Python syntax
+        run: |
+          python -m py_compile scripts/memory_db.py
+          python -m py_compile scripts/total_recall_search.py
+          python -m py_compile skills/daily-briefing/scripts/get-memory-health.py
+
+      - name: Run memory test suite
+        run: |
+          python3 Tests/ai_memory_test_suite.py -v 2>&1 | tail -30
+        continue-on-error: false
+
+  secrets-scan:
+    name: Secret Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for new secrets in diff
+        run: |
+          # Mirror the pre-commit hook logic
+          if git diff origin/main...HEAD | grep '^+' | grep -v '^+++' | \
+             perl -ne 'exit 0 if /[a-z0-9]{32,}.*=/i or /AKIA[0-9A-Z]{16}/ or /ghp_[a-zA-Z0-9]{36}/; END { exit 1 }'; then
+            echo "❌ Possible secret found in PR diff"
+            exit 1
+          fi
+          echo "✅ No secrets detected"
