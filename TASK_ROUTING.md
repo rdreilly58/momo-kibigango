@@ -7,7 +7,7 @@
 ## Task Classification Rules
 
 ### SIMPLE TASKS → Haiku (Fast Model)
-**Characteristics:** Direct answer, minimal reasoning, <5 min expected work
+**Characteristics:** Direct answer, minimal reasoning, <50 words, no analysis
 
 **Examples:**
 - Weather, time, calendar lookups
@@ -22,28 +22,55 @@
 - ✅ SOUL.md (who you are)
 - ✅ USER.md (who Bob is)
 - ❌ MEMORY.md (not needed for facts)
-- ❌ memory/YYYY-MM-DD.md (not needed for facts)
 - ❌ TOOLS.md (unless specifically about tools)
 
 **Token Budgeting (Reasoning):**
-- ✅ `thinking="off"` or `reasoning="off"` (skip reasoning overhead)
+- ✅ `thinking="off"` — skip reasoning overhead
 - Saves 2-3 seconds per request
-- Haiku doesn't need reasoning for simple factual lookups
-- Direct inference only
 
-**Model:** `anthropic/claude-haiku-4-5`
+**Model:** `anthropic/claude-haiku-4-5-20251001`
+
+**Hard rule:** If message word count > 50, minimum tier is Sonnet. No exceptions.
+
+---
+
+### MEDIUM TASKS → Sonnet (Default Model)
+**Characteristics:** Conversational, analytical, writing, medium-complexity, or anything that doesn't clearly match Simple or Complex
+
+**Examples:**
+- General conversation and greetings with follow-up work
+- Explaining concepts or summarizing things
+- Writing emails, messages, short content
+- Answering questions that need some context
+- Memory lookups and cross-session continuity
+- Most heartbeat tasks
+- Anything ambiguous — when in doubt, Sonnet (not Haiku)
+
+**Context Loading:**
+- ✅ SOUL.md (who you are)
+- ✅ USER.md (who Bob is)
+- ✅ MEMORY.md (continuity)
+- ❌ TOOLS.md (unless task needs it)
+
+**Token Budgeting (Reasoning):**
+- ✅ `thinking="off"` for conversational
+- ✅ `thinking="medium"` for analysis
+
+**Model:** `anthropic/claude-sonnet-4-6`
+
+**This is the default tier.** Anything that doesn't match simple or complex keywords routes here.
 
 ---
 
 ### COMPLEX TASKS → Opus (Capable Model)
-**Characteristics:** Multi-step, reasoning, analysis, coding, >5 min work
+**Characteristics:** Multi-step, deep reasoning, coding, architecture, strategy, >5 min work
 
 **Examples:**
 - Coding tasks (design, refactor, build, debug)
 - Strategic decisions, analysis
-- Writing/editing (emails, documentation, content)
-- Multi-step workflows (password audit, deployments)
-- Problem-solving that needs deep reasoning
+- Writing/editing (emails, documentation, content) requiring deep reasoning
+- Multi-step workflows (deployments, audits)
+- Problem-solving that needs extended reasoning
 - Research and synthesis
 - Context-aware responses (understanding ongoing projects)
 
@@ -58,11 +85,9 @@
 **Token Budgeting (Reasoning):**
 - ✅ `thinking="medium"` (balanced reasoning for most tasks)
 - ✅ `thinking="full"` (extended reasoning for hard problems)
-- ✅ `thinking="off"` (skip if no analysis needed, rare for complex tasks)
-- Complex work REQUIRES reasoning investment
-- Better decision-making, deeper analysis, fewer mistakes
+- ✅ `thinking="off"` (rare — skip if user asks for speed)
 
-**Model:** `anthropic/claude-opus-4-0`
+**Model:** `anthropic/claude-opus-4-6`
 
 ---
 
@@ -73,44 +98,46 @@
 - User knows their need better than classifier
 
 **Sensitive or privacy-critical:**
-- Use Opus (safer defaults)
-- Better at handling nuance and context
+- Use Sonnet minimum (Opus if complex)
 
 **When in doubt:**
-- Default to Opus (better to over-invest than under-deliver)
+- Default to Sonnet (not Haiku — Sonnet is the middle ground)
+- Reserve Opus for truly hard problems only
 
 ---
 
 ## Context Size Impact
 
-**Simple task with full context:**
-- Haiku: ~1.5-2s (but using full 100+ KB context is wasteful)
-
 **Simple task with minimal context:**
-- Haiku: ~200-400ms (3-5x faster)
+- Haiku: ~200-400ms
+
+**Medium task with Sonnet:**
+- Sonnet: ~500ms-1s (covers ~80% of all requests)
 
 **Complex task with full context:**
 - Opus: ~1-2s (needed for quality)
 
-**Savings from context optimization:**
-- Simple tasks: ~1-1.5s saved per request
-- Complex tasks: No impact (use full context)
+**Savings vs old Haiku/Opus binary:**
+- Old pattern: ~50% of tasks hit Opus unnecessarily
+- New pattern: ~80% hit Sonnet, ~15% Haiku, ~5% Opus
 
 ---
 
 ## Implementation
 
 **Classifier logic:**
-1. **Input length** — If <200 tokens + looks factual → Simple
-2. **Keywords** — If contains code/build/analyze/research → Complex
-3. **Scope** — If asks for single piece of info → Simple; if multi-step → Complex
-4. **Default** — When unclear, pick Complex (safer)
+1. **Complex keywords** — if message contains complex keywords → Opus
+2. **Simple keywords + short** — if simple keyword AND message < 50 words → Haiku
+3. **Word count** — if message > 50 words → Sonnet minimum (not Haiku)
+4. **Default** — Sonnet (not Haiku — Sonnet is the safe default)
 
 **Context loader:**
 ```
 if SIMPLE:
   load(SOUL, USER)
-else:
+elif MEDIUM:
+  load(SOUL, USER, MEMORY)
+else:  # COMPLEX
   load(SOUL, USER, MEMORY, TOOLS, relevant_projects, today's_memory)
 ```
 
@@ -121,17 +148,19 @@ else:
 **Thinking/Reasoning Overhead:**
 - Reasoning adds 2-3 seconds per request
 - Haiku: Better off without reasoning (direct inference only)
+- Sonnet: Optional — off for conversation, medium for analysis
 - Opus: Usually needs reasoning (better decisions)
 
 **Implementation:**
-- **Simple tasks with Haiku:** Always `thinking="off"` (no overhead)
+- **Simple tasks with Haiku:** Always `thinking="off"`
+- **Medium tasks with Sonnet:** `thinking="off"` for chat, `thinking="medium"` for analysis
 - **Complex tasks with Opus:** Default `thinking="medium"`
   - Upgrade to `thinking="full"` only for hard problems
-  - Can be `thinking="off"` if user asks for speed + accuracy < importance
 
 **Speed Impact:**
 - Simple + `thinking="off"`: ~0.5-1s response time
-- Simple + reasoning enabled: ~2-3s response time
+- Medium + `thinking="off"`: ~0.5-1s response time
+- Medium + `thinking="medium"`: ~1-2s response time
 - Complex + `thinking="medium"`: ~1-2s response time
 - Complex + `thinking="full"`: ~3-5s response time
 
@@ -147,34 +176,31 @@ else:
 - New: 1 batch call = 1-2 seconds
 - Savings: 4-8 seconds
 
-**Implementation:** See BATCH_PROCESSING.md for details
-
 ---
 
-## Speculative Decoding (Tier 3 Future - TBD Q3/Q4 2026)
+## Speculative Decoding (Available)
 
-**Status:** Awaiting API provider support (Google/OpenAI)
+**Status:** Skill installed — `openclaw-skills:speculative-decoding`
 
 **Expected benefits:**
-- 2-3x speedup without quality loss
+- 1.8-2.1x speedup without quality loss
 - Small fast model generates draft
 - Large model verifies in parallel
 - Combines speed + quality
 
-**When available:**
-- Will be activated automatically
-- No code changes needed
-- Monitor announcements from Claude/GPT-4 teams
+**When to use:**
+- Long-form generation tasks (emails, reports, code)
+- When latency is the user's primary concern
+- See skill SKILL.md for activation details
 
 ---
 
 ## Review & Adjust
 
 Monitor accuracy of classification. Adjust rules if:
-- Haiku is rejecting tasks it should handle
+- Sonnet is routing tasks that need Haiku (over-investing on trivial tasks)
+- Opus is being hit for tasks Sonnet handles fine
 - Simple classification is wrong >10% of time
 - User feedback suggests better thresholds
-- Reasoning level (thinking) needs adjustment
-- Batch sizes need tuning (3-5 items optimal?)
 
 Quarterly review recommended.

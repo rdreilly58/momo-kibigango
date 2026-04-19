@@ -105,8 +105,8 @@ cat > "$TEMPLATE_FILE" << 'XMLEOF'
 </roblox>
 XMLEOF
 
-# Create game file (gzip XML)
-gzip -c "$TEMPLATE_FILE" > "$GAME_FILE" 2>/dev/null || cp "$TEMPLATE_FILE" "$GAME_FILE"
+# Create game file (plain XML - Studio reads this directly)
+cp "$TEMPLATE_FILE" "$GAME_FILE"
 echo "   ✅ Game file created: $(basename $GAME_FILE)"
 echo ""
 
@@ -243,8 +243,21 @@ echo ""
 echo "8️⃣  Analyzing startup output for errors..."
 echo ""
 
-ERROR_COUNT=$(grep -i "error\|fail\|exception" "$OUTPUT_CAPTURE" 2>/dev/null | wc -l)
-WARNING_COUNT=$(grep -i "warning" "$OUTPUT_CAPTURE" 2>/dev/null | wc -l)
+# Filter out Studio FLog/DFLog infrastructure noise — only count real Lua script errors
+# Use ERE alternation (plain | not \|) to exclude known Studio internals
+flog_noise() {
+    grep -v -E 'FLog::|DFLog::|Mimalloc|Redundant Flag|settingsUrl|LoadIxpSettings|GUID|Launch Intent|interruptWith|version fetch|flagOnly|X-Signature|telemetryLog|StudioGameState|ErrorType: DataModel|ParallelDmTask'
+}
+
+SCRIPT_ERRORS=$(grep -i "error\|fail\|exception" "$OUTPUT_CAPTURE" 2>/dev/null | flog_noise || true)
+SCRIPT_WARNINGS=$(grep -i "warning" "$OUTPUT_CAPTURE" 2>/dev/null | flog_noise || true)
+
+ERROR_COUNT=$(echo "$SCRIPT_ERRORS" | grep -c . || true)
+WARNING_COUNT=$(echo "$SCRIPT_WARNINGS" | grep -c . || true)
+
+# Empty string → 0
+[[ -z "$SCRIPT_ERRORS" ]] && ERROR_COUNT=0
+[[ -z "$SCRIPT_WARNINGS" ]] && WARNING_COUNT=0
 
 cat > "$OUTPUT_DIR/.test_results.txt" << RESULTSEOF
 ═══════════════════════════════════════════════════════════════
@@ -257,13 +270,17 @@ Studio PID: $STUDIO_PID
 
 SUMMARY:
 --------
-Errors Found: $ERROR_COUNT
-Warnings Found: $WARNING_COUNT
+Script Errors: $ERROR_COUNT
+Script Warnings: $WARNING_COUNT
 Status: $([ $ERROR_COUNT -eq 0 ] && echo "✅ PASS" || echo "❌ FAIL")
 
-STARTUP LOG (last 50 lines):
-----------------------------
-$(tail -50 "$OUTPUT_CAPTURE")
+SCRIPT ERRORS:
+--------------
+${SCRIPT_ERRORS:-None}
+
+SCRIPT WARNINGS:
+----------------
+${SCRIPT_WARNINGS:-None}
 
 FULL OUTPUT:
 -----------
@@ -271,20 +288,20 @@ $(cat "$OUTPUT_CAPTURE")
 RESULTSEOF
 
 echo "📊 Test Results Summary:"
-echo "   Errors: $ERROR_COUNT"
-echo "   Warnings: $WARNING_COUNT"
+echo "   Script Errors:   $ERROR_COUNT"
+echo "   Script Warnings: $WARNING_COUNT"
 echo "   Status: $([ $ERROR_COUNT -eq 0 ] && echo "✅ PASS" || echo "❌ FAIL")"
 echo ""
 
 if [ $ERROR_COUNT -gt 0 ]; then
-    echo "⚠️  ERRORS DETECTED:"
-    grep -i "error\|fail\|exception" "$OUTPUT_CAPTURE" 2>/dev/null | head -10 | sed 's/^/   /'
+    echo "⚠️  SCRIPT ERRORS DETECTED:"
+    echo "$SCRIPT_ERRORS" | head -10 | sed 's/^/   /'
     echo ""
 fi
 
 if [ $WARNING_COUNT -gt 0 ]; then
-    echo "⚠️  WARNINGS:"
-    grep -i "warning" "$OUTPUT_CAPTURE" 2>/dev/null | head -5 | sed 's/^/   /'
+    echo "⚠️  SCRIPT WARNINGS:"
+    echo "$SCRIPT_WARNINGS" | head -5 | sed 's/^/   /'
     echo ""
 fi
 

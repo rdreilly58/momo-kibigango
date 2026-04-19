@@ -6,6 +6,14 @@
 
 set -uo pipefail  # Remove -e to prevent trap from killing script on warnings
 
+# Idempotency guard: only run once per calendar day
+LOCK_FILE="/tmp/morning-briefing-$(date +%Y-%m-%d).lock"
+if [ -f "$LOCK_FILE" ]; then
+  echo "[briefing] Already ran today (lock: $LOCK_FILE). Skipping duplicate trigger."
+  exit 0
+fi
+touch "$LOCK_FILE"
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BRIEFING_TYPE="morning"
 

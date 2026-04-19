@@ -1,7 +1,7 @@
 {
   "models": {
-    "primary": "openrouter/openrouter/auto",
-    "fallback": "anthropic/claude-haiku-4-5"
+    "primary": "anthropic/claude-sonnet-4-6",
+    "fallback": "anthropic/claude-haiku-4-5-20251001"
   },
   "gateway": {
     "bind": "127.0.0.1:8080",
@@ -13,6 +13,10 @@
     "simple": {
       "max_chars": 5000,
       "files": ["SOUL.md", "USER.md"]
+    },
+    "medium": {
+      "max_chars": 40000,
+      "files": ["SOUL.md", "USER.md", "MEMORY.md"]
     },
     "complex": {
       "max_chars": 135000,

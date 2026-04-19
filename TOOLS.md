@@ -1,147 +1,75 @@
-# TOOLS.md - Local Notes
 
-Skills define _how_ tools work. This file is for _your_ specifics — the stuff that's unique to your setup.
+## Git Commit Author (ENFORCED)
 
-**Note:** Detailed configs for email, printers, AA meetings, Leidos work, and API keys
-are in dedicated `memory/` files for better search. This file has active tool references only.
-
----
-
-## ReillyDesignStudio Deployment (March 22, 2026)
-
-**Deployment Platform:** Vercel (primary)
-- Auto-deploys from `main` branch pushes
-- Build time: ~4-5 minutes from push to live
-- URL: https://reillydesignstudio.com
-- Domain: reillydesignstudio.com (via Cloudflare)
-- Framework: Next.js 16
-- **Commit Author:** MUST be `robert.reilly@peraton.com` (Vercel requirement)
+**Always use:** `robert.reilly@peraton.com` / `Robert Reilly`  
+Vercel only builds reillydesignstudio with this author. Set globally: `git config --global user.email "robert.reilly@peraton.com"`
 
 ---
 
-## Roblox Development Setup (March 21, 2026)
+## Email Operations
 
-- **Username:** reillyrdai
-- **API Key:** Stored in 1Password (OpenClaw Secrets vault)
-- **Permissions:** universe-places (read/write), universe-datastores (read/write), universe-assets (write), universe-analytics (read)
-- **Status:** ✅ ACTIVE
-- **Automation:** `scripts/roblox-full-automation.sh` (GitHub → Studio → test → report)
+**Primary account:** `reillyrd58@gmail.com` — use `gog` CLI for all Gmail ops.  
+- **Send:** `gog gmail send -a "reillyrd58@gmail.com" --to "..." --subject "..." --body-file <(cat file.txt)`  
+- **Read:** `gog gmail search -a reillyrd58@gmail.com "is:inbox"` (supports `from:X AND subject:Y AND after:DATE`)  
+- **Never use:** Himalaya for Gmail, `mail` command, `rdreilly2010@gmail.com` (expired)  
+
+**ReillyDesignStudio** (`robert@reillydesignstudio.com`): Routed via reillyrd58@gmail.com (forwarding + send-as)  
+- **Receive:** forwards to reillyrd58 inbox — read with `gog gmail search -a reillyrd58@gmail.com "is:inbox"`  
+- **Send as robert@:** `gog gmail send -a reillyrd58@gmail.com --from robert@reillydesignstudio.com --to "..." --subject "..." --body "..."`
 
 ---
 
-## Calendar Operations (gog)
+## Total Recall Search — Unified Memory + Disk Search (Added April 9, 2026)
 
-**Primary Account:** `reillyrd58@gmail.com`
-
+**Tool:** `total-recall-search`
+**Location:** `~/bin/total-recall-search` → `~/.openclaw/workspace/scripts/total_recall_search.py`
+**Skill:** `~/.openclaw/workspace/skills/total-recall-search/SKILL.md`
+**Usage:** `total-recall-search <query> [--type auto|semantic|keyword] [--limit N] [--path /dir] [--json]`
+**Purpose:** Unified search across semantic memory (Sentence Transformers over memory files) and local disk (momo-kioku-search/Spotlight). Auto-routes: file/path queries → keyword; prose/concept queries → semantic.
+**Examples:**
 ```bash
-gog calendar list -a reillyrd58@gmail.com
-gog calendar list -a reillyrd58@gmail.com --json
+total-recall-search "cascade proxy savings"          # auto-route (semantic)
+total-recall-search "SOUL.md" --type keyword         # file search
+total-recall-search "Leidos job" --type semantic     # memory recall
+total-recall-search "config" --json --limit 5        # JSON output
 ```
-
-**Legacy:** `gog calendar list -a rdreilly2010@gmail.com`
-
-**If auth fails:** `gog auth login -a reillyrd58@gmail.com`
+**Output:** JSON array with `type`, `path`, `snippet`, `score`, `source_line` fields.
+**Note:** Semantic search requires `sentence-transformers` in workspace venv (~5-15s first run).
 
 ---
 
-## Google Tasks
+## Compute Fallback Hierarchy (Updated April 2026)
 
-**Status:** ✅ Integrated via gog CLI
+When GPU/inference compute is needed, use this priority order:
 
-- **Task List ID:** `MDE3Mjg4NDY4MTYwNjc5NDE0MDY6MDow`
-- **Account:** rdreilly2010@gmail.com
+| Priority | Resource | Status | Notes |
+|----------|----------|--------|-------|
+| 1 | Local M4 Mac Mini GPU (MLX) | ✅ Active | Best for everyday inference |
+| 2 | Google Colab H100 | ✅ Available | Manual setup; use notebooks in repo |
+| 3 | AWS EC2 `54.81.20.218` | ❌ DOWN | Down since April 5 — restart in AWS console |
 
-```bash
-# List pending
-gog tasks list MDE3Mjg4NDY4MTYwNjc5NDE0MDY6MDow -a rdreilly2010@gmail.com --json | jq '.tasks[] | select(.status == "needsAction")'
-
-# Add task
-gog tasks add MDE3Mjg4NDY4MTYwNjc5NDE0MDY6MDow -a rdreilly2010@gmail.com --title "Task title"
-
-# Mark done
-gog tasks done MDE3Mjg4NDY4MTYwNjc5NDE0MDY6MDow <TASK_ID> -a rdreilly2010@gmail.com
-```
+**GPU health check scripts** archived to `scripts/_archive/` — do not use until AWS instance is back.
 
 ---
 
-## PDF Generation (WeasyPrint)
+## Known API Reliability Issues
 
-**Status:** ✅ PRODUCTION READY
+**Anthropic Sonnet `:01` timeout:** Sonnet times out at exactly :01 past the hour (61s). Gemini fallback succeeds. Manual retry is rarely needed now.
 
-```bash
-# Markdown to PDF
-bash ~/.openclaw/workspace/scripts/pdf-from-markdown.sh document.md -o output.pdf -t "Title" -a "Author"
+**Retry config (applied April 19, 2026):**
+- `channels.telegram.retry`: attempts=3, minDelayMs=5000, maxDelayMs=30000
+- `cron.retry`: maxAttempts=3, backoffMs=[5000,15000,30000], retryOn all transient types
 
-# Direct HTML to PDF
-weasyprint input.html output.pdf
-```
+Gateway restart required to activate (or restart automatically next gateway cycle).
 
-Pipeline: Markdown → HTML (pandoc) → PDF (weasyprint)
+**OpenRouter credits:** Monitor at `openrouter.ai/settings/credits`. Credits exhausted ~April 11 — Total Recall Observer fell back to Anthropic Haiku silently. The `api-quota-monitor.sh` now checks and alerts when below $1.
 
 ---
 
-## PDF Extraction from Emails
+## Fast Disk Search (via mdfind) - Added April 8, 2026
 
-```bash
-# Get thread ID
-THREAD_ID=$(gog gmail search 'subject:"YOUR_SUBJECT"' --json | jq -r '.threads[0].id')
-
-# Download attachments
-cd /tmp && gog gmail thread attachments $THREAD_ID --download --out-dir /tmp
-
-# Extract text
-pdftotext /tmp/FILE.pdf - | head -200
-```
-
----
-
-## Sudo Access & Permissions
-
-**Status:** ✅ ACTIVE - Passwordless sudo for whitelisted commands
-**Config:** `/etc/sudoers.d/momotaro`
-
-**Whitelisted:** softwareupdate, brew, xcode-select, launchctl, systemctl, dscacheutil, log, diskutil, lsof, clawhub
-
-Use sudo freely — it's whitelisted and expected. Don't ask permission.
-
----
-
-## Orion Paper (Apple Neural Engine Research)
-
-- **Title:** Orion: Characterizing and Programming Apple's Neural Engine for LLM Training and Inference
-- **Link:** https://arxiv.org/pdf/2603.06728
-- **Significance:** First detailed public ANE architecture documentation
-- **Status:** ✅ Referenced for momo-kiji development
-
----
-
-## Current Date & Time
-
-**Always run `session_status` to get current date/time. Never infer or hardcode.**
-
----
-
-## Location
-
-**Default location:** Reston, VA
-
----
-
-## Default Email
-
-**Default email:** rdreilly2010@gmail.com (sender) / reillyrd58@gmail.com (receiving/work)
-
----
-
-## What Goes Here
-
-Things like camera names, SSH hosts, preferred voices, speaker names, device nicknames — anything environment-specific. Detailed configs go in `memory/` files for searchability.
-
----
-
-## BigQuery + GA4 (Reference)
-
-- **GCP Project ID:** `127601657025`
-- **GA4 Property ID:** `526836321` (ReillyDesignStudio)
-- **Dataset:** `ga4_reillydesignstudio`
-- **Status:** ⏳ Awaiting GA4 Admin linkage (manual step at analytics.google.com)
+**Tool:** `fast-find.sh`
+**Location:** `~/.openclaw/workspace/scripts/fast-find.sh`
+**Usage:** `bash ~/.openclaw/workspace/scripts/fast-find.sh "your query" [limit]`
+**Purpose:** Leverages macOS Spotlight (`mdfind`) for very fast keyword searching across the entire disk.
+**Example:** `bash ~/.openclaw/workspace/scripts/fast-find.sh "momo-akira" 20`

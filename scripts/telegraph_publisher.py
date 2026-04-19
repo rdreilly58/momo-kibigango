@@ -243,6 +243,57 @@ class TelegraphPublisher:
             logger.error(f"❌ Publish failed: {str(e)}")
             return {'success': False, 'error': str(e)}
     
+    def edit_page(self, page_path: str, title: str, markdown_content: str) -> Dict[str, Any]:
+        """
+        Update an existing Telegraph page in-place (editPage API).
+
+        Args:
+            page_path: The path component of the Telegraph URL (e.g. 'OpenClaw-Status-04-16')
+            title: New title for the page
+            markdown_content: Updated Markdown content
+
+        Returns:
+            Dict with 'url', 'path', and 'success' keys
+        """
+        logger.info(f"Editing page: {page_path}")
+
+        if not markdown_content.strip():
+            raise ValueError("Content cannot be empty")
+
+        content = self._markdown_to_telegraph_content(markdown_content)
+
+        url = f"{self.api_endpoint}/editPage/{page_path}"
+        payload = {
+            'access_token': self.token,
+            'title': title[:256],
+            'author_name': self.config['author']['name'],
+            'author_url': 'https://github.com/rreilly/openclaw',
+            'content': content,
+            'return_content': False,
+        }
+
+        try:
+            response = self._retry_request('POST', url, json=payload)
+
+            if 'result' in response:
+                result = response['result']
+                page_url = result['url']
+                logger.info(f"✅ Edited: {page_url}")
+                return {
+                    'success': True,
+                    'url': f"https://telegra.ph{page_url}",
+                    'path': result.get('path'),
+                    'title': result.get('title'),
+                }
+            else:
+                error_msg = response.get('error', 'Unknown error')
+                logger.error(f"❌ editPage error: {error_msg}")
+                return {'success': False, 'error': error_msg}
+
+        except Exception as e:
+            logger.error(f"❌ editPage failed: {str(e)}")
+            return {'success': False, 'error': str(e)}
+
     def test_connectivity(self) -> bool:
         """Test Telegraph API connectivity."""
         logger.info("Testing Telegraph API connectivity...")

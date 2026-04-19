@@ -5,6 +5,14 @@
 
 set -e
 
+# Idempotency guard: only run once per calendar day (prevents duplicate cron fires)
+LOCK_FILE="/tmp/backup-openclaw-config-$(date +%Y-%m-%d).lock"
+if [ -f "$LOCK_FILE" ]; then
+  echo "[backup] Already ran today (lock: $LOCK_FILE). Skipping duplicate trigger."
+  exit 0
+fi
+touch "$LOCK_FILE"
+
 # Source and destination
 CONFIG_FILE="$HOME/.openclaw/openclaw.json"
 BACKUP_DIR="$HOME/.openclaw/backups"

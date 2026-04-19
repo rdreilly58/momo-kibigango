@@ -14,7 +14,7 @@ echo "=================================================="
 # 1. Create daily memory file if not exists
 if [ ! -f "$DAILY_LOG" ]; then
     echo "📝 Creating daily log: $DAILY_LOG"
-    cat > "$DAILY_LOG" << 'EOF'
+    cat > "$DAILY_LOG" << EOF
 # Daily Notes - Session Log
 
 ## Session Start

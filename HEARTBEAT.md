@@ -21,35 +21,44 @@ The cron will automatically prompt you on Sunday mornings. Response flow:
 
 ---
 
-## Cascade Proxy Monitoring (TRIAL ENDED April 5, 2026 — DISABLED)
+## Things 3 Task Check
 
-<!-- Trial ended with zero requests routed. Proxy can be stopped. -->
-<!-- To fully decommission: launchctl bootout gui/$(id -u)/com.momotaro.cascade-proxy -->
-
----
-
-## Google Tasks Check
-
-Show pending tasks during periodic checks:
+Show pending tasks during periodic checks (Things 3 is the primary task tracker since April 16, 2026):
 
 ```bash
-TASKLIST_ID="MDE3Mjg4NDY4MTYwNjc5NDE0MDY6MDow"
-PENDING=$(gog tasks list $TASKLIST_ID -a rdreilly2010@gmail.com --json 2>/dev/null | \
-  jq '[.tasks[] | select(.status == "needsAction")] | length')
+echo "📋 Today's Tasks:"
+things today 2>/dev/null | head -10 | sed 's/^/  • /' || echo "  (Things unavailable)"
 
-echo "📋 Pending Tasks: $PENDING"
-gog tasks list $TASKLIST_ID -a rdreilly2010@gmail.com --json 2>/dev/null | \
-  jq -r '.tasks[] | select(.status == "needsAction") | "  • \(.title)"' | head -5
+echo ""
+echo "📥 Inbox:"
+things inbox 2>/dev/null | head -5 | sed 's/^/  • /' || true
 ```
 
 **What it shows:**
-- Count of pending tasks
-- Top 5 task titles
+- Today's scheduled tasks
+- Inbox items needing triage
 - Quick overview of what needs attention
 
 **Frequency:** Every heartbeat (~30 min)  
-**Duration:** <5 seconds  
+**Duration:** <2 seconds  
 **Impact:** Lightweight, informational only
+
+> Note: Google Tasks check was removed April 2026 — `jq` display was broken (escaping issue in `exec` call). Things 3 is now authoritative. Use `things today` or `things inbox` from CLI.
+
+---
+
+## Heartbeat Performance: Isolation Mode
+
+Heartbeats run in isolated sessions with light context to minimize token burn:
+
+```bash
+openclaw config set agents.defaults.heartbeat.isolatedSession true
+openclaw config set agents.defaults.heartbeat.lightContext true
+```
+
+**Current status:** ✅ Configured April 19, 2026. Each heartbeat check runs in a fresh isolated session (no main session history loaded). Estimated 60-80% cost reduction vs. main session.
+
+> Note: User-defined `systemEvent` crons always run in the main session (OpenClaw constraint). Isolation applies to the built-in agent heartbeat only. To isolate a cron, it must use `--message` (agentTurn), not `--system-event`.
 
 ---
 
@@ -78,23 +87,16 @@ python3 ~/.openclaw/workspace/scripts/telegraph_heartbeat.py
 
 ---
 
-## GPU Offload Health Check (DISABLED)
+## GPU / Compute Status
 
-# Run full GPU health test every heartbeat (detect issues early):
-# ```bash
-# /Users/rreilly/.openclaw/workspace/scripts/gpu-health-check-full.sh
-# ```
+**Current compute hierarchy (as of April 2026):**
 
-**What it does:**
-- Tests SSH connectivity to GPU instance (54.81.20.218)
-- Verifies GPU driver & CUDA availability
-- Runs quick inference test (measures latency + speed)
-- Sends success/failure message to Telegram
-- Logs results to ~/.openclaw/logs/gpu-health.log
+| Tier | Resource | Status |
+|------|----------|--------|
+| 1 | Local M4 Mac Mini GPU | ✅ Available |
+| 2 | Google Colab H100 | ✅ Available (manual) |
+| 3 | AWS EC2 `54.81.20.218` | ❌ DOWN since April 5 — restart needed in AWS console |
 
-**Success:** "✅ GPU offload startup OK" with performance metrics  
-**Failure:** "❌ GPU offload setup failed" with reason + disables GPU feature
+**GPU health check is DISABLED** — scripts archived to `scripts/_archive/`. Do not run them; the AWS instance is unreachable. Restart or replace the instance in the AWS console before re-enabling.
 
-**Frequency:** Every heartbeat (~30 min)  
-**Duration:** ~90 seconds (includes model load if needed)  
-**Skip if:** Bob explicitly disables GPU feature or is troubleshooting
+> **Action needed:** Log into AWS console → EC2 → start/replace `54.81.20.218`.

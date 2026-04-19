@@ -5,6 +5,14 @@
 
 set -euo pipefail
 
+# Idempotency guard: only run once per calendar day
+LOCK_FILE="/tmp/evening-briefing-$(date +%Y-%m-%d).lock"
+if [ -f "$LOCK_FILE" ]; then
+  echo "[briefing] Already ran today (lock: $LOCK_FILE). Skipping duplicate trigger."
+  exit 0
+fi
+touch "$LOCK_FILE"
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SEND_EMAIL="${1:-}"
 

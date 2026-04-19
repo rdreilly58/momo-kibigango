@@ -16,7 +16,7 @@ set -uo pipefail
 # ============================================================================
 
 # Primary email account (migrate all to this)
-export MOMOTARO_EMAIL="${MOMOTARO_EMAIL:-reillyrd58@gmail.com}"
+export MOMOTARO_EMAIL="${MOMOTARO_EMAIL:-rdreilly2010@gmail.com}"
 
 # Logging
 MOMOTARO_LOG_DIR="${MOMOTARO_LOG_DIR:-$HOME/.openclaw/logs}"

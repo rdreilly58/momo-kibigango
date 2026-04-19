@@ -130,16 +130,33 @@ def memory_search(query: str, top_k: int = 5) -> List[Dict]:
     return results
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Usage: memory_search_local.py <query>")
-        sys.exit(1)
-    
-    query = " ".join(sys.argv[1:])
+    import argparse as _argparse
+    import json as _json
+
+    _parser = _argparse.ArgumentParser(prog="memory_search_local")
+    _parser.add_argument("query", nargs="+", help="Search query")
+    _parser.add_argument("--limit", type=int, default=5, help="Max results")
+    _parser.add_argument("--json", action="store_true", help="Emit JSON array")
+    _args = _parser.parse_args()
+
+    query = " ".join(_args.query)
     print(f"\nSearching for: '{query}'\n", file=sys.stderr)
-    
-    results = memory_search(query, top_k=5)
-    
-    if results:
+
+    results = memory_search(query, top_k=_args.limit)
+
+    if _args.json:
+        # Emit clean JSON for machine consumption
+        _json_results = [
+            {
+                "score": round(float(r["score"]), 4),
+                "text": r["text"],
+                "source": r["source"],
+                "index": r["index"],
+            }
+            for r in results
+        ]
+        print(_json.dumps(_json_results, ensure_ascii=False))
+    elif results:
         print(f"\n{'='*70}\n")
         for i, result in enumerate(results, 1):
             print(f"[{i}] Score: {result['score']:.3f} | {result['source']}")

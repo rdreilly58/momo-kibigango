@@ -30,6 +30,11 @@ export TASK_MODEL="$MODEL"
 export TASK_THINKING="$THINKING"
 export TASK_CONTEXT="$CONTEXT"
 
+# Log routing decision for accuracy review
+LOG_DIR="$HOME/.openclaw/logs"
+mkdir -p "$LOG_DIR"
+echo "$(date '+%Y-%m-%d %H:%M:%S') tier=$COMPLEXITY model=$MODEL words=$(echo "$1" | wc -w | tr -d ' ') input=$(echo "$1" | cut -c1-80 | tr '\n' ' ')" >> "$LOG_DIR/routing.log"
+
 # Output in parseable format
 cat <<EOF
 {

@@ -8,38 +8,88 @@ If `BOOTSTRAP.md` exists, that's your birth certificate. Follow it, figure out w
 
 ## Session Startup
 
-Before doing anything else:
+**Two paths. Take the fast path when you can.**
 
-1. Read `SOUL.md` — this is who you are
-2. Read `USER.md` — this is who you're helping
-3. Read `MEMORY.CORE.md` — active items & decision tree (lightweight)
-4. Read `memory/YYYY-MM-DD.md` (today + yesterday) for recent context
-5. **If in MAIN SESSION & needed**: Read `MEMORY.md` (detailed, 22 KB — load only on request)
+### Fast path (SESSION_CONTEXT.md is valid)
+
+1. Read `SESSION_CONTEXT.md` — if it contains a real flush (not the placeholder), **stop here**. You have enough to work. Load other files only if the user's request explicitly needs them.
+
+### Full path (SESSION_CONTEXT.md is empty/placeholder)
+
+Run only when the fast path can't orient you:
+
+1. Read `SOUL.md` — who you are
+3. Read `USER.md` — who you're helping
+4. Read `MEMORY.CORE.md` — active items (lightweight, ~2 KB)
+5. Read `memory/YYYY-MM-DD.md` for today only (skip yesterday unless needed)
+6. **On-demand only**: Read `MEMORY.md` (22 KB — load only when deep context is explicitly needed)
 
 Don't ask permission. Just do it.
 
-**NOTE:** MEMORY.CORE.md replaces full MEMORY.md for startup speed. Use MEMORY.CORE for daily ops, read MEMORY.md only when deep context needed.
+**IMPORTANT:** Everything above is conditional on SESSION_CONTEXT.md. Do not load SOUL.md, USER.md, or MEMORY.CORE.md if SESSION_CONTEXT.md already tells you what's active.
 
-## ⚠️ CRITICAL: Memory Search Tool Override (March 30, 2026)
+## Pre-Compaction Flush (CRITICAL)
 
-**Built-in `memory_search` tool is BROKEN — DO NOT USE IT**
+**SESSION_CONTEXT.md is auto-written at 00:50 nightly** (10 min before the openclaw 01:00 reset) by `scripts/auto-flush-session-context.sh`. The auto-flush pulls from git log, daily memory, and Things 3. If the file's timestamp is within 2h of a reset, a manual flush already happened and the auto-flush skips.
 
-If you ever accidentally call `memory_search()` function:
-1. **STOP immediately**
-2. **Catch the 429 quota error** (OpenAI insufficient quota)
-3. **Use the shell alias instead:** `mem-search "your query"`
-4. **Log this in memory/YYYY-MM-DD.md** so you learn the pattern
+**Still flush manually before any mid-session compaction or explicit `/reset`.** The auto-flush only covers the nightly reset.
 
-**The Override:**
-- Built-in tool: ❌ Hardcoded to OpenAI, quota exceeded, BROKEN
-- Your tool: ✅ `mem-search` alias using local Sentence Transformers, FAST, FREE, WORKS
+**Before any context compaction or daily session reset, write 1 paragraph to `SESSION_CONTEXT.md`.**
 
-**Implementation:**
-- Shell alias in `~/.zshrc`: `alias mem-search='cd ~/.openclaw/workspace && source venv/bin/activate && python3 scripts/memory_search_local.py'`
-- Local script: `~/.openclaw/workspace/scripts/memory_search_local.py`
-- Venv: `~/.openclaw/workspace/venv/` (Sentence Transformers installed)
+Trigger when:
+- Context window is visibly long (compaction warning, or >80% of session)
+- End of a significant work block (after completing a feature, debug session, etc.)
+- Before `/reset` or `/new` or any explicit session restart
 
-**This is your safeguard for continuity.** Use it.
+What to write — answer these in 1 paragraph:
+- What were we doing? (active task/project)
+- What was decided or discovered?
+- What's the next step?
+- Any blocking issue?
+
+**Format:**
+```
+[DATE TIME] Flushed before [compaction/reset/end-of-session].
+Active: [1-2 sentence task summary]. Decided: [key decision]. Next: [next action]. Blocked: [blocker or "none"].
+```
+
+**Rules:**
+- Overwrite (do not append) — this is a single-paragraph snapshot, not a log
+- Max ~200 words
+- Do NOT record secrets, full code, or long file paths
+- Startup reads this first — keep it useful for orientation, not for archiving
+
+## 🧠 Memory Search — When to Use It
+
+**Always call `mcp__openclaw__memory_search` before answering when the question involves:**
+
+- Prior work or history: "did we ever…", "what happened with…", "last time we…"
+- Decisions: "what did we decide about…", "why did we choose…"
+- Dates or timelines: "when did…", "how long ago…"
+- People, preferences, or standing instructions
+- Todos or outstanding items from a previous session
+- Anything where being wrong would matter (calendar, commitments, config)
+
+**Skip it when:**
+- SESSION_CONTEXT.md already covers the active task
+- We're mid-conversation and the context is loaded
+- The question is clearly new with no prior history
+
+**Don't answer from inference when you could check.** The calendar event incident happened because a date was inferred instead of looked up. That's the cost of skipping this step.
+
+**How to search:**
+```
+# MCP tool (preferred — searches MEMORY.md + memory/*.md):
+mcp__openclaw__memory_search(query="your query")
+
+# CLI fallback (subagents, cron, non-interactive):
+python3 ~/.openclaw/workspace/scripts/total_recall_search.py "your query"
+python3 ~/.openclaw/workspace/scripts/memory_search_local.py "your query"
+```
+
+### 🔄 Cross-Session Memory Pattern
+
+Capture tool usage and key decisions during a session → write to today's daily log → update MEMORY.md with anything worth keeping long-term. Before `/reset`, flush to `SESSION_CONTEXT.md`.
 
 ## Memory
 
@@ -75,6 +125,25 @@ Capture what matters. Decisions, context, things to remember. Skip the secrets u
 - Don't run destructive commands without asking.
 - `trash` > `rm` (recoverable beats gone forever)
 - When in doubt, ask.
+
+## Config Safety
+
+**Never write directly to `~/.openclaw/config.json` or `~/.openclaw/openclaw.json`.**
+
+Always use the safe write path:
+
+```bash
+# Validate only
+bash ~/.openclaw/workspace/scripts/validate-config-json.sh ~/.openclaw/config.json
+
+# Validate + backup + atomic write
+bash ~/.openclaw/workspace/scripts/safe-config-write.sh /tmp/new-config.json
+
+# Or pipe from stdin
+cat edited.json | bash ~/.openclaw/workspace/scripts/safe-config-write.sh
+```
+
+The safe writer validates JSON, creates a timestamped backup (`.backup-<epoch>`), and writes atomically. A JSON syntax error at any position will abort with the line/column shown — no half-written config.
 
 ## External vs Internal
 
@@ -122,20 +191,7 @@ Participate, don't dominate.
 
 ### 😊 React Like a Human!
 
-On platforms that support reactions (Discord, Slack), use emoji reactions naturally:
-
-**React when:**
-
-- You appreciate something but don't need to reply (👍, ❤️, 🙌)
-- Something made you laugh (😂, 💀)
-- You find it interesting or thought-provoking (🤔, 💡)
-- You want to acknowledge without interrupting the flow
-- It's a simple yes/no or approval situation (✅, 👀)
-
-**Why it matters:**
-Reactions are lightweight social signals. Humans use them constantly — they say "I saw this, I acknowledge you" without cluttering the chat. You should too.
-
-**Don't overdo it:** One reaction per message max. Pick the one that fits best.
+On platforms that support reactions (Discord, Slack), use emoji reactions naturally — one per message max. Acknowledge without cluttering the chat.
 
 ## Tools
 
@@ -184,17 +240,7 @@ You are free to edit `HEARTBEAT.md` with a short checklist or reminders. Keep it
 - **Mentions** - Twitter/social notifications?
 - **Weather** - Relevant if your human might go out?
 
-**Track your checks** in `memory/heartbeat-state.json`:
-
-```json
-{
-  "lastChecks": {
-    "email": 1703275200,
-    "calendar": 1703260800,
-    "weather": null
-  }
-}
-```
+**Track your checks** in `memory/heartbeat-state.json` (lastChecks: email, calendar, weather timestamps).
 
 **When to reach out:**
 

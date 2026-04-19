@@ -5,6 +5,14 @@
 
 set -e
 
+# Idempotency guard: only run once per scheduled hour (dedup duplicate cron firings)
+LOCK_FILE="/tmp/api-quota-monitor-$(date +%Y-%m-%d-%H).lock"
+if [ -f "$LOCK_FILE" ]; then
+  echo "[quota] Already ran this hour (lock: $LOCK_FILE). Skipping duplicate trigger."
+  exit 0
+fi
+touch "$LOCK_FILE"
+
 WORKSPACE="$HOME/.openclaw/workspace"
 LOG_DIR="$HOME/.openclaw/logs"
 TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
@@ -145,6 +153,59 @@ check_cloudflare_quota() {
   fi
 }
 
+# OpenRouter credit check
+check_openrouter_quota() {
+  local OPENROUTER_KEY=$(security find-generic-password -s OpenRouterAPI -a openclaw -w 2>/dev/null)
+  if [ -z "$OPENROUTER_KEY" ]; then
+    report_quota "OpenRouter" "No key in keychain" "N/A" "status"
+    return
+  fi
+
+  local response
+  response=$(curl -sf "https://openrouter.ai/api/v1/auth/key" \
+    -H "Authorization: Bearer $OPENROUTER_KEY" 2>/dev/null)
+
+  if [ -z "$response" ]; then
+    report_quota "OpenRouter" "API unreachable" "FAILED" "status"
+    return
+  fi
+
+  local credits_remaining
+  credits_remaining=$(echo "$response" | python3 -c "
+import json,sys
+try:
+    d = json.load(sys.stdin).get('data', {})
+    limit = d.get('limit')
+    used = d.get('usage', 0)
+    if limit is None:
+        print('unlimited')
+    else:
+        remaining = limit - used
+        print(f'{remaining:.2f}')
+except Exception as e:
+    print('parse_error')
+" 2>/dev/null)
+
+  if [ "$credits_remaining" = "unlimited" ]; then
+    report_quota "OpenRouter" "Unlimited" "Unlimited" "credits"
+  elif [ "$credits_remaining" = "parse_error" ] || [ -z "$credits_remaining" ]; then
+    report_quota "OpenRouter" "Parse error" "FAILED" "status"
+  else
+    # Alert if below $1.00
+    local cents_remaining
+    cents_remaining=$(echo "$credits_remaining" | python3 -c "import sys; v=float(sys.stdin.read().strip()); print(int(v*100))" 2>/dev/null || echo 0)
+    if [ "$cents_remaining" -lt 100 ]; then
+      echo -e "${RED}⚠️  OpenRouter credits LOW: \$$credits_remaining remaining${NC}"
+      echo "[$TIMESTAMP] OpenRouter: \$$credits_remaining remaining — REPLENISH at https://openrouter.ai/settings/credits" >> "$LOG_DIR/quota.log"
+      if [ $SEND_ALERT -eq 1 ]; then
+        bash "$WORKSPACE/scripts/notify-telegram.sh" "⚠️ ALERT: OpenRouter\nStatus: Warning\nError: Credits below \$1.00 (\$$credits_remaining remaining)\nImpact: Total Recall Observer fallback active\nAction: Replenish at openrouter.ai/settings/credits" 2>/dev/null || true
+      fi
+    else
+      report_quota "OpenRouter" "\$$credits_remaining remaining" "OK" "credits"
+    fi
+  fi
+}
+
 # AWS quota check
 check_aws_quota() {
   # Check status of Mac instance quota
@@ -174,6 +235,7 @@ main() {
   
   check_brave_quota || true
   check_openai_quota || true
+  check_openrouter_quota || true
   check_huggingface_quota || true
   check_local_embeddings || true
   check_cloudflare_quota || true

@@ -1,6 +1,6 @@
 # 🍑 Momotaro — AI Agent Workspace
 
-Personal AI agent workspace powered by [OpenClaw](https://openclaw.ai), running on an M4 Mac Mini. Momotaro is a persistent AI assistant with memory, tools, and multi-channel communication (Telegram, Rocket.Chat, Discord).
+Personal AI agent workspace powered by [OpenClaw](https://openclaw.ai), running on an M4 Mac Mini (24GB RAM, macOS 25.x). Momotaro is a persistent autonomous assistant with memory, tools, and multi-channel communication (Telegram, Rocket.Chat, Discord).
 
 ## Overview
 
@@ -9,22 +9,121 @@ This workspace is the operational home for Momotaro — an AI agent that manages
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────┐
-│                  OpenClaw Gateway                │
-│         (Claude Opus 4.0 / Haiku 4.5)           │
-├────────────┬──────────────┬─────────────────────┤
-│  Telegram  │  Rocket.Chat │  Discord (planned)  │
-├────────────┴──────────────┴─────────────────────┤
-│              Momotaro Agent Core                 │
-│  ┌──────────┬──────────┬──────────┬──────────┐  │
-│  │ Memory   │ Skills   │ Scripts  │ Projects │  │
-│  │ System   │ (30+)    │ (40+)    │ (6+)     │  │
-│  └──────────┴──────────┴──────────┴──────────┘  │
-├─────────────────────────────────────────────────┤
-│          M4 Mac Mini (24GB RAM)                  │
-│    macOS • Homebrew • Docker • Node.js v25       │
-└─────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────────┐
+│                   COMMUNICATION LAYER                      │
+│   Telegram (primary) │ Rocket.Chat (work) │ Discord (soon) │
+└─────────────────────────┬─────────────────────────────────┘
+                          │
+┌─────────────────────────▼─────────────────────────────────┐
+│              OPENCLAW GATEWAY (:18789, loopback)           │
+│    Session Mgmt  │  Model Routing  │  Skill Dispatch       │
+└──────┬───────────┴─────────────────┴────────┬─────────────┘
+       │                                      │
+┌──────▼──────────────┐           ┌───────────▼────────────┐
+│   TASK CLASSIFIER   │           │    MEMORY SYSTEM       │
+│  Simple → Haiku     │           │  Total Recall (5-layer) │
+│  Medium → Sonnet    │           │  observations.md       │
+│  Complex → Opus     │           │  MEMORY.md (curated)   │
+└──────┬──────────────┘           └────────────────────────┘
+       │
+┌──────▼───────────────────────────────────────────────────┐
+│             SKILLS (30+) & SCRIPTS (40+)                  │
+│  roblox-loader  │  ga4-analytics  │  daily-briefing       │
+│  s3  │  aws-deploy  │  gmail-send  │  slack  │  ios-dev   │
+└──────────────────────────────────────────────────────────┘
 ```
+
+## Theory of Operations
+
+### Task Routing (3 Tiers)
+
+Every incoming message is classified before a model is invoked, keeping costs low and speed high.
+
+| Tier | Model | Trigger | Context Loaded |
+|------|-------|---------|----------------|
+| Simple | `claude-haiku-4-5` | ≤50 words, status/weather queries | SOUL.md, USER.md |
+| Medium | `claude-sonnet-4-6` | Conversation, writing, analysis | + MEMORY.md |
+| Complex | `claude-opus-4-6` | Code, architecture, multi-step | + TOOLS.md, project files |
+
+Classification is keyword-driven (`config/classifier-config.json`). Complex keywords: `build`, `refactor`, `implement`, `debug`, `architecture`. Simple keywords: `weather`, `status`, `check`, `today`. Default tier is Medium.
+
+### Memory System
+
+Memory is file-based and manually curated. No autonomous LLM compression — high signal, low noise.
+
+| File | Purpose | When Loaded |
+|------|---------|-------------|
+| `SESSION_CONTEXT.md` | Single-paragraph session snapshot | First, every session (fast path) |
+| `SOUL.md` | Personality, rules, behavior | Always (full path only) |
+| `USER.md` | Who Bob is, preferences | Always (full path only) |
+| `MEMORY.md` | Curated long-term facts | Medium/complex tasks |
+| `TOOLS.md` | APIs, credentials guide, compute | Complex tasks only |
+| `memory/YYYY-MM-DD.md` | Raw daily event logs | Today's file on demand |
+
+### Session Context Fast Path
+
+On session start, `SESSION_CONTEXT.md` is checked first. If recent, it bypasses full memory load — saving time and tokens. Auto-flush runs nightly at 00:50 before the 01:00 context reset.
+
+### Memory Maintenance
+
+During heartbeats (every few days): read recent `memory/YYYY-MM-DD.md` files, distill significant events into `MEMORY.md`, remove outdated entries. Daily files are raw notes; `MEMORY.md` is curated wisdom.
+
+### Roblox Automation Pipeline
+
+```
+GitHub repo URL
+    → git clone to ~/.games/
+    → roblox-create-blank-place.sh   (creates game.rbxl XML)
+    → plugin injection (MomotaroAutoTest.lua → ~/Library/...Plugins)
+    → RobloxStudio launched with game file
+    → 15s wait for initialization
+    → log capture from ~/Library/Logs/Roblox/
+    → error/warning parse (FLog/DFLog infrastructure noise filtered)
+    → test result report (.test_results.txt)
+```
+
+## Testing
+
+### Run the Workspace Test Suite
+
+```bash
+cd ~/.openclaw/workspace
+bash Tests/workspace-test-suite.sh
+```
+
+Results are saved to `Tests/workspace-test-results.log`. The suite covers 15 sections across 77 tests:
+
+| Section | What It Checks |
+|---------|---------------|
+| 1. Core Files | SOUL, USER, AGENTS, MEMORY, TOOLS, TASK_ROUTING, HEARTBEAT |
+| 2. Directory Structure | scripts/, config/, skills/, memory/, logs/, Tests/ |
+| 3. Config Validation | JSON validity, required keys, all 3 model IDs present |
+| 4. OpenClaw Config | openclaw.json valid, models configured, no raw keys |
+| 5. Script Syntax | bash -n / py_compile on all key scripts |
+| 6. Script Executability | chmod +x on all runnable scripts |
+| 7. Memory Integrity | observations.md non-empty, daily logs present, search script valid |
+| 8. SOUL.md Content | Routing, memory, alerting, date rules, group chat behavior |
+| 9. Task Routing | Haiku/Sonnet/Opus tiers and token budget documented |
+| 10. Security | File permissions (700/600), no secrets in logs |
+| 11. Skills | Required skills present, total skill count ≥ 4 |
+| 12. Roblox Prerequisites | Studio installed, scripts present, Plugins dir exists |
+| 13. Gateway Health | openclaw gateway running on port 18789 |
+| 14. Python Dependencies | python3 available, json/pathlib/requests importable |
+| 15. Git Health | Is a repo, no sensitive files tracked, git email configured |
+
+### Other Test Suites
+
+| Suite | Purpose |
+|-------|---------|
+| `Tests/tier-integration-test-suite.sh` | Verify classify-coding-task.sh routes correctly (Haiku/Opus/GPT-4) |
+| `Tests/model-routing-test-suite.sh` | OpenRouter config, credentials, gateway, cron, security |
+| `scripts/test/test_total_recall_file_indexing.sh` | Total Recall file indexing behavior |
+
+### Known Test Findings (2026-04-19)
+
+- `config/briefing.env`, `config/ga4.env`, `memory/api-keys-and-secrets.md` are tracked by git — these should be added to `.gitignore` and removed from history with `git filter-repo`
+
+---
 
 ## Key Projects
 
@@ -157,7 +256,7 @@ Brave Search API key was in the config file but the Gateway couldn't find it. Ro
 
 ---
 
-## Current Status (April 3, 2026)
+## Current Status (April 19, 2026)
 
 ### ✅ Operational
 - **OpenClaw Gateway** — Running, Claude Opus 4.0 default

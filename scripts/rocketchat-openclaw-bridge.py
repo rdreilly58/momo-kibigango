@@ -1,161 +1,160 @@
 #!/usr/bin/env python3
 """
-Rocket.Chat → OpenClaw Gateway Bridge
-Routes Rocket.Chat messages through OpenClaw Gateway to reach Claude AI
+Rocket.Chat → Claude Bridge
+Polls #general and DMs, responds via claude -p
 """
 
 import requests
 import json
+import subprocess
 import time
 import sys
 from datetime import datetime
 
-# Track processed message IDs to avoid duplicate responses
+# Track processed message IDs
 PROCESSED_MESSAGES = set()
-MAX_TRACKED = 100
+MAX_TRACKED = 500
 
-# Configuration
+# Config
 ROCKETCHAT_URL = "http://localhost:3000"
-OPENCLAW_GATEWAY = "https://127.0.0.1:18789"  # Local loopback with TLS
 BOT_USER_ID = "NyTi2Ktzzv4Q6hDoL"
 BOT_AUTH_TOKEN = "oeGEa58-35WlCJTkWd8BcqVWoIPOTMkkMedpCIqEPgQ"
 GENERAL_ROOM_ID = "GENERAL"
+DM_ROOM_ID = "69c9017c2fa4cd8b432ac5ca"  # momotaro <-> bob-reilly
+TARGET_USERNAME = "bob-reilly"
 
-# Gateway auth token
-GATEWAY_TOKEN = "7b8a244f4f9ba85d67f41de3ae835682e7c9ca25facc2fa4"
+LOG_FILE = "/Users/rreilly/.openclaw/logs/rocketchat-responder.log"
 
-# Headers for Rocket.Chat API
 RC_HEADERS = {
     "X-User-Id": BOT_USER_ID,
     "X-Auth-Token": BOT_AUTH_TOKEN,
     "Content-Type": "application/json"
 }
 
-def get_channel_messages(room_id, limit=5):
-    """Fetch messages from channel"""
-    url = f"{ROCKETCHAT_URL}/api/v1/channels.messages?roomId={room_id}&count={limit}"
+SYSTEM_PROMPT = (
+    "You are Momo, Bob Reilly's personal AI assistant running inside Rocket.Chat. "
+    "Be direct, concise, and genuinely helpful. Skip filler phrases. "
+    "You have access to Bob's workspace and can help with coding, tasks, research, and more. "
+    "Keep replies brief unless depth is needed."
+)
+
+
+def log(msg):
+    ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    line = f"[{ts}] {msg}"
+    print(line, flush=True)
+    try:
+        with open(LOG_FILE, "a") as f:
+            f.write(line + "\n")
+    except Exception:
+        pass
+
+
+def get_messages(room_id, room_type="channel", limit=10):
+    """Fetch recent messages from a channel or DM."""
+    if room_type == "dm":
+        url = f"{ROCKETCHAT_URL}/api/v1/im.messages?roomId={room_id}&count={limit}"
+    else:
+        url = f"{ROCKETCHAT_URL}/api/v1/channels.messages?roomId={room_id}&count={limit}"
     try:
         resp = requests.get(url, headers=RC_HEADERS, timeout=5)
         if resp.status_code == 200:
             data = resp.json()
-            if "messages" in data:
-                return data.get("messages", [])
+            return data.get("messages", [])
     except Exception as e:
-        print(f"❌ Error fetching messages: {e}")
+        log(f"❌ Error fetching messages from {room_id}: {e}")
     return []
 
-def send_message_to_channel(text, room_id):
-    """Send message to Rocket.Chat channel"""
+
+def post_message(text, room_id):
+    """Post a message to a Rocket.Chat room."""
     url = f"{ROCKETCHAT_URL}/api/v1/chat.postMessage"
-    payload = {
-        "roomId": room_id,
-        "text": text
-    }
     try:
-        resp = requests.post(url, json=payload, headers=RC_HEADERS, timeout=10)
+        resp = requests.post(url, json={"roomId": room_id, "text": text},
+                             headers=RC_HEADERS, timeout=10)
         if resp.status_code == 200 and resp.json().get("success"):
-            print(f"✅ Message posted to #general: {text[:50]}...")
+            log(f"✅ Posted to {room_id} ({len(text)} chars)")
             return True
         else:
-            print(f"⚠️ API error {resp.status_code}: {resp.text[:100]}")
+            log(f"⚠️ Post failed {resp.status_code}: {resp.text[:100]}")
     except Exception as e:
-        print(f"❌ Error posting message: {e}")
+        log(f"❌ Error posting: {e}")
     return False
 
-def query_openclaw_gateway(question):
-    """Send question to OpenClaw Gateway and get response from Claude"""
-    url = f"{OPENCLAW_GATEWAY}/message"
-    
-    headers = {
-        "Authorization": f"Bearer {GATEWAY_TOKEN}",
-        "Content-Type": "application/json"
-    }
-    
-    payload = {
-        "text": question,
-        "context": "Rocket.Chat channel query"
-    }
-    
-    try:
-        print(f"🌐 Querying OpenClaw Gateway at {url}...")
-        # Disable SSL verification for localhost (self-signed cert)
-        resp = requests.post(url, json=payload, headers=headers, timeout=30, verify=False)
-        
-        if resp.status_code == 200:
-            data = resp.json()
-            response_text = data.get("response") or data.get("message") or data.get("text")
-            if response_text:
-                return response_text
-        else:
-            print(f"⚠️ Gateway returned {resp.status_code}")
-            return None
-    except Exception as e:
-        print(f"❌ Gateway error: {e}")
-        return None
 
-def process_messages():
-    """Check for new messages and route to OpenClaw Gateway"""
-    global PROCESSED_MESSAGES
-    
-    print(f"\n[{datetime.now().strftime('%H:%M:%S')}] Checking for messages...")
-    
-    messages = get_channel_messages(GENERAL_ROOM_ID, limit=10)
-    if not messages:
-        print("  No messages found")
-        return
-    
-    # Get the latest UNPROCESSED message from Bob
-    for msg in messages:
-        username = msg.get("u", {}).get("username", "")
-        text = msg.get("msg", "")
+def ask_claude(user_message):
+    """Send a message to Claude via claude -p and return the response."""
+    try:
+        result = subprocess.run(
+            ["/opt/homebrew/bin/claude", "-p", "--model", "haiku",
+             "--append-system-prompt", SYSTEM_PROMPT,
+             user_message],
+            capture_output=True, text=True, timeout=60
+        )
+        if result.returncode == 0 and result.stdout.strip():
+            return result.stdout.strip()
+        else:
+            log(f"⚠️ Claude returned code {result.returncode}: {result.stderr[:200]}")
+    except subprocess.TimeoutExpired:
+        log("⚠️ Claude timed out")
+    except Exception as e:
+        log(f"❌ Claude error: {e}")
+    return None
+
+
+def process_room(room_id, room_type="channel"):
+    """Check a room for new messages and respond."""
+    messages = get_messages(room_id, room_type=room_type)
+    for msg in reversed(messages):  # oldest first
         msg_id = msg.get("_id", "")
-        
-        # Skip if already processed or not from bob_r
-        if msg_id in PROCESSED_MESSAGES or not text:
+        username = msg.get("u", {}).get("username", "")
+        text = msg.get("msg", "").strip()
+
+        if not text or msg_id in PROCESSED_MESSAGES:
             continue
-        
-        if username != "bob_r":
-            continue
-        
-        # Found new message from Bob
-        print(f"\n📨 New message from {username}: {text}")
-        
-        # Mark as processed
+
+        # Mark all seen messages as processed (including bot's own)
         PROCESSED_MESSAGES.add(msg_id)
         if len(PROCESSED_MESSAGES) > MAX_TRACKED:
-            PROCESSED_MESSAGES.pop()
-        
-        # Query OpenClaw Gateway (routes to Claude)
-        response = query_openclaw_gateway(text)
-        
-        if response:
-            print(f"✨ Claude response: {response[:100]}...")
-            # Post response back to #general
-            send_message_to_channel(response, GENERAL_ROOM_ID)
-            return
-        else:
-            print("⚠️ No response from OpenClaw Gateway")
+            # Drop oldest 100
+            old = list(PROCESSED_MESSAGES)[:100]
+            for o in old:
+                PROCESSED_MESSAGES.discard(o)
 
-def monitor_loop(interval=10):
-    """Continuously monitor for messages"""
-    print(f"🚀 Starting Rocket.Chat ↔ OpenClaw Gateway Bridge")
-    print(f"📍 Checking every {interval} seconds")
-    print(f"🌐 Gateway: {OPENCLAW_GATEWAY}")
-    print(f"💬 Rocket.Chat: {ROCKETCHAT_URL}")
-    print(f"🎯 Target: Claude AI via OpenClaw")
-    print("=" * 50)
-    
+        if username != TARGET_USERNAME:
+            continue
+
+        log(f"📨 [{username}] ({room_type}): {text}")
+        response = ask_claude(text)
+        if response:
+            log(f"🤖 Responding: {response[:80]}...")
+            post_message(response, room_id)
+        else:
+            log("⚠️ No response generated")
+
+
+def monitor_loop(interval=5):
+    log("🚀 Rocket.Chat ↔ Claude Bridge started")
+    log(f"   Polling #general + DMs every {interval}s")
+    log(f"   Target user: {TARGET_USERNAME}")
+
+    # Seed processed set with existing messages to avoid replying to old ones
+    log("📋 Seeding processed messages (skipping history)...")
+    for room_id, rtype in [(GENERAL_ROOM_ID, "channel"), (DM_ROOM_ID, "dm")]:
+        msgs = get_messages(room_id, room_type=rtype, limit=20)
+        for m in msgs:
+            PROCESSED_MESSAGES.add(m.get("_id", ""))
+    log(f"   Seeded {len(PROCESSED_MESSAGES)} existing message IDs")
+
     try:
         while True:
-            process_messages()
+            process_room(GENERAL_ROOM_ID, "channel")
+            process_room(DM_ROOM_ID, "dm")
             time.sleep(interval)
     except KeyboardInterrupt:
-        print("\n\n⏹️  Bridge stopped")
+        log("⏹️  Bridge stopped")
         sys.exit(0)
 
+
 if __name__ == "__main__":
-    if len(sys.argv) > 1 and sys.argv[1] == "--test":
-        print("🧪 Test Mode: Processing one message...")
-        process_messages()
-    else:
-        monitor_loop(interval=10)
+    monitor_loop(interval=5)

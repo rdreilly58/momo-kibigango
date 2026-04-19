@@ -72,6 +72,10 @@
     "email-daily-summary": {
       "version": "0.1.0",
       "installedAt": 1773714061421
+    },
+    "total-recall": {
+      "version": "1.5.1",
+      "installedAt": 1775647046754
     }
   }
 }
