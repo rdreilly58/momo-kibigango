@@ -32,6 +32,7 @@ EMAIL_ACCOUNTS = [
 ]
 
 CALENDAR_ACCOUNT = "rdreilly2010@gmail.com"
+THINGS_CLI       = "/opt/homebrew/bin/things"
 
 
 def run(cmd: str, timeout: int = 12) -> tuple[int, str]:
@@ -205,7 +206,67 @@ def get_email_for_account(account: dict) -> dict:
     }
 
 
-def render_today_md(calendar: dict, email_results: list) -> str:
+def get_things() -> dict:
+    """Fetch today's Things 3 tasks + upcoming (tomorrow).
+    Requires Full Disk Access granted to OpenClaw.app in System Settings.
+    Returns gracefully if CLI hangs or Things DB is inaccessible."""
+    import subprocess as _sp
+
+    def _things_run(args: list, timeout: int = 8):
+        """Returns list on success, None on timeout/error."""
+        try:
+            r = _sp.run(
+                [THINGS_CLI] + args + ["--json"],
+                capture_output=True, text=True, timeout=timeout,
+            )
+            if r.returncode != 0:
+                return None
+            return json.loads(r.stdout) or []
+        except _sp.TimeoutExpired:
+            return None  # FDA not granted — CLI hangs reading DB
+        except (json.JSONDecodeError, FileNotFoundError):
+            return None
+        except Exception:
+            return None
+
+    today_raw    = _things_run(["today"])
+    upcoming_raw = _things_run(["upcoming"])
+
+    if today_raw is None or upcoming_raw is None:
+        return {"status": "needs_fda",
+                "fix": "System Settings → Privacy & Security → Full Disk Access → add OpenClaw.app"}
+
+    # upcoming: keep only tasks scheduled for tomorrow
+    tomorrow_str = (datetime.now(TZ) + timedelta(days=1)).strftime("%Y-%m-%d")
+    tomorrow_tasks = [
+        t for t in (upcoming_raw or [])
+        if (t.get("startDate") or "").startswith(tomorrow_str)
+    ]
+
+    def _fmt(tasks: list) -> list:
+        out = []
+        for t in tasks:
+            title    = t.get("title", "Untitled")
+            project  = t.get("project", {})
+            proj_str = project.get("title", "") if isinstance(project, dict) else ""
+            deadline = t.get("deadline", "")
+            tags     = t.get("tags", [])
+            out.append({
+                "title":    title,
+                "project":  proj_str,
+                "deadline": deadline,
+                "tags":     tags,
+            })
+        return out
+
+    return {
+        "status":   "ok",
+        "today":    _fmt(today_raw or []),
+        "tomorrow": _fmt(tomorrow_tasks),
+    }
+
+
+def render_today_md(calendar: dict, email_results: list, things=None) -> str:
     now_str = datetime.now(TZ).strftime("%A %B %-d, %Y  %-I:%M %p %Z")
     lines   = [f"# TODAY  —  {now_str}", ""]
 
@@ -271,6 +332,37 @@ def render_today_md(calendar: dict, email_results: list) -> str:
 
         lines.append("")
 
+    # ── Things 3 ──────────────────────────────────────────────────────────────
+    lines.append("## ✅ Things 3")
+    lines.append("")
+
+    if things is None or things.get("status") == "needs_fda":
+        fix = (things or {}).get("fix", "Grant Full Disk Access to OpenClaw.app in System Settings → Privacy & Security")
+        lines.append(f"_Unavailable — {fix}_")
+    elif things.get("status") == "error":
+        lines.append("_Things unavailable_")
+    else:
+        today_tasks = things.get("today", [])
+        if today_tasks:
+            lines.append(f"**Today ({len(today_tasks)} tasks):**")
+            for t in today_tasks:
+                proj = f"  ·  {t['project']}" if t["project"] else ""
+                dl   = f"  ⚑ {t['deadline']}" if t["deadline"] else ""
+                lines.append(f"- {t['title']}{proj}{dl}")
+        else:
+            lines.append("**Today:** _Nothing scheduled_")
+
+        lines.append("")
+        tmrw_tasks = things.get("tomorrow", [])
+        if tmrw_tasks:
+            lines.append(f"**Tomorrow ({len(tmrw_tasks)} tasks):**")
+            for t in tmrw_tasks:
+                proj = f"  ·  {t['project']}" if t["project"] else ""
+                lines.append(f"- {t['title']}{proj}")
+        else:
+            lines.append("**Tomorrow:** _Nothing scheduled_")
+
+    lines.append("")
     lines.append("---")
     lines.append(f"_Refreshed by observer-agent.sh · Next refresh in ~2h_")
     return "\n".join(lines)
@@ -279,7 +371,8 @@ def render_today_md(calendar: dict, email_results: list) -> str:
 def main():
     calendar      = get_calendar()
     email_results = [get_email_for_account(a) for a in EMAIL_ACCOUNTS]
-    md            = render_today_md(calendar, email_results)
+    things        = get_things()
+    md            = render_today_md(calendar, email_results, things)
     TODAY_FILE.write_text(md)
     print(f"[today-context] Written: {TODAY_FILE}")
     # Summary for caller
