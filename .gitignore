@@ -114,6 +114,10 @@ TOOLS.*.local
 .local/
 secrets/
 
+# === LOCAL CONTEXT (machine-specific, contains personal data) ===
+TODAY.md
+SESSION_CONTEXT.md
+
 # === LOCAL DATABASE (machine-specific, not version-controlled) ===
 ai-memory.db
 ai-memory.db-shm

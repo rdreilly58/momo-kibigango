@@ -64,6 +64,12 @@ try:
 except: pass
 " 2>/dev/null || things today 2>/dev/null | tail -n +2 | grep -v "^---\|^$" | cut -f2 | head -5 | sed 's/^/  - /' || echo "  (Things unavailable)")
 
+# TODAY.md — calendar + email context (written every 2h by observer-agent.sh)
+TODAY_CONTEXT=""
+if [ -f "$WORKSPACE/TODAY.md" ]; then
+  TODAY_CONTEXT=$(grep -v '^#\|^---\|^_Refreshed' "$WORKSPACE/TODAY.md" | head -25 | tr '\n' ' ' | sed 's/  */ /g' | cut -c1-600)
+fi
+
 # Most recently modified skill or config (signals what was being worked on)
 RECENT_FILE=$(find "$WORKSPACE/scripts" "$WORKSPACE/skills" "$WORKSPACE/config" -newer "$WORKSPACE/HEARTBEAT.md" -name "*.sh" -o -name "*.json" -o -name "*.py" 2>/dev/null | head -3 | sed 's|.*/||' | tr '\n' ', ' | sed 's/,$//')
 RECENT_FILE="${RECENT_FILE:-(no recent file changes detected)}"
@@ -77,7 +83,7 @@ cat > "$OUT" << SNAPSHOT
 ---
 
 [$TIMESTAMP] Auto-flushed before daily reset (openclaw resets at 01:00).
-Active: Session auto-context from file state — no live session at flush time. Recent commits: $(echo "$RECENT_COMMITS" | tr '\n' ';' | sed 's/; */; /g' | cut -c1-200). Daily log: $DAILY_SUMMARY. Recently modified: $RECENT_FILE. Things today: $(echo "$THINGS_TODAY" | tr '\n' ',' | sed 's/,$//'). Next: Resume from Bob's next message — check MEMORY.md + today's daily log for full context. Blocked: none known.
+Active: Session auto-context from file state — no live session at flush time. Recent commits: $(echo "$RECENT_COMMITS" | tr '\n' ';' | sed 's/; */; /g' | cut -c1-200). Daily log: $DAILY_SUMMARY. Recently modified: $RECENT_FILE. Things today: $(echo "$THINGS_TODAY" | tr '\n' ',' | sed 's/,$//'). Schedule/email: $TODAY_CONTEXT. Next: Resume from Bob's next message — check MEMORY.md + today's daily log for full context. Blocked: none known.
 SNAPSHOT
 
 echo "[$TIMESTAMP] [auto-flush] Written: $OUT"

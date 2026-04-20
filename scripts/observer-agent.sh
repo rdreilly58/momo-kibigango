@@ -65,6 +65,9 @@ if [ -n "$NEW_MEMORY" ]; then
     --tier short --ns workspace --tags "observation,auto,memory" 2>/dev/null || true
 fi
 
+# Refresh TODAY.md (calendar + email context)
+python3 "$WORKSPACE/scripts/get-today-context.py" 2>/dev/null || echo "[observer] TODAY.md refresh skipped"
+
 # Update stamp
 echo "$(date +%s)" > "$STAMP"
 echo "[observer] Done — observations written"
