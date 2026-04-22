@@ -3,7 +3,7 @@
 #
 # Usage: bash send-briefing-v2.sh evening
 
-set -uo pipefail  # Remove -e to prevent trap from killing script on warnings
+set -Eeuo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BRIEFING_TYPE="${1:-evening}"
@@ -13,6 +13,9 @@ source ~/.openclaw/workspace/config/briefing.env 2>/dev/null || {
   echo "[briefing] Error: briefing.env not found"
   exit 1
 }
+
+# Load shared notification library
+source ~/.openclaw/workspace/scripts/lib/notify.sh
 
 # Health check URLs (from TOOLS.md)
 HEALTHCHECK_EVENING="https://hc-ping.com/d570cbc7-1164-492b-98f1-0443ce23482e"
@@ -26,12 +29,12 @@ else
 fi
 
 # Error trap: alert on failure
-trap 'echo "[briefing] ❌ ERROR: $BRIEFING_TYPE briefing failed"; \
-      if [ -n "${TELEGRAM_BOT_TOKEN:-}" ] && [ -n "${TELEGRAM_CHAT_ID:-}" ]; then \
-        curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
-          -d "chat_id=${TELEGRAM_CHAT_ID}" \
-          -d "text=⚠️ BRIEFING FAILED: ${BRIEFING_TYPE} briefing error at $(date '+%H:%M %z')" > /dev/null 2>&1 || true; \
-      fi' ERR
+_briefing_error_handler() {
+  echo "[briefing] ❌ ERROR: $BRIEFING_TYPE briefing failed"
+  hc_fail
+  notify_telegram "⚠️ BRIEFING FAILED: ${BRIEFING_TYPE} briefing error at $(date '+%H:%M %z')"
+}
+trap '_briefing_error_handler' ERR
 
 echo "[briefing] =========================================="
 echo "[briefing] Starting $BRIEFING_TYPE briefing delivery"
@@ -40,6 +43,7 @@ echo "[briefing] =========================================="
 
 # Step 1: Generate HTML briefing
 HTML_FILE="/tmp/${BRIEFING_TYPE}-briefing-$(date +%s).html"
+trap 'rm -f "$HTML_FILE"' EXIT
 bash "$SCRIPT_DIR/scripts/${BRIEFING_TYPE}-briefing.sh" > "$HTML_FILE" 2>&1
 
 echo "[briefing] ✓ Generated HTML: $HTML_FILE"
@@ -97,6 +101,6 @@ echo "[briefing] =========================================="
 
 # Ping health check on success
 echo "[briefing] 📍 Pinging health check..."
-curl -s -X POST "$HEALTHCHECK_URL" > /dev/null 2>&1 && \
+curl -fsS -m 10 --retry 5 -o /dev/null "$HEALTHCHECK_URL" && \
   echo "[briefing] ✓ Health check pinged" || \
   echo "[briefing] ⚠️  Health check ping failed (non-fatal)"

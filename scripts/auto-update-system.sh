@@ -8,7 +8,7 @@
 #
 # Updated: March 22, 2026 (6:31 AM EDT)
 
-set -uo pipefail
+set -Eeuo pipefail
 
 # ============================================================================
 # CONFIGURATION
@@ -19,13 +19,21 @@ LOG_DIR="$HOME/.openclaw/logs"
 LOG_FILE="$LOG_DIR/auto-update-$(date +%Y%m%d-%H%M%S).log"
 mkdir -p "$LOG_DIR"
 
+# Rotate logs older than 30 days
+find "$LOG_DIR" -name "auto-update-*.log" -mtime +30 -delete 2>/dev/null || true
+
+# Load shared notification library
+# shellcheck source=lib/notify.sh
+source "$(dirname "$0")/lib/notify.sh"
+
 # Timing
 UPDATE_TIME="${UPDATE_TIME:-02:00}"  # 2:00 AM EDT
 TIMEZONE="${TIMEZONE:-America/New_York}"
 
-# Health check (optional)
-HEALTHCHECK_URL="${HEALTHCHECK_URL:-}"  # Set to ping URL if available
-TELEGRAM_ENABLED="${TELEGRAM_ENABLED:-false}"
+# Health check / notifications (optional — set in env to enable)
+HEALTHCHECK_URL="${HEALTHCHECK_URL:-}"
+TELEGRAM_BOT_TOKEN="${TELEGRAM_BOT_TOKEN:-}"
+TELEGRAM_CHAT_ID="${TELEGRAM_CHAT_ID:-}"
 
 # Features (control what updates)
 UPDATE_MACOS="${UPDATE_MACOS:-true}"
@@ -37,6 +45,12 @@ UPDATE_PIP="${UPDATE_PIP:-false}"  # Disabled by default (virtualenv safety)
 # Flags
 DRY_RUN="${DRY_RUN:-false}"
 SKIP_BREW="${SKIP_BREW:-false}"
+
+# ============================================================================
+# ERROR TRAP
+# ============================================================================
+
+trap '_notify_err_handler $LINENO' ERR
 
 # ============================================================================
 # LOGGING & REPORTING
@@ -77,12 +91,15 @@ report_status() {
     log_info "$emoji Auto-update $status: $summary"
     
     # Health check ping (if configured)
-    if [[ -n "$HEALTHCHECK_URL" ]]; then
-        if [[ "$status" == "success" ]]; then
-            curl -s "$HEALTHCHECK_URL" > /dev/null 2>&1 || true
-        elif [[ "$status" == "failure" ]]; then
-            curl -s "${HEALTHCHECK_URL}/fail" > /dev/null 2>&1 || true
-        fi
+    if [[ "$status" == "success" ]]; then
+        hc_success
+    elif [[ "$status" == "failure" ]]; then
+        hc_fail
+    fi
+
+    # Telegram notification on failure
+    if [[ "$status" == "failure" ]]; then
+        notify_telegram "❌ Auto-update failed: ${summary}"
     fi
 }
 
@@ -98,11 +115,13 @@ update_macos() {
         return 0
     fi
     
-    local updates=$(softwareupdate -l 2>/dev/null | grep -c "Software Update:" || echo 0)
-    updates_num=$(echo "$updates" | awk '{print $1}')
-    
+    local sw_output=""
+    local updates_num=0
+    sw_output=$(softwareupdate -l --include-config-data 2>&1) || true
+    updates_num=$(echo "$sw_output" | grep -c "^\*") || updates_num=0
+
     if [[ "$updates_num" -gt 0 ]]; then
-        log_info "Found $updates macOS updates"
+        log_info "Found $updates_num macOS updates"
         
         # Install all updates (requires sudo, but whitelisted)
         if sudo softwareupdate -i -a 2>&1 | tee -a "$LOG_FILE"; then
@@ -260,23 +279,25 @@ main() {
     
     # Run updates
     if [[ "$UPDATE_MACOS" == "true" ]]; then
-        update_macos || ((failed_checks++))
+        update_macos || failed_checks=$((failed_checks + 1))
     fi
     
     if [[ "$UPDATE_BREW" == "true" ]]; then
-        update_brew || ((failed_checks++))
+        update_brew || failed_checks=$((failed_checks + 1))
     fi
     
     if [[ "$UPDATE_NPM" == "true" ]]; then
-        update_npm || ((failed_checks++))
+        update_npm || failed_checks=$((failed_checks + 1))
     fi
     
-    # Verify
-    if verify_updates; then
+    # Verify (skip in dry-run — network/command checks don't apply)
+    if [[ "$DRY_RUN" == "true" ]]; then
+        log_info "DRY RUN: Skipping verify_updates"
+    elif verify_updates; then
         log_info "✅ System health verified"
     else
         log_warn "⚠️ System health check failed (non-fatal)"
-        ((failed_checks++))
+        failed_checks=$((failed_checks + 1))
     fi
     
     # Final report

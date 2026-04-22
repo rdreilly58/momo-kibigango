@@ -3,7 +3,7 @@
 # Checks remaining quota for all configured APIs
 # Usage: api-quota-monitor.sh [--verbose] [--alert]
 
-set -e
+set -Eeuo pipefail
 
 # Idempotency guard: only run once per scheduled hour (dedup duplicate cron firings)
 LOCK_FILE="/tmp/api-quota-monitor-$(date +%Y-%m-%d-%H).lock"
@@ -15,6 +15,7 @@ touch "$LOCK_FILE"
 
 WORKSPACE="$HOME/.openclaw/workspace"
 LOG_DIR="$HOME/.openclaw/logs"
+find "$LOG_DIR" \( -name "quota-monitor*.log" -o -name "api-quota*.log" \) -mtime +30 -delete 2>/dev/null || true
 TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
 
 # Options
@@ -124,7 +125,7 @@ check_openai_quota() {
 
 # Check Hugging Face quota (fallback)
 check_huggingface_quota() {
-  if [ -n "$HF_API_TOKEN" ]; then
+  if [ -n "${HF_API_TOKEN:-}" ]; then
     # Hugging Face has generous free tier
     report_quota "Hugging Face API" "Free tier" "Unlimited" "status"
   else
@@ -145,7 +146,7 @@ check_local_embeddings() {
 
 # Check Cloudflare API
 check_cloudflare_quota() {
-  if [ -n "$CLOUDFLARE_TOKEN" ]; then
+  if [ -n "${CLOUDFLARE_TOKEN:-}" ]; then
     # Cloudflare API usage is typically not quota-limited for most endpoints
     report_quota "Cloudflare API" "OK" "Unlimited" "status"
   else

@@ -3,7 +3,7 @@
 #
 # Usage: bash evening-briefing.sh [--send]
 
-set -euo pipefail
+set -Eeuo pipefail
 
 # Idempotency guard: only run once per calendar day
 LOCK_FILE="/tmp/evening-briefing-$(date +%Y-%m-%d).lock"

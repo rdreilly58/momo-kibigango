@@ -120,6 +120,7 @@ memory/api-keys-and-secrets.md
 # === LOCAL CONTEXT (machine-specific, contains personal data) ===
 TODAY.md
 SESSION_CONTEXT.md
+.email-vip-state.json
 
 # === LOCAL DATABASE (machine-specific, not version-controlled) ===
 ai-memory.db

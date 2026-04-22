@@ -2,7 +2,7 @@
 """
 get-today-context.py — Fetch today's calendar + email and write TODAY.md
 
-Runs every 2h via observer-agent.sh. Produces ~/.openclaw/workspace/TODAY.md
+Runs every 30min via observer-agent.sh. Produces ~/.openclaw/workspace/TODAY.md
 for agent context awareness.
 
 Accounts:
@@ -364,7 +364,7 @@ def render_today_md(calendar: dict, email_results: list, things=None) -> str:
 
     lines.append("")
     lines.append("---")
-    lines.append(f"_Refreshed by observer-agent.sh · Next refresh in ~2h_")
+    lines.append(f"_Refreshed by observer-agent.sh · Next refresh in ~30min_")
     return "\n".join(lines)
 
 

@@ -3,11 +3,12 @@
 # Monitors critical systems and alerts on failures
 # Usage: system-health-check.sh [--verbose] [--telegram]
 
-set -e
+set -Eeuo pipefail
 
 WORKSPACE="$HOME/.openclaw/workspace"
 SCRIPT_DIR="$WORKSPACE/scripts"
 LOG_DIR="$HOME/.openclaw/logs"
+find "$LOG_DIR" -name "health-check*.log" -mtime +30 -delete 2>/dev/null || true
 TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
 
 # Colors
@@ -243,3 +244,6 @@ main() {
 }
 
 main "$@"
+
+# ── Dead-man heartbeat ───────────────────────────────────────────────────────
+bash /Users/rreilly/.openclaw/workspace/scripts/cron-heartbeat.sh system-health-check $?

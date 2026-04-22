@@ -68,6 +68,12 @@ fi
 # Refresh TODAY.md (calendar + email context)
 python3 "$WORKSPACE/scripts/get-today-context.py" 2>/dev/null || echo "[observer] TODAY.md refresh skipped"
 
+# Regenerate unified STATUS.md
+bash "$WORKSPACE/scripts/generate-status.sh" 2>/dev/null || echo "[observer] STATUS.md refresh skipped"
+
 # Update stamp
 echo "$(date +%s)" > "$STAMP"
 echo "[observer] Done — observations written"
+
+# ── Dead-man heartbeat ───────────────────────────────────────────────────────
+bash /Users/rreilly/.openclaw/workspace/scripts/cron-heartbeat.sh observer-agent $?

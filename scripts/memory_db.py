@@ -257,6 +257,77 @@ class MemoryDB:
             results.append(r)
         return results
 
+    # ── GRAPH ────────────────────────────────────────────────────────────────
+
+    def get_links(self, mem_id: str, direction: str = "both") -> List[Dict]:
+        """
+        Return all links for a memory node.
+        direction: 'out' (outgoing), 'in' (incoming), 'both'
+        Each result: {other_id, relation, direction}
+        """
+        results = []
+        with _conn(self.db_path) as con:
+            if direction in ("out", "both"):
+                for row in con.execute(
+                    "SELECT target_id, relation FROM memory_links WHERE source_id=?",
+                    (mem_id,),
+                ).fetchall():
+                    results.append({"other_id": row[0], "relation": row[1], "direction": "out"})
+            if direction in ("in", "both"):
+                for row in con.execute(
+                    "SELECT source_id, relation FROM memory_links WHERE target_id=?",
+                    (mem_id,),
+                ).fetchall():
+                    results.append({"other_id": row[0], "relation": row[1], "direction": "in"})
+        return results
+
+    def traverse(
+        self,
+        start_id: str,
+        depth: int = 2,
+        relation: Optional[str] = None,
+    ) -> List[Dict]:
+        """
+        BFS from start_id up to depth hops across memory_links.
+        Optionally filter by relation type.
+        Returns list of {memory, depth, relation, direction}.
+        """
+        visited = {start_id}
+        queue = [(start_id, 0)]
+        results = []
+
+        with _conn(self.db_path) as con:
+            while queue:
+                current_id, current_depth = queue.pop(0)
+                if current_depth >= depth:
+                    continue
+
+                links = self.get_links(current_id)
+                for link in links:
+                    if relation and link["relation"] != relation:
+                        continue
+                    nid = link["other_id"]
+                    if nid in visited:
+                        continue
+                    visited.add(nid)
+                    row = con.execute(
+                        "SELECT id, title, content, tier, namespace, tags, metadata FROM memories WHERE id=?",
+                        (nid,),
+                    ).fetchone()
+                    if row:
+                        m = dict(row)
+                        m["tags"] = json.loads(m.get("tags") or "[]")
+                        m["metadata"] = json.loads(m.get("metadata") or "{}")
+                        results.append({
+                            "memory": m,
+                            "depth": current_depth + 1,
+                            "relation": link["relation"],
+                            "direction": link["direction"],
+                        })
+                        queue.append((nid, current_depth + 1))
+
+        return results
+
     # ── MAINTENANCE ──────────────────────────────────────────────────────────
 
     def expire_ttl(self) -> int:

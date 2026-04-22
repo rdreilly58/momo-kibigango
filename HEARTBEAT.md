@@ -88,14 +88,17 @@ python3 ~/.openclaw/workspace/scripts/telegraph_heartbeat.py
 
 ## GPU / Compute Status
 
-**Current compute hierarchy (as of April 2026):**
+**Current compute hierarchy (as of April 22, 2026):**
 
 | Tier | Resource | Status |
 |------|----------|--------|
-| 1 | Local M4 Mac Mini GPU | ✅ Available |
-| 2 | Google Colab H100 | ✅ Available (manual) |
-| 3 | AWS EC2 `54.81.20.218` | ❌ DOWN since April 5 — restart needed in AWS console |
+| 1 | Local M4 Max GPU (24GB) | ✅ Primary — torch/MLX, all local inference |
+| 2 | Google Colab H100 | ✅ Available (manual) — large batch jobs only |
+| ~~3~~ | ~~AWS EC2 `54.81.20.218`~~ | 🗑️ **Decommissioned April 22, 2026** |
 
-**GPU health check is DISABLED** — scripts archived to `scripts/_archive/`. Do not run them; the AWS instance is unreachable. Restart or replace the instance in the AWS console before re-enabling.
+**Decision:** EC2 instance was down since April 5 with no path to recovery. Standardised on M4 Max (local, always available) + Colab H100 (manual, for jobs needing >24GB VRAM). EC2 tier removed — no restart, no replacement.
 
-> **Action needed:** Log into AWS console → EC2 → start/replace `54.81.20.218`.
+**For GPU work:**
+- Local inference → M4 Max via MLX or PyTorch (MPS backend)
+- Large-scale batch / >24GB jobs → Google Colab H100 (manual launch)
+- Do NOT attempt to ssh to `54.81.20.218` — instance terminated

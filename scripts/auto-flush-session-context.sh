@@ -74,16 +74,24 @@ fi
 RECENT_FILE=$(find "$WORKSPACE/scripts" "$WORKSPACE/skills" "$WORKSPACE/config" -newer "$WORKSPACE/HEARTBEAT.md" -name "*.sh" -o -name "*.json" -o -name "*.py" 2>/dev/null | head -3 | sed 's|.*/||' | tr '\n' ', ' | sed 's/,$//')
 RECENT_FILE="${RECENT_FILE:-(no recent file changes detected)}"
 
-# ── 3. Write context snapshot ─────────────────────────────────────────────────
+# ── 3. Semantic retrieval — embed "recent session context", rank by similarity ─
+RECENT_MEMORIES=$("$WORKSPACE/venv/bin/python3" "$WORKSPACE/scripts/memory_retrieve.py" \
+  "recent session context" --top-k 5 2>/dev/null \
+  || echo "  (semantic retrieval unavailable)")
+
+# ── 4. Write context snapshot ─────────────────────────────────────────────────
 cat > "$OUT" << SNAPSHOT
 # SESSION_CONTEXT.md — Pre-Compaction Flush
 
-**Purpose:** Written by the agent just before context compaction or daily reset. Startup reads this first as lightweight recovery. Keep to ~1 paragraph max. Overwrite on every flush (no history).
+**Purpose:** Written by the agent just before context compaction or daily reset. Startup reads this first as lightweight recovery. Overwrite on every flush (no history).
 
 ---
 
 [$TIMESTAMP] Auto-flushed before daily reset (openclaw resets at 01:00).
 Active: Session auto-context from file state — no live session at flush time. Recent commits: $(echo "$RECENT_COMMITS" | tr '\n' ';' | sed 's/; */; /g' | cut -c1-200). Daily log: $DAILY_SUMMARY. Recently modified: $RECENT_FILE. Things today: $(echo "$THINGS_TODAY" | tr '\n' ',' | sed 's/,$//'). Schedule/email: $TODAY_CONTEXT. Next: Resume from Bob's next message — check MEMORY.md + today's daily log for full context. Blocked: none known.
+
+## Retrieved Memory (top-5, auto-indexed)
+$RECENT_MEMORIES
 SNAPSHOT
 
 echo "[$TIMESTAMP] [auto-flush] Written: $OUT"
@@ -99,3 +107,6 @@ python3 "$WORKSPACE/scripts/memory_db.py" add \
   >> "$LOG_DIR/session-context-flush.log" 2>&1 || true
 
 echo "[$TIMESTAMP] [auto-flush] Done."
+
+# ── Dead-man heartbeat ───────────────────────────────────────────────────────
+bash /Users/rreilly/.openclaw/workspace/scripts/cron-heartbeat.sh auto-flush-session-context $?

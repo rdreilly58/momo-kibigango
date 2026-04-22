@@ -185,8 +185,20 @@ PYTHON_EOF
 # Fetch email statistics
 EMAIL_STATS=$(/bin/bash /Users/rreilly/.openclaw/workspace/scripts/email-stats.sh)
 
-# Fetch calendar events (today in EDT)
-CALENDAR_EVENTS=$(/opt/homebrew/bin/gog calendar events primary --json 2>/dev/null | jq -r '.events[] | select(.start.dateTime | startswith("'$(date +%Y-%m-%d)'")) | "\(.start.dateTime[11:16]) - \(.summary)"' 2>/dev/null | head -10 || echo "")
+# Fetch calendar events (today)
+CALENDAR_EVENTS=$(/opt/homebrew/bin/gog calendar events primary --account "$EMAIL" --json 2>/dev/null | python3 -c "
+import sys, json
+from datetime import datetime
+today = datetime.now().strftime('%Y-%m-%d')
+try:
+    data = json.load(sys.stdin)
+    for e in data.get('events', []):
+        start = e.get('start', {}).get('dateTime', '') or e.get('start', {}).get('date', '')
+        if start.startswith(today):
+            time = start[11:16] if 'T' in start else 'All day'
+            print(f'{time} - {e.get(\"summary\", \"(no title)\")}')
+except: pass
+" 2>/dev/null | head -10)
 
 # Fetch tasks statistics
 TASKS_STATS=$(/bin/bash /Users/rreilly/.openclaw/workspace/scripts/tasks-stats.sh)
@@ -215,13 +227,6 @@ Tasks: $TASKS_STATS
 Top Pending:
 $(if [ -n "$TOP_TASKS" ]; then echo "$TOP_TASKS" | sed 's/^/  • /'; else echo "  No pending tasks"; fi)
 
-📋 Your Priorities for Today:
-• Check calendar and upcoming meetings
-• Review important emails  
-• Work on active projects:
-  - ReillyDesignStudio: Set Stripe env vars, configure OAuth
-  - Momotaro-iOS: Add WebSocket dependencies, implement gateway connection
-
 Have a productive day! 🍑
 "
 
@@ -229,3 +234,6 @@ Have a productive day! 🍑
 /opt/homebrew/bin/gog gmail send --account "$EMAIL" --to "$EMAIL" --subject "$SUBJECT" --body "$BODY" 2>&1 | tee -a /tmp/morning-briefing.log
 
 exit $?
+
+# ── Dead-man heartbeat ───────────────────────────────────────────────────────
+bash /Users/rreilly/.openclaw/workspace/scripts/cron-heartbeat.sh morning-briefing $?

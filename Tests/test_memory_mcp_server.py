@@ -591,7 +591,10 @@ class TestMcpStdioProtocol(unittest.TestCase):
         while time.time() - start < timeout:
             rlist, _, _ = select.select([proc.stdout], [], [], 0.5)
             if rlist:
-                chunk = proc.stdout.read(4096)
+                # read1() makes a single underlying syscall — avoids blocking
+                # when BufferedReader tries to fill its buffer beyond what select
+                # confirmed is available.
+                chunk = proc.stdout.read1(4096)
                 if not chunk:
                     break
                 buf += chunk

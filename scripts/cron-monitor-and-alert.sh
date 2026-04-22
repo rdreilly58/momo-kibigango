@@ -3,7 +3,7 @@
 # Monitors all cron jobs for timeouts, failures, queue backlog
 # Usage: cron-monitor-and-alert.sh [--alert] [--verbose]
 
-set -e
+set -Eeuo pipefail
 
 WORKSPACE="$HOME/.openclaw/workspace"
 LOG_DIR="$HOME/.openclaw/logs/cron_runs"
@@ -120,9 +120,9 @@ generate_report() {
   for job_def in "${CRON_JOBS[@]}"; do
     IFS=':' read -r job_name timeout_sec <<< "$job_def"
     if check_job_health "$job_name" "$timeout_sec"; then
-      ((ok++))
+      ok=$((ok + 1))
     else
-      ((failed++))
+      failed=$((failed + 1))
     fi
   done
   

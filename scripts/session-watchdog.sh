@@ -8,15 +8,19 @@
 # Usage: bash session-watchdog.sh [--force]
 # Cron:  0 * * * * bash ~/.openclaw/workspace/scripts/session-watchdog.sh >> ~/.openclaw/logs/session-watchdog.log 2>&1
 
-set -uo pipefail
+set -Eeuo pipefail
 
 # ── Config ──────────────────────────────────────────────────────────────────
 SESSIONS_FILE="$HOME/.openclaw/agents/main/sessions/sessions.json"
-SESSION_KEY="agent:main:main"
+# Check multiple session keys — if ANY is recent, the agent is alive
+# agent:main:main is the web/desktop UI session (often stale when using Telegram/cron)
+# We consider the agent alive if any of these updated recently
+SESSION_KEYS=("agent:main:main" "agent:main:main:heartbeat" "agent:main:telegram:direct:8755120444")
 STALE_THRESHOLD_SEC=3600        # 60 min = 2x 30min heartbeat
 WARN_THRESHOLD_SEC=2700         # 45 min = warn (no alert yet)
 LOG_DIR="$HOME/.openclaw/logs"
 LOG_FILE="$LOG_DIR/session-watchdog.log"
+find "$LOG_DIR" -name "session-watchdog*.log" -mtime +30 -delete 2>/dev/null || true
 WORKSPACE="$HOME/.openclaw/workspace"
 TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
 
@@ -69,20 +73,25 @@ if [ ! -f "$SESSIONS_FILE" ]; then
   exit 1
 fi
 
-# ── Read updatedAt for main session ──────────────────────────────────────────
+# ── Read updatedAt — pick the MOST RECENT across all watched keys ─────────────
 UPDATED_MS=$(python3 -c "
 import json, sys
+keys = ['agent:main:main', 'agent:main:main:heartbeat', 'agent:main:telegram:direct:8755120444']
 try:
     d = json.load(open('$SESSIONS_FILE'))
-    s = d.get('$SESSION_KEY', {})
-    print(int(s.get('updatedAt', 0)))
+    best = 0
+    for k in keys:
+        ts = int(d.get(k, {}).get('updatedAt', 0))
+        if ts > best:
+            best = ts
+    print(best)
 except Exception as e:
     print(0)
 " 2>/dev/null || echo 0)
 
 if [ "$UPDATED_MS" -eq 0 ]; then
-  echo "[$TIMESTAMP] [watchdog] ⚠️  Could not read updatedAt from session — session may be missing"
-  send_telegram "⚠️ <b>OpenClaw Watchdog</b>: Could not read main session timestamp. Session key missing?"
+  echo "[$TIMESTAMP] [watchdog] ⚠️  Could not read updatedAt from any watched session"
+  send_telegram "⚠️ <b>OpenClaw Watchdog</b>: Could not read any session timestamp. Agent may not be running."
   exit 1
 fi
 
@@ -125,9 +134,46 @@ Main session has been silent for <b>${AGE_MIN} minutes</b> (last seen: ${LAST_SE
 
 Attempting automatic restart. If this message repeats, the session may need manual recovery."
 
-# 2. Attempt to restart via openclaw agent
+# 2. Emergency summarization — save whatever context we can before restart
+echo "[$TIMESTAMP] [watchdog] Running emergency session summarizer..."
+PYTHON="$WORKSPACE/venv/bin/python3"
+SUMMARIZER="$WORKSPACE/scripts/session_summarizer.py"
+
+# Build a stale-session context snapshot from available signals
+STALE_CONTEXT="Session went stale after ${AGE_MIN} minutes of silence (last seen: ${LAST_SEEN}).
+
+$(cat "$WORKSPACE/SESSION_CONTEXT.md" 2>/dev/null | head -40 | grep -v '^#\|^---\|^\*\*Purpose' || echo 'No SESSION_CONTEXT.md available.')
+
+Recent commits: $(cd "$WORKSPACE" && git log --oneline -5 2>/dev/null | head -5 || echo 'unavailable')
+
+Daily log excerpt: $(cat "$WORKSPACE/memory/$(date +%Y-%m-%d).md" 2>/dev/null | tail -20 || echo 'no daily log')"
+
+# Only summarize if we have enough context
+if [ ${#STALE_CONTEXT} -gt 300 ]; then
+  "$PYTHON" "$SUMMARIZER" \
+    --text "$STALE_CONTEXT" \
+    --no-context \
+    --workspace "$WORKSPACE" \
+    >> "$LOG_DIR/session-watchdog.log" 2>&1 && \
+    echo "[$TIMESTAMP] [watchdog] ✅ Emergency summarizer wrote to daily notes + db" || \
+    echo "[$TIMESTAMP] [watchdog] ⚠️  Emergency summarizer failed (non-fatal)"
+else
+  echo "[$TIMESTAMP] [watchdog] ⚠️  Insufficient context for emergency summary"
+fi
+
+# Also write a stale-session marker directly to daily notes (no API needed)
+TODAY="$(date +%Y-%m-%d)"
+HH_MM="$(date +%H:%M)"
+DAILY_FILE="$WORKSPACE/memory/$TODAY.md"
+if [ -f "$DAILY_FILE" ]; then
+  echo "- [$HH_MM] ⚠️ Session went stale — watchdog detected ${AGE_MIN}m silence. Emergency summary attempted." \
+    >> "$DAILY_FILE" 2>/dev/null || true
+fi
+
+# 3. Attempt to restart via openclaw agent (send to main agent session)
 echo "[$TIMESTAMP] [watchdog] Sending restart ping via openclaw agent..."
 PING_RESULT=$(openclaw agent \
+  --agent main \
   --message "WATCHDOG: Session detected stale after ${AGE_MIN}m silence. Please respond HEARTBEAT_OK and resume normal operation." \
   --deliver 2>&1) && {
   echo "[$TIMESTAMP] [watchdog] ✅ Restart ping delivered"
@@ -140,3 +186,6 @@ Error: ${PING_RESULT:0:200}"
 }
 
 echo "[$TIMESTAMP] [watchdog] Done."
+
+# ── Dead-man heartbeat ───────────────────────────────────────────────────────
+bash /Users/rreilly/.openclaw/workspace/scripts/cron-heartbeat.sh session-watchdog $?

@@ -14,6 +14,8 @@ import os
 import sys
 import glob
 import json
+import subprocess
+from datetime import date, timedelta
 from pathlib import Path
 from typing import Optional
 
@@ -21,6 +23,9 @@ from typing import Optional
 _VENV = Path(__file__).parent.parent / "venv" / "lib" / "python3.14" / "site-packages"
 if _VENV.exists():
     sys.path.insert(0, str(_VENV))
+
+# Ensure Homebrew bin is on PATH (MCP servers launched by OpenClaw may have stripped PATH)
+os.environ["PATH"] = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:" + os.environ.get("PATH", "")
 
 import numpy as np
 from sentence_transformers import SentenceTransformer
@@ -32,6 +37,12 @@ from mcp.server.fastmcp import FastMCP
 
 WORKSPACE = Path(os.environ.get("OPENCLAW_WORKSPACE", Path.home() / ".openclaw" / "workspace"))
 MODEL_NAME = "all-MiniLM-L6-v2"
+
+EMAIL_ACCOUNTS = [
+    "rdreilly2010@gmail.com",
+    "reillyrd58@gmail.com",
+    "robert@reillydesignstudio.com",
+]
 DEFAULT_TOP_K = 5
 CHUNK_SIZE = 500  # chars
 CHUNK_OVERLAP = 2  # lines kept for overlap between chunks
@@ -195,12 +206,53 @@ def get_memory_file(filename: str) -> Optional[str]:
 # MCP server definition
 # ---------------------------------------------------------------------------
 
+import subprocess
+import shutil
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
+
+_TZ = ZoneInfo("America/New_York")
+
+# Email accounts known to the system
+_EMAIL_ACCOUNTS = [
+    "rdreilly2010@gmail.com",
+    "reillyrd58@gmail.com",
+    "robert@reillydesignstudio.com",
+]
+_DEFAULT_CALENDAR_ACCOUNT = "rdreilly2010@gmail.com"
+
+
+def _run(cmd: str, timeout: int = 15) -> tuple[int, str, str]:
+    """Run a shell command, return (returncode, stdout, stderr)."""
+    r = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=timeout)
+    return r.returncode, r.stdout.strip(), r.stderr.strip()
+
+
+def _gog_available() -> bool:
+    return shutil.which("gog") is not None
+
+
+def _resolve_accounts(account: str) -> list[str]:
+    """Return list of account email addresses to query."""
+    if account == "all":
+        return list(_EMAIL_ACCOUNTS)
+    if account in _EMAIL_ACCOUNTS:
+        return [account]
+    # Allow short label match
+    for a in _EMAIL_ACCOUNTS:
+        if account in a:
+            return [a]
+    return [account]  # pass through unknown, let gog error
+
+
 mcp = FastMCP(
     name="memory",
     instructions=(
         "Provides semantic search over the agent's persistent memory files "
         "(MEMORY.md and memory/*.md). Use memory_search to find relevant context "
-        "by natural-language query. Use memory_get to retrieve a specific file."
+        "by natural-language query. Use memory_get to retrieve a specific file. "
+        "Also provides live email and calendar tools: email_list_unread, "
+        "email_search, email_read, calendar_today, calendar_range."
     ),
 )
 
@@ -224,6 +276,78 @@ def memory_search(query: str, top_k: int = DEFAULT_TOP_K) -> str:
 
 
 @mcp.tool()
+def memory_graph_search(query: str, depth: int = 1) -> str:
+    """
+    Graph-augmented memory search: semantic search + BFS link expansion.
+
+    First finds semantically similar memory chunks (seeds), then traverses
+    their graph links up to `depth` hops to surface related entities and
+    session nodes.
+
+    Args:
+        query:  Natural-language search query.
+        depth:  BFS expansion depth after seed retrieval (default 1, max 2).
+
+    Returns:
+        JSON with {"seeds": [...], "graph": [...]} — seeds are ranked by
+        semantic similarity; graph nodes are linked neighbours.
+    """
+    import sys
+    from pathlib import Path
+
+    depth = max(0, min(depth, 2))
+
+    # Seed phase: semantic search
+    seeds = semantic_search(query, top_k=5)
+
+    if not seeds or depth == 0:
+        return json.dumps({"seeds": seeds, "graph": []}, ensure_ascii=False, indent=2)
+
+    # Graph expansion via memory_db
+    scripts_dir = Path(__file__).parent
+    if str(scripts_dir) not in sys.path:
+        sys.path.insert(0, str(scripts_dir))
+
+    try:
+        from memory_db import MemoryDB  # type: ignore
+
+        db = MemoryDB()
+        seen_ids: set = set()
+        graph_nodes = []
+
+        for seed in seeds:
+            # Map chunk source file → try to find memory DB entries by title/content
+            source = seed.get("source", "")
+            fts_hits = db.search_fts(query, limit=3)
+            for hit in fts_hits:
+                hit_id = hit["id"]
+                if hit_id in seen_ids:
+                    continue
+                seen_ids.add(hit_id)
+                neighbors = db.traverse(hit_id, depth=depth)
+                for n in neighbors:
+                    nid = n["memory"]["id"]
+                    if nid not in seen_ids:
+                        seen_ids.add(nid)
+                        graph_nodes.append({
+                            "title": n["memory"]["title"],
+                            "content": n["memory"]["content"][:200],
+                            "depth": n["depth"],
+                            "relation": n["relation"],
+                            "direction": n["direction"],
+                        })
+    except Exception as exc:
+        return json.dumps({"seeds": seeds, "graph": [], "error": str(exc)},
+                          ensure_ascii=False, indent=2)
+
+    return json.dumps({
+        "seeds": [{"source": s["source"], "score": s["score"], "preview": s["preview"]}
+                  for s in seeds],
+        "graph": graph_nodes,
+    }, ensure_ascii=False, indent=2)
+
+
+@mcp.tool()
 def memory_get(filename: str) -> str:
     """
     Retrieve the raw Markdown content of a specific memory file.
@@ -243,6 +367,289 @@ def memory_get(filename: str) -> str:
             "available_files": available,
         }, ensure_ascii=False, indent=2)
     return content
+
+
+# ---------------------------------------------------------------------------
+# Email + Calendar MCP tools
+# ---------------------------------------------------------------------------
+
+@mcp.tool()
+def email_list_unread(account: str = "all") -> str:
+    """
+    List unread and important emails from one or all Gmail accounts.
+
+    Args:
+        account: Email address, short label (e.g. 'rdreilly2010'), or 'all'
+                 (default). Known accounts: rdreilly2010@gmail.com,
+                 reillyrd58@gmail.com, robert@reillydesignstudio.com.
+
+    Returns:
+        JSON object keyed by account with lists of {from, subject, date, flags}.
+    """
+    if not _gog_available():
+        return json.dumps({"error": "gog CLI not found on PATH"})
+
+    accounts = _resolve_accounts(account)
+    results: dict = {}
+
+    for acct in accounts:
+        code, out, err = _run(f"gog gmail search 'is:unread' -a {acct} --json", timeout=20)
+        if code != 0:
+            results[acct] = {"error": err[:200] or "gog returned non-zero"}
+            continue
+        try:
+            data = json.loads(out)
+            msgs = data.get("messages", data.get("threads", []))
+            results[acct] = [
+                {
+                    "id": m.get("id", ""),
+                    "from": m.get("from", ""),
+                    "subject": m.get("subject", "(no subject)"),
+                    "date": m.get("date", ""),
+                    "flags": [l for l in m.get("labels", []) if l in ("IMPORTANT", "STARRED")],
+                }
+                for m in msgs[:15]
+            ]
+        except (json.JSONDecodeError, Exception) as exc:
+            results[acct] = {"error": str(exc), "raw": out[:300]}
+
+    return json.dumps(results, ensure_ascii=False, indent=2)
+
+
+@mcp.tool()
+def email_search(query: str, account: str = "all", max_results: int = 10) -> str:
+    """
+    Search email using a Gmail search query across one or all accounts.
+
+    Args:
+        query:       Gmail search string, e.g. 'from:boss subject:meeting'.
+        account:     Account email, short label, or 'all' (default).
+        max_results: Cap per account (default 10, max 25).
+
+    Returns:
+        JSON object keyed by account, each with a list of matching messages.
+    """
+    if not _gog_available():
+        return json.dumps({"error": "gog CLI not found on PATH"})
+
+    max_results = max(1, min(max_results, 25))
+    accounts = _resolve_accounts(account)
+    results: dict = {}
+
+    for acct in accounts:
+        safe_query = query.replace("'", "'\\''")
+        code, out, err = _run(f"gog gmail search '{safe_query}' -a {acct} --json", timeout=20)
+        if code != 0:
+            results[acct] = {"error": err[:200] or "gog returned non-zero"}
+            continue
+        try:
+            data = json.loads(out)
+            msgs = data.get("messages", data.get("threads", []))
+            results[acct] = [
+                {
+                    "id": m.get("id", ""),
+                    "from": m.get("from", ""),
+                    "subject": m.get("subject", "(no subject)"),
+                    "date": m.get("date", ""),
+                    "snippet": m.get("snippet", m.get("subject", ""))[:200],
+                }
+                for m in msgs[:max_results]
+            ]
+        except (json.JSONDecodeError, Exception) as exc:
+            results[acct] = {"error": str(exc)}
+
+    return json.dumps(results, ensure_ascii=False, indent=2)
+
+
+@mcp.tool()
+def email_read(message_id: str, account: str) -> str:
+    """
+    Fetch the full body of a specific email message.
+
+    Args:
+        message_id: The message ID returned by email_list_unread or email_search.
+        account:    The account email address that owns this message.
+
+    Returns:
+        JSON with {from, to, subject, date, body} or {error}.
+    """
+    if not _gog_available():
+        return json.dumps({"error": "gog CLI not found on PATH"})
+
+    safe_id = message_id.replace("'", "").replace(";", "").replace("&", "").replace("$", "").replace("(", "").replace(")", "")
+    safe_acct = account.replace("'", "")
+    code, out, err = _run(f"gog gmail read '{safe_id}' -a {safe_acct} --json", timeout=20)
+
+    if code != 0:
+        return json.dumps({"error": err[:300] or "gog returned non-zero", "message_id": message_id})
+
+    try:
+        data = json.loads(out)
+        return json.dumps({
+            "from": data.get("from", ""),
+            "to": data.get("to", ""),
+            "subject": data.get("subject", "(no subject)"),
+            "date": data.get("date", ""),
+            "body": data.get("body", data.get("text", data.get("snippet", "")))[:4000],
+        }, ensure_ascii=False, indent=2)
+    except json.JSONDecodeError:
+        # gog may return plain text for some messages
+        return json.dumps({"body": out[:4000]})
+
+
+@mcp.tool()
+def calendar_today(account: str = _DEFAULT_CALENDAR_ACCOUNT) -> str:
+    """
+    Fetch today's remaining calendar events plus tomorrow morning events.
+
+    Args:
+        account: Google Calendar account to query
+                 (default rdreilly2010@gmail.com).
+
+    Returns:
+        JSON with {today: [...], tomorrow_morning: [...]} each event has
+        {title, time, location}.
+    """
+    if not _gog_available():
+        return json.dumps({"error": "gog CLI not found on PATH"})
+
+    code, out, err = _run(f"gog calendar list -a {account} --json", timeout=20)
+    if code != 0:
+        return json.dumps({"error": err[:200] or "gog calendar unavailable"})
+
+    try:
+        data = json.loads(out)
+        events = data.get("events", data.get("items", []))
+    except json.JSONDecodeError:
+        return json.dumps({"error": "JSON parse error", "raw": out[:300]})
+
+    now = datetime.now(_TZ)
+    today = now.date()
+    tomorrow = today + timedelta(days=1)
+    today_events, tomorrow_events = [], []
+
+    for ev in events:
+        start = ev.get("start", {})
+        summary = ev.get("summary", "Untitled")
+        location = ev.get("location", "")
+
+        if "dateTime" in start:
+            try:
+                dt = datetime.fromisoformat(start["dateTime"]).astimezone(_TZ)
+                ev_date = dt.date()
+                if ev_date == today and dt < now:
+                    continue  # already past
+                time_str = dt.strftime("%-I:%M %p")
+            except Exception:
+                ev_date = None
+                time_str = start["dateTime"][:16]
+        elif "date" in start:
+            try:
+                from datetime import date as _date
+                ev_date = _date.fromisoformat(start["date"])
+                time_str = "All day"
+            except Exception:
+                ev_date = None
+                time_str = ""
+        else:
+            continue
+
+        if ev_date is None:
+            continue
+
+        entry = {"title": summary, "time": time_str, "location": location}
+
+        if ev_date == today:
+            today_events.append(entry)
+        elif ev_date == tomorrow:
+            # only morning (before noon)
+            if time_str == "All day":
+                tomorrow_events.append(entry)
+            elif "dateTime" in start:
+                try:
+                    h = datetime.fromisoformat(start["dateTime"]).astimezone(_TZ).hour
+                    if h < 12:
+                        tomorrow_events.append(entry)
+                except Exception:
+                    pass
+
+    return json.dumps({
+        "today": today_events[:10],
+        "tomorrow_morning": tomorrow_events[:5],
+        "as_of": now.strftime("%Y-%m-%d %H:%M %Z"),
+    }, ensure_ascii=False, indent=2)
+
+
+@mcp.tool()
+def calendar_range(start_date: str, end_date: str, account: str = _DEFAULT_CALENDAR_ACCOUNT) -> str:
+    """
+    Fetch calendar events between two dates (inclusive).
+
+    Args:
+        start_date: ISO date string, e.g. '2026-04-22'.
+        end_date:   ISO date string, e.g. '2026-04-29'.
+        account:    Google Calendar account (default rdreilly2010@gmail.com).
+
+    Returns:
+        JSON {events: [{title, date, time, location}, ...], count: N}.
+    """
+    if not _gog_available():
+        return json.dumps({"error": "gog CLI not found on PATH"})
+
+    # Validate dates
+    try:
+        from datetime import date as _date
+        d_start = _date.fromisoformat(start_date)
+        d_end = _date.fromisoformat(end_date)
+        if d_end < d_start:
+            return json.dumps({"error": "end_date must be >= start_date"})
+    except ValueError as exc:
+        return json.dumps({"error": f"Invalid date: {exc}"})
+
+    code, out, err = _run(f"gog calendar list -a {account} --json", timeout=20)
+    if code != 0:
+        return json.dumps({"error": err[:200] or "gog calendar unavailable"})
+
+    try:
+        data = json.loads(out)
+        events = data.get("events", data.get("items", []))
+    except json.JSONDecodeError:
+        return json.dumps({"error": "JSON parse error"})
+
+    from datetime import date as _date
+    matched = []
+
+    for ev in events:
+        start = ev.get("start", {})
+        summary = ev.get("summary", "Untitled")
+        location = ev.get("location", "")
+
+        if "dateTime" in start:
+            try:
+                dt = datetime.fromisoformat(start["dateTime"]).astimezone(_TZ)
+                ev_date = dt.date()
+                time_str = dt.strftime("%-I:%M %p")
+            except Exception:
+                continue
+        elif "date" in start:
+            try:
+                ev_date = _date.fromisoformat(start["date"])
+                time_str = "All day"
+            except Exception:
+                continue
+        else:
+            continue
+
+        if d_start <= ev_date <= d_end:
+            matched.append({
+                "title": summary,
+                "date": ev_date.isoformat(),
+                "time": time_str,
+                "location": location,
+            })
+
+    matched.sort(key=lambda e: (e["date"], e["time"]))
+    return json.dumps({"events": matched, "count": len(matched)}, ensure_ascii=False, indent=2)
 
 
 # ---------------------------------------------------------------------------

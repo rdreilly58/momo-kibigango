@@ -1,0 +1,145 @@
+{
+  "id": null,
+  "uid": "openclaw-overview",
+  "title": "OpenClaw Overview",
+  "tags": ["openclaw", "observability"],
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "1m",
+  "time": { "from": "now-3h", "to": "now" },
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Session Status",
+      "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
+      "datasource": { "uid": "openclaw-prometheus", "type": "prometheus" },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "orientation": "auto",
+        "colorMode": "background",
+        "graphMode": "none"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            { "type": "value", "options": { "0": { "text": "ACTIVE", "color": "green" }, "1": { "text": "STALE", "color": "red" } } }
+          ],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 1 }] }
+        }
+      },
+      "targets": [{ "expr": "openclaw_session_stale", "legendFormat": "Session" }]
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Session Age",
+      "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 },
+      "datasource": { "uid": "openclaw-prometheus", "type": "prometheus" },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "orientation": "auto",
+        "colorMode": "value"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 2700 }, { "color": "red", "value": 3600 }] }
+        }
+      },
+      "targets": [{ "expr": "openclaw_session_age_seconds", "legendFormat": "Session Age" }]
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Memory Entries",
+      "gridPos": { "x": 12, "y": 0, "w": 6, "h": 4 },
+      "datasource": { "uid": "openclaw-prometheus", "type": "prometheus" },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "orientation": "auto",
+        "colorMode": "value"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "blue", "value": null }] }
+        }
+      },
+      "targets": [{ "expr": "openclaw_memory_entries_total", "legendFormat": "Total Memories" }]
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Stale Crons",
+      "gridPos": { "x": 18, "y": 0, "w": 6, "h": 4 },
+      "datasource": { "uid": "openclaw-prometheus", "type": "prometheus" },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "orientation": "auto",
+        "colorMode": "background"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 1 }, { "color": "red", "value": 3 }] }
+        }
+      },
+      "targets": [{ "expr": "sum(openclaw_cron_stale)", "legendFormat": "Stale Crons" }]
+    },
+    {
+      "id": 5,
+      "type": "table",
+      "title": "Cron Job Health",
+      "gridPos": { "x": 0, "y": 4, "w": 24, "h": 10 },
+      "datasource": { "uid": "openclaw-prometheus", "type": "prometheus" },
+      "options": { "footer": { "show": false } },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "stale" }, "properties": [{ "id": "custom.displayMode", "value": "color-background" }, { "id": "mappings", "value": [{ "type": "value", "options": { "0": { "text": "OK", "color": "green" }, "1": { "text": "STALE", "color": "red" } } }] }] },
+          { "matcher": { "id": "byName", "options": "exit_code" }, "properties": [{ "id": "custom.displayMode", "value": "color-background" }, { "id": "mappings", "value": [{ "type": "value", "options": { "0": { "text": "OK", "color": "green" } } }] }, { "id": "thresholds", "value": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 1 }] } }] },
+          { "matcher": { "id": "byName", "options": "age_seconds" }, "properties": [{ "id": "unit", "value": "s" }] }
+        ]
+      },
+      "targets": [
+        { "expr": "openclaw_cron_last_run_age_seconds", "legendFormat": "{{job}}", "instant": true },
+        { "expr": "openclaw_cron_last_exit_code", "legendFormat": "{{job}}", "instant": true },
+        { "expr": "openclaw_cron_stale", "legendFormat": "{{job}}", "instant": true }
+      ],
+      "transformations": [
+        { "id": "merge", "options": {} },
+        { "id": "organize", "options": { "renameByName": { "openclaw_cron_last_run_age_seconds": "age_seconds", "openclaw_cron_last_exit_code": "exit_code", "openclaw_cron_stale": "stale", "job": "Job" } } }
+      ]
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Session Age Over Time",
+      "gridPos": { "x": 0, "y": 14, "w": 12, "h": 8 },
+      "datasource": { "uid": "openclaw-prometheus", "type": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 2700 }, { "color": "red", "value": 3600 }] }
+        }
+      },
+      "targets": [{ "expr": "openclaw_session_age_seconds", "legendFormat": "Session Age" }]
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Memory Entries by Tier",
+      "gridPos": { "x": 12, "y": 14, "w": 12, "h": 8 },
+      "datasource": { "uid": "openclaw-prometheus", "type": "prometheus" },
+      "targets": [{ "expr": "openclaw_memory_entries_by_tier", "legendFormat": "{{tier}}" }]
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Log Errors (last 200 lines)",
+      "gridPos": { "x": 0, "y": 22, "w": 24, "h": 8 },
+      "datasource": { "uid": "openclaw-prometheus", "type": "prometheus" },
+      "targets": [{ "expr": "openclaw_log_errors_recent", "legendFormat": "{{log}}" }]
+    }
+  ]
+}
