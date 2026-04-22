@@ -18,6 +18,7 @@ SESSIONS_FILE="$HOME/.openclaw/agents/main/sessions/sessions.json"
 SESSION_KEYS=("agent:main:main" "agent:main:main:heartbeat" "agent:main:telegram:direct:8755120444")
 STALE_THRESHOLD_SEC=3600        # 60 min = 2x 30min heartbeat
 WARN_THRESHOLD_SEC=2700         # 45 min = warn (no alert yet)
+PROCESS_COMPLETION_MONITORING="${WATCHDOG_PROCESS_COMPLETION:-false}"  # off by default
 LOG_DIR="$HOME/.openclaw/logs"
 LOG_FILE="$LOG_DIR/session-watchdog.log"
 find "$LOG_DIR" -name "session-watchdog*.log" -mtime +30 -delete 2>/dev/null || true
@@ -105,6 +106,24 @@ AGE_SEC=$((AGE_MS / 1000))
 AGE_MIN=$((AGE_SEC / 60))
 
 echo "[$TIMESTAMP] [watchdog] Main session age: ${AGE_MIN}m ${AGE_SEC}s (threshold: $((STALE_THRESHOLD_SEC / 60))m)"
+
+# ── Process Completion Monitoring (toggle: WATCHDOG_PROCESS_COMPLETION=true) ─
+# Marks agent_coordinator tasks that have exceeded their timeout as failed.
+# Runs on every invocation. Off by default.
+if [ "$PROCESS_COMPLETION_MONITORING" = "true" ]; then
+  echo "[$TIMESTAMP] [watchdog] Running process completion check..."
+  _TIMED_OUT=$(python3 "$WORKSPACE/scripts/agent_coordinator.py" \
+    timeout-check 2>/dev/null | python3 -c \
+    "import sys,json; [print(t['id']) for t in json.load(sys.stdin).get('tasks',[])]" 2>/dev/null || true)
+  for _TID in $_TIMED_OUT; do
+    python3 "$WORKSPACE/scripts/agent_coordinator.py" \
+      fail --id "$_TID" --error "Exceeded agent_type timeout limit" \
+      >/dev/null 2>&1 || true
+    echo "[$TIMESTAMP] [watchdog] Marked task $_TID as timed out"
+  done
+else
+  echo "[$TIMESTAMP] [watchdog] Process completion monitoring: off (set WATCHDOG_PROCESS_COMPLETION=true to enable)"
+fi
 
 # ── Healthy ───────────────────────────────────────────────────────────────────
 if [ "$AGE_SEC" -lt "$WARN_THRESHOLD_SEC" ]; then
@@ -204,16 +223,3 @@ Error: ${PING_RESULT:0:200}"
 echo "[$TIMESTAMP] [watchdog] Done."
 
 # NOTE: cron-heartbeat.sh is called via EXIT trap above — no explicit call needed here.
-
-# Fail any tasks that have exceeded their timeout
-_TIMED_OUT=$(python3 "$WORKSPACE/scripts/agent_coordinator.py" \
-  timeout-check 2>/dev/null | python3 -c \
-  "import sys,json; [print(t['id']) for t in json.load(sys.stdin).get('tasks',[])]" 2>/dev/null || true)
-for _TID in $_TIMED_OUT; do
-  python3 "$WORKSPACE/scripts/agent_coordinator.py" \
-    fail --id "$_TID" --error "Exceeded agent_type timeout limit" \
-    >/dev/null 2>&1 || true
-done
-
-# ── Dead-man heartbeat ───────────────────────────────────────────────────────
-bash /Users/rreilly/.openclaw/workspace/scripts/cron-heartbeat.sh session-watchdog $?
