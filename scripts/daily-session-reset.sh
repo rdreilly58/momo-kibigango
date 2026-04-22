@@ -7,7 +7,8 @@
 
 set -e
 
-WORKSPACE="$HOME/.openclaw/workspace"
+# Allow test harness to override workspace (OPENCLAW_TEST_WORKSPACE=...)
+WORKSPACE="${OPENCLAW_TEST_WORKSPACE:-$HOME/.openclaw/workspace}"
 ARCHIVE_DIR="$WORKSPACE/memory/archive"
 DAILY_LOG="$WORKSPACE/memory/$(date +%Y-%m-%d).md"
 
