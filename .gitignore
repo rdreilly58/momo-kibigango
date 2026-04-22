@@ -113,6 +113,9 @@ TOOLS.*.local
 .env.*
 .local/
 secrets/
+config/briefing.env
+config/ga4.env
+memory/api-keys-and-secrets.md
 
 # === LOCAL CONTEXT (machine-specific, contains personal data) ===
 TODAY.md
