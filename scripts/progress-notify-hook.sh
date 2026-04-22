@@ -14,6 +14,7 @@
 
 WORKSPACE="${OPENCLAW_TEST_WORKSPACE:-$HOME/.openclaw/workspace}"
 ENV_FILE="$WORKSPACE/config/briefing.env"
+OPENCLAW_CONFIG="${OPENCLAW_TEST_OPENCLAW_CONFIG:-$HOME/.openclaw/config.json}"
 LOG_DIR="${OPENCLAW_TEST_LOG_DIR:-$HOME/.openclaw/logs}"
 LOG_FILE="$LOG_DIR/progress-notify.log"
 STATE_FILE="$LOG_DIR/progress-notify-last.txt"
@@ -29,7 +30,26 @@ _log() {
 }
 
 # ── 1. Load Telegram credentials ──────────────────────────────────────────────
-if [ -f "$ENV_FILE" ]; then
+# Primary source: ~/.openclaw/config.json (managed by openclaw gateway)
+if [ -z "${TELEGRAM_BOT_TOKEN:-}" ] && [ -f "$OPENCLAW_CONFIG" ] && command -v python3 &>/dev/null; then
+  TELEGRAM_BOT_TOKEN=$(python3 -c "
+import json, sys
+try:
+    d = json.load(open('$OPENCLAW_CONFIG'))
+    print(d.get('telegram', {}).get('botToken', ''), end='')
+except Exception: pass
+" 2>/dev/null || true)
+  TELEGRAM_CHAT_ID=$(python3 -c "
+import json, sys
+try:
+    d = json.load(open('$OPENCLAW_CONFIG'))
+    print(d.get('telegram', {}).get('chatId', ''), end='')
+except Exception: pass
+" 2>/dev/null || true)
+fi
+
+# Fallback: briefing.env (legacy)
+if [ -z "${TELEGRAM_BOT_TOKEN:-}" ] && [ -f "$ENV_FILE" ]; then
   # shellcheck source=/dev/null
   source "$ENV_FILE" 2>/dev/null || true
 fi
@@ -81,7 +101,14 @@ if ! echo "$TOOL_NAME" | grep -qE "$HEAVY_TOOLS_PATTERN"; then
   exit 0
 fi
 
-# ── 5. Guard: throttle by silence window ─────────────────────────────────────
+# ── 5. Guard: throttle by silence window (with mkdir lock to prevent concurrent sends) ──
+# mkdir is atomic on POSIX — only one invocation wins; others exit silently
+LOCK_DIR="${STATE_FILE}.lockdir"
+if ! mkdir "$LOCK_DIR" 2>/dev/null; then
+  exit 0
+fi
+trap 'rmdir "$LOCK_DIR" 2>/dev/null || true' EXIT
+
 NOW=$(date +%s)
 LAST_NOTIFY=0
 
@@ -91,7 +118,11 @@ fi
 
 ELAPSED=$((NOW - LAST_NOTIFY))
 
-if [ "$ELAPSED" -lt "$SILENCE_THRESHOLD" ]; then
+# Treat missing state file (epoch delta > 1 year) as "first run" — no elapsed display
+FIRST_RUN=0
+[ "$ELAPSED" -gt 31536000 ] && FIRST_RUN=1
+
+if [ "$FIRST_RUN" -eq 0 ] && [ "$ELAPSED" -lt "$SILENCE_THRESHOLD" ]; then
   _log "Throttled: ${ELAPSED}s since last notify (threshold=${SILENCE_THRESHOLD}s, tool=${TOOL_NAME})"
   exit 0
 fi
@@ -106,38 +137,39 @@ case "$TOOL_NAME" in
   *)           TOOL_LABEL="running ${TOOL_NAME}" ;;
 esac
 
-if [ "$ELAPSED" -ge 3600 ]; then
+if [ "$FIRST_RUN" -eq 1 ]; then
+  MESSAGE="⚙️ Still working — ${TOOL_LABEL}"
+elif [ "$ELAPSED" -ge 3600 ]; then
   ELAPSED_MSG="$((ELAPSED / 3600))h $(( (ELAPSED % 3600) / 60 ))m elapsed"
+  MESSAGE="⚙️ Still working — ${TOOL_LABEL} (${ELAPSED_MSG})"
 elif [ "$ELAPSED" -ge 60 ]; then
   ELAPSED_MSG="$((ELAPSED / 60))m $((ELAPSED % 60))s elapsed"
+  MESSAGE="⚙️ Still working — ${TOOL_LABEL} (${ELAPSED_MSG})"
 else
-  ELAPSED_MSG="${ELAPSED}s elapsed"
+  MESSAGE="⚙️ Still working — ${TOOL_LABEL} (${ELAPSED}s elapsed)"
 fi
-
-MESSAGE="⚙️ Still working — ${TOOL_LABEL} (${ELAPSED_MSG})"
 
 # ── 7. Send Telegram notification ────────────────────────────────────────────
-_log "Sending: $MESSAGE (tool=$TOOL_NAME)"
-
-if command -v jq &>/dev/null; then
-  BODY=$(jq -n \
-    --arg text "$MESSAGE" \
-    --arg chat_id "$TELEGRAM_CHAT_ID" \
-    '{chat_id: $chat_id, text: $text}')
-else
-  ESCAPED="${MESSAGE//\"/\\\"}"
-  BODY="{\"chat_id\":\"${TELEGRAM_CHAT_ID}\",\"text\":\"${ESCAPED}\"}"
-fi
-
-curl -fsS -m 30 --retry 2 \
-  -H 'Content-Type: application/json' \
-  -d "$BODY" \
-  "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
-  >/dev/null 2>&1 || _log "curl failed (non-fatal)"
-
-# ── 8. Update last-notify timestamp ──────────────────────────────────────────
+# Update timestamp before sending so concurrent invocations are blocked even if send is slow
 echo "$NOW" > "$STATE_FILE"
 
-_log "Ping sent for tool=$TOOL_NAME elapsed=${ELAPSED}s"
+_log "Sending: $MESSAGE (tool=$TOOL_NAME elapsed=${ELAPSED}s)"
+
+# openclaw CLI routes through openclaw.json token — the only working delivery path
+SENT=0
+if command -v openclaw &>/dev/null && [ -n "${TELEGRAM_CHAT_ID:-}" ]; then
+  if openclaw message send \
+      --channel telegram \
+      --target "$TELEGRAM_CHAT_ID" \
+      --message "$MESSAGE" \
+      >/dev/null 2>&1; then
+    SENT=1
+    _log "Sent via openclaw (tool=$TOOL_NAME)"
+  else
+    _log "openclaw send failed (non-fatal)"
+  fi
+fi
+
+[ "$SENT" -eq 0 ] && _log "Notification not delivered (openclaw unavailable or failed)"
 
 exit 0
