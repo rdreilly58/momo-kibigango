@@ -1,0 +1,41 @@
+# Static registry — edit freely, loaded fresh on each coordinator call
+version: 1
+
+agent_types:
+  coding:
+    description: "Software implementation, debugging, refactoring"
+    default_model: "claude-opus-4-6"
+    fallback_model: "claude-haiku-4-5-20251001"
+    max_concurrent: 3
+    timeout_seconds: 900
+    context_files:
+      - SESSION_CONTEXT.md
+      - STATUS.md
+
+  observer:
+    description: "Read-only workspace scanning and memory updates"
+    default_model: "claude-haiku-4-5-20251001"
+    fallback_model: "claude-haiku-4-5-20251001"
+    max_concurrent: 1
+    timeout_seconds: 300
+    context_files:
+      - SESSION_CONTEXT.md
+
+  research:
+    description: "Web search, summarization, analysis"
+    default_model: "claude-sonnet-4-6"
+    fallback_model: "claude-haiku-4-5-20251001"
+    max_concurrent: 2
+    timeout_seconds: 600
+    context_files:
+      - SESSION_CONTEXT.md
+
+  ops:
+    description: "Infrastructure, cron, deployment"
+    default_model: "claude-sonnet-4-6"
+    fallback_model: "claude-haiku-4-5-20251001"
+    max_concurrent: 1
+    timeout_seconds: 600
+    context_files:
+      - SESSION_CONTEXT.md
+      - STATUS.md
