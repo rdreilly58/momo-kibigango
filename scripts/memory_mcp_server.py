@@ -248,31 +248,150 @@ def _resolve_accounts(account: str) -> list[str]:
 mcp = FastMCP(
     name="memory",
     instructions=(
-        "Provides semantic search over the agent's persistent memory files "
-        "(MEMORY.md and memory/*.md). Use memory_search to find relevant context "
-        "by natural-language query. Use memory_get to retrieve a specific file. "
+        "Provides tiered semantic search over persistent memory (Hot LRU cache + "
+        "LanceDB warm vector store + SQLite cold archive). Use memory_search for "
+        "hybrid RRF search. Use memory_get to retrieve a specific file. "
+        "Use memory_store to save new memories. Use memory_stats to see tier health. "
         "Also provides live email and calendar tools: email_list_unread, "
         "email_search, email_read, calendar_today, calendar_range."
     ),
 )
 
+# Lazy TierManager — only initialised when first memory tool is called
+_tier_manager = None
+
+
+def _get_tier_manager():
+    global _tier_manager
+    if _tier_manager is None:
+        scripts_dir = Path(__file__).parent
+        if str(scripts_dir) not in sys.path:
+            sys.path.insert(0, str(scripts_dir))
+        from memory_tier_manager import TierManager
+        _tier_manager = TierManager()
+    return _tier_manager
+
 
 @mcp.tool()
-def memory_search(query: str, top_k: int = DEFAULT_TOP_K) -> str:
+def memory_search(query: str, top_k: int = DEFAULT_TOP_K, include_cold: bool = False) -> str:
     """
-    Semantically search the agent's persistent memory files.
+    Tiered hybrid semantic search across Hot cache, LanceDB warm store, and
+    optionally SQLite cold archive.
+
+    Uses Reciprocal Rank Fusion of vector similarity + BM25 full-text scores
+    weighted by memory priority.
 
     Args:
-        query:  Natural-language search query.
-        top_k:  Maximum number of results to return (default 5, max 20).
+        query:        Natural-language search query.
+        top_k:        Maximum results (default 5, max 20).
+        include_cold: Also search archived (cold) memories via FTS5 (default False).
 
     Returns:
-        JSON array of results, each with: source, score, preview, text.
-        Returns an empty array JSON string if nothing is indexed.
+        JSON array of results, each with: title, content, namespace, _score, _tier.
     """
     top_k = max(1, min(top_k, 20))
-    results = semantic_search(query, top_k=top_k)
-    return json.dumps(results, ensure_ascii=False, indent=2)
+    try:
+        mgr = _get_tier_manager()
+        results = mgr.search(query, k=top_k, include_cold=include_cold)
+        # Add preview field for backwards compatibility
+        for r in results:
+            if "preview" not in r:
+                content = str(r.get("content", ""))
+                r["preview"] = content[:200] + ("..." if len(content) > 200 else "")
+        return json.dumps(results, ensure_ascii=False, indent=2)
+    except Exception as exc:
+        # Fall back to legacy flat-file search if tier manager fails
+        results = semantic_search(query, top_k=top_k)
+        return json.dumps({"results": results, "fallback": True, "error": str(exc)},
+                          ensure_ascii=False, indent=2)
+
+
+@mcp.tool()
+def memory_store(
+    title: str,
+    content: str,
+    namespace: str = "workspace",
+    tier: str = "short",
+    tags: str = "",
+    priority: int = 5,
+) -> str:
+    """
+    Store a new memory in all tiers (SQLite + LanceDB warm vector index).
+
+    Args:
+        title:     Short descriptive title.
+        content:   Full memory content.
+        namespace: Logical namespace (workspace, personal, projects/name, etc.).
+        tier:      Memory tier: working (7-day TTL), short, or long.
+        tags:      Comma-separated tags.
+        priority:  Priority 1-10 (default 5).
+
+    Returns:
+        JSON with {id, status}.
+    """
+    try:
+        tag_list = [t.strip() for t in tags.split(",") if t.strip()]
+        mgr = _get_tier_manager()
+        mem_id = mgr.store(title, content, namespace=namespace, tier=tier,
+                           tags=tag_list, priority=priority)
+        return json.dumps({"id": mem_id, "status": "stored"}, ensure_ascii=False)
+    except Exception as exc:
+        return json.dumps({"error": str(exc)}, ensure_ascii=False)
+
+
+@mcp.tool()
+def memory_stats() -> str:
+    """
+    Return health metrics for all memory tiers.
+
+    Returns:
+        JSON with hot cache hit rate, warm store record count, cold archive count,
+        SQLite tier breakdown, and session search count.
+    """
+    try:
+        mgr = _get_tier_manager()
+        return json.dumps(mgr.stats(), ensure_ascii=False, indent=2)
+    except Exception as exc:
+        return json.dumps({"error": str(exc)}, ensure_ascii=False)
+
+
+@mcp.tool()
+def memory_promote(memory_id: str) -> str:
+    """
+    Promote a cold (archived) memory back to the warm tier.
+    Recomputes its embedding and re-indexes it in LanceDB.
+
+    Args:
+        memory_id: The UUID of the archived memory.
+
+    Returns:
+        JSON with the promoted memory dict or {error}.
+    """
+    try:
+        mgr = _get_tier_manager()
+        result = mgr.promote_to_warm(memory_id)
+        if result is None:
+            return json.dumps({"error": f"Memory {memory_id} not found in cold store"})
+        return json.dumps(result, ensure_ascii=False, indent=2)
+    except Exception as exc:
+        return json.dumps({"error": str(exc)}, ensure_ascii=False)
+
+
+@mcp.tool()
+def memory_rebuild_index() -> str:
+    """
+    Rebuild the LanceDB warm vector index from scratch by re-reading all
+    SQLite memories and recomputing their embeddings.
+
+    Returns:
+        JSON with {synced: N, status}.
+    """
+    try:
+        mgr = _get_tier_manager()
+        n = mgr.rebuild_warm_index()
+        return json.dumps({"synced": n, "status": "ok"}, ensure_ascii=False)
+    except Exception as exc:
+        return json.dumps({"error": str(exc)}, ensure_ascii=False)
 
 
 @mcp.tool()

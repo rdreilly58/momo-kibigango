@@ -76,6 +76,26 @@
     "total-recall": {
       "version": "1.5.1",
       "installedAt": 1775647046754
+    },
+    "telegram-voice-to-voice-macos": {
+      "version": "0.1.3",
+      "installedAt": 1776879556745
+    },
+    "apple-calendar-cli": {
+      "version": "1.0.1",
+      "installedAt": 1776879601299
+    },
+    "openclaw-agent-discovery": {
+      "version": "1.0.0",
+      "installedAt": 1776878735674
+    },
+    "openclaw-ops-guardrails": {
+      "version": "0.1.1",
+      "installedAt": 1776879560690
+    },
+    "elite-longterm-memory": {
+      "version": "1.2.3",
+      "installedAt": 1776878745409
     }
   }
 }

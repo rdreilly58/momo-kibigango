@@ -7,361 +7,244 @@ Used for OpenClaw subagent output, HEARTBEAT reports, and manual publishing.
 import requests
 import json
 import os
-import time
 import re
+import time
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional, Dict, Any
 from datetime import datetime
 import logging
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s [%(levelname)s] %(message)s',
-    handlers=[
-        logging.FileHandler(os.path.expanduser("~/.openclaw/logs/telegraph.log")),
-        logging.StreamHandler()
-    ]
-)
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class TelegraphConfig:
+    """Configuration for the Telegraph publisher."""
+    api_url: str = "https://api.telegra.ph"
+    max_retries: int = 3
+    timeout: int = 30
+    default_author: str = "OpenClaw"
+
 
 class TelegraphPublisher:
     """Publish content to Telegraph with retry logic and error handling."""
-    
-    def __init__(self, config_path: Optional[str] = None):
-        """Initialize publisher with config."""
-        self.config_path = config_path or os.path.expanduser("~/.openclaw/workspace/config/telegraph.json")
-        self.config = self._load_config()
-        self.token = self._load_token()
-        self.api_endpoint = self.config['api']['endpoint']
-        self.timeout = self.config['api']['timeout_seconds']
-        
-    def _load_config(self) -> Dict[str, Any]:
-        """Load Telegraph configuration."""
-        if not os.path.exists(self.config_path):
-            raise FileNotFoundError(f"Config not found: {self.config_path}")
-        
-        with open(self.config_path, 'r') as f:
-            return json.load(f)
-    
-    def _load_token(self) -> str:
-        """Load access token from secure storage."""
-        token_path = os.path.expanduser(self.config['token']['storage'])
-        
-        if not os.path.exists(token_path):
-            raise FileNotFoundError(f"Telegraph token not found: {token_path}")
-        
-        with open(token_path, 'r') as f:
-            return f.read().strip()
-    
-    def _retry_request(self, method: str, endpoint: str, **kwargs) -> Dict[str, Any]:
-        """Make request with exponential backoff retry."""
-        retry_config = self.config['api']['retry']
-        max_attempts = retry_config['max_attempts']
-        initial_delay = retry_config['initial_delay_ms'] / 1000
-        max_delay = retry_config['max_delay_ms'] / 1000
-        
-        delay = initial_delay
-        last_error = None
-        
-        for attempt in range(max_attempts):
+
+    def __init__(
+        self,
+        access_token: Optional[str] = None,
+        config: Optional[TelegraphConfig] = None,
+    ):
+        self.access_token = access_token
+        self.config = config or TelegraphConfig()
+        self.account_info: Optional[Dict[str, Any]] = None
+
+    # ── Internal HTTP ──────────────────────────────────────────────────────────
+
+    def _request(self, method: str, endpoint: str, **kwargs) -> Dict[str, Any]:
+        """Make a single API call; returns the unwrapped ``result`` dict."""
+        url = f"{self.config.api_url}/{endpoint}"
+        func = getattr(requests, method.lower())
+        response = func(url, timeout=self.config.timeout, **kwargs)
+        data = response.json()
+        if data.get("ok"):
+            return data["result"]
+        raise Exception(data.get("error", "Telegraph API error"))
+
+    def _request_with_retry(self, method: str, endpoint: str, **kwargs) -> Dict[str, Any]:
+        """_request with exponential-backoff retry up to config.max_retries."""
+        last_err: Exception = Exception("no attempts")
+        delay = 1.0
+        for attempt in range(self.config.max_retries):
             try:
-                if method.upper() == 'POST':
-                    response = requests.post(endpoint, timeout=self.timeout, **kwargs)
-                else:
-                    response = requests.get(endpoint, timeout=self.timeout, **kwargs)
-                
-                if response.status_code == 200:
-                    return response.json()
-                else:
-                    last_error = f"HTTP {response.status_code}: {response.text}"
-                    
-                    if response.status_code == 429:  # Rate limit
-                        delay = min(delay * 2, max_delay)
-                        logger.warning(f"Rate limited, retry in {delay:.1f}s")
-                        time.sleep(delay)
-                        continue
-                    
-                    raise Exception(last_error)
-            
-            except requests.Timeout:
-                last_error = f"Timeout after {self.timeout}s"
-                if attempt < max_attempts - 1:
+                return self._request(method, endpoint, **kwargs)
+            except Exception as exc:
+                last_err = exc
+                if attempt < self.config.max_retries - 1:
                     time.sleep(delay)
-                    delay = min(delay * 2, max_delay)
-            
-            except Exception as e:
-                last_error = str(e)
-                if attempt < max_attempts - 1:
-                    time.sleep(delay)
-                    delay = min(delay * 2, max_delay)
-        
-        raise Exception(f"Failed after {max_attempts} attempts: {last_error}")
-    
-    def _markdown_to_telegraph_content(self, markdown: str) -> list:
-        """Convert Markdown to Telegraph content format."""
-        content = []
-        lines = markdown.split('\n')
-        
+                    delay = min(delay * 2, 30)
+        raise last_err
+
+    # ── Account ────────────────────────────────────────────────────────────────
+
+    def create_account(
+        self,
+        short_name: str = "openclaw_agent",
+        author_name: str = "OpenClaw",
+    ) -> str:
+        """Create a Telegraph account; returns the access token."""
+        result = self._request(
+            "post",
+            "createAccount",
+            json={"short_name": short_name, "author_name": author_name},
+        )
+        self.access_token = result["access_token"]
+        self.account_info = result
+        return self.access_token
+
+    # ── Publishing ─────────────────────────────────────────────────────────────
+
+    def publish_markdown(self, title: str, content: str, **_) -> str:
+        """Publish Markdown content; returns the page URL."""
+        nodes = self._markdown_to_nodes(content)
+        result = self._request_with_retry(
+            "post",
+            "createPage",
+            json={
+                "access_token": self.access_token,
+                "title": title[:256],
+                "author_name": self.config.default_author,
+                "content": nodes,
+            },
+        )
+        return result["url"]
+
+    def publish_html(self, title: str, content: str, **_) -> str:
+        """Publish HTML content; returns the page URL."""
+        result = self._request_with_retry(
+            "post",
+            "createPage",
+            json={
+                "access_token": self.access_token,
+                "title": title[:256],
+                "author_name": self.config.default_author,
+                "content": content,
+            },
+        )
+        return result["url"]
+
+    def update_page(self, path: str, content: str, title: str = "", **_) -> str:
+        """Edit an existing page; returns the page URL."""
+        result = self._request_with_retry(
+            "post",
+            f"editPage/{path}",
+            json={
+                "access_token": self.access_token,
+                "title": (title or path)[:256],
+                "author_name": self.config.default_author,
+                "content": content,
+            },
+        )
+        return result["url"]
+
+    # Keep old name as an alias
+    def edit_page(self, page_path: str, title: str, markdown_content: str) -> str:
+        nodes = self._markdown_to_nodes(markdown_content)
+        return self.update_page(page_path, nodes, title=title)  # type: ignore[arg-type]
+
+    def get_page(self, path: str, return_content: bool = True) -> Dict[str, Any]:
+        """Fetch a Telegraph page; returns the result dict."""
+        return self._request(
+            "get",
+            f"getPage/{path}",
+            params={"return_content": int(return_content)},
+        )
+
+    # ── Conversion helpers ─────────────────────────────────────────────────────
+
+    def _markdown_to_html(self, markdown: str) -> str:
+        """Convert Markdown to an HTML string (used by integration layer)."""
+        html = markdown
+        html = re.sub(r"^# (.+)$", r"<h1>\1</h1>", html, flags=re.MULTILINE)
+        html = re.sub(r"^## (.+)$", r"<h2>\1</h2>", html, flags=re.MULTILINE)
+        html = re.sub(r"^### (.+)$", r"<h3>\1</h3>", html, flags=re.MULTILINE)
+        html = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", html)
+        html = re.sub(r"\*(.+?)\*", r"<em>\1</em>", html)
+        html = re.sub(r"`(.+?)`", r"<code>\1</code>", html)
+        html = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", r'<a href="\2">\1</a>', html)
+        return html
+
+    def _markdown_to_nodes(self, markdown: str) -> list:
+        """Convert Markdown to Telegraph Node list format."""
+        nodes: list = []
+        lines = markdown.split("\n")
         i = 0
         while i < len(lines):
             line = lines[i]
-            
-            # Headings (H2-H6)
-            if line.startswith('## '):
-                content.append({'tag': 'h3', 'children': [line[3:].strip()]})
-            elif line.startswith('### '):
-                content.append({'tag': 'h4', 'children': [line[4:].strip()]})
-            elif line.startswith('#### '):
-                content.append({'tag': 'h5', 'children': [line[5:].strip()]})
-            
-            # Code blocks
-            elif line.startswith('```'):
+            if line.startswith("# "):
+                nodes.append({"tag": "h3", "children": [line[2:].strip()]})
+            elif line.startswith("## "):
+                nodes.append({"tag": "h3", "children": [line[3:].strip()]})
+            elif line.startswith("### "):
+                nodes.append({"tag": "h4", "children": [line[4:].strip()]})
+            elif line.startswith("```"):
                 code_lines = []
                 i += 1
-                while i < len(lines) and not lines[i].startswith('```'):
+                while i < len(lines) and not lines[i].startswith("```"):
                     code_lines.append(lines[i])
                     i += 1
-                
-                code_content = '\n'.join(code_lines).strip()
-                if code_content:
-                    content.append({'tag': 'pre', 'children': [code_content]})
-            
-            # Tables (basic support)
-            elif '|' in line and i + 1 < len(lines) and '|' in lines[i + 1]:
-                # Simple table to paragraph conversion for now
-                content.append({'tag': 'p', 'children': [line]})
-            
-            # Lists
-            elif line.startswith('- '):
-                content.append({'tag': 'p', 'children': ['• ' + line[2:].strip()]})
-            elif line.startswith('* '):
-                content.append({'tag': 'p', 'children': ['• ' + line[2:].strip()]})
-            
-            # Paragraphs
+                code = "\n".join(code_lines).strip()
+                if code:
+                    nodes.append({"tag": "pre", "children": [code]})
+            elif line.startswith("- ") or line.startswith("* "):
+                nodes.append({"tag": "p", "children": ["• " + line[2:].strip()]})
             elif line.strip():
-                # Inline formatting: bold (**text**) and italic (*text*)
-                formatted = line.strip()
-                formatted = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', formatted)
-                formatted = re.sub(r'\*(.+?)\*', r'<em>\1</em>', formatted)
-                content.append({'tag': 'p', 'children': [formatted]})
-            
+                text = line.strip()
+                text = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", text)
+                text = re.sub(r"\*(.+?)\*", r"<em>\1</em>", text)
+                nodes.append({"tag": "p", "children": [text]})
             i += 1
-        
-        return content if content else [{'tag': 'p', 'children': ['(empty content)']}]
-    
-    def publish_markdown(self, title: str, markdown_content: str, 
-                        return_content: bool = False) -> Dict[str, Any]:
-        """
-        Publish Markdown content to Telegraph.
-        
-        Args:
-            title: Article title
-            markdown_content: Markdown formatted content
-            return_content: If True, return full Telegraph content
-        
-        Returns:
-            Dict with 'url' key and Telegraph response
-        """
-        logger.info(f"Publishing: {title}")
-        
-        if not markdown_content.strip():
-            raise ValueError("Content cannot be empty")
-        
-        # Convert to Telegraph content format
-        content = self._markdown_to_telegraph_content(markdown_content)
-        
-        # Create page
-        url = f"{self.api_endpoint}/createPage"
-        payload = {
-            'access_token': self.token,
-            'title': title[:256],  # Telegraph limit
-            'author_name': self.config['author']['name'],
-            'author_url': 'https://github.com/rreilly/openclaw',
-            'content': content,
-            'return_content': return_content
+        return nodes or [{"tag": "p", "children": ["(empty content)"]}]
+
+    # ── Token persistence ──────────────────────────────────────────────────────
+
+    def save_token(self, path: str) -> None:
+        """Persist access_token (and account_info) to a JSON file."""
+        data: Dict[str, Any] = {
+            "access_token": self.access_token,
+            "created_at": datetime.now().isoformat(),
         }
-        
-        try:
-            response = self._retry_request('POST', url, json=payload)
-            
-            if 'result' in response:
-                result = response['result']
-                page_url = result['url']
-                logger.info(f"✅ Published: {page_url}")
-                
-                return {
-                    'success': True,
-                    'url': f"https://telegra.ph{page_url}",
-                    'path': result.get('path'),
-                    'title': result.get('title')
-                }
-            else:
-                error_msg = response.get('error', 'Unknown error')
-                logger.error(f"❌ API Error: {error_msg}")
-                return {'success': False, 'error': error_msg}
-        
-        except Exception as e:
-            logger.error(f"❌ Publish failed: {str(e)}")
-            return {'success': False, 'error': str(e)}
-    
-    def publish_html(self, title: str, html_content: str,
-                    return_content: bool = False) -> Dict[str, Any]:
-        """Publish HTML content to Telegraph."""
-        logger.info(f"Publishing HTML: {title}")
-        
-        url = f"{self.api_endpoint}/createPage"
-        payload = {
-            'access_token': self.token,
-            'title': title[:256],
-            'author_name': self.config['author']['name'],
-            'author_url': 'https://github.com/rreilly/openclaw',
-            'content': html_content,
-            'return_content': return_content
-        }
-        
-        try:
-            response = self._retry_request('POST', url, json=payload)
-            
-            if 'result' in response:
-                result = response['result']
-                page_url = result['url']
-                logger.info(f"✅ Published: {page_url}")
-                
-                return {
-                    'success': True,
-                    'url': f"https://telegra.ph{page_url}",
-                    'path': result.get('path'),
-                    'title': result.get('title')
-                }
-            else:
-                error_msg = response.get('error', 'Unknown error')
-                logger.error(f"❌ API Error: {error_msg}")
-                return {'success': False, 'error': error_msg}
-        
-        except Exception as e:
-            logger.error(f"❌ Publish failed: {str(e)}")
-            return {'success': False, 'error': str(e)}
-    
-    def edit_page(self, page_path: str, title: str, markdown_content: str) -> Dict[str, Any]:
-        """
-        Update an existing Telegraph page in-place (editPage API).
+        if self.account_info:
+            data["account_info"] = self.account_info
+        Path(path).parent.mkdir(parents=True, exist_ok=True)
+        with open(path, "w") as fh:
+            json.dump(data, fh, indent=2)
 
-        Args:
-            page_path: The path component of the Telegraph URL (e.g. 'OpenClaw-Status-04-16')
-            title: New title for the page
-            markdown_content: Updated Markdown content
+    @staticmethod
+    def load_token(path: str) -> str:
+        """Load access_token from a JSON file written by save_token."""
+        with open(path) as fh:
+            data = json.load(fh)
+        return data["access_token"]
 
-        Returns:
-            Dict with 'url', 'path', and 'success' keys
-        """
-        logger.info(f"Editing page: {page_path}")
-
-        if not markdown_content.strip():
-            raise ValueError("Content cannot be empty")
-
-        content = self._markdown_to_telegraph_content(markdown_content)
-
-        url = f"{self.api_endpoint}/editPage/{page_path}"
-        payload = {
-            'access_token': self.token,
-            'title': title[:256],
-            'author_name': self.config['author']['name'],
-            'author_url': 'https://github.com/rreilly/openclaw',
-            'content': content,
-            'return_content': False,
-        }
-
-        try:
-            response = self._retry_request('POST', url, json=payload)
-
-            if 'result' in response:
-                result = response['result']
-                page_url = result['url']
-                logger.info(f"✅ Edited: {page_url}")
-                return {
-                    'success': True,
-                    'url': f"https://telegra.ph{page_url}",
-                    'path': result.get('path'),
-                    'title': result.get('title'),
-                }
-            else:
-                error_msg = response.get('error', 'Unknown error')
-                logger.error(f"❌ editPage error: {error_msg}")
-                return {'success': False, 'error': error_msg}
-
-        except Exception as e:
-            logger.error(f"❌ editPage failed: {str(e)}")
-            return {'success': False, 'error': str(e)}
+    # ── Connectivity check ─────────────────────────────────────────────────────
 
     def test_connectivity(self) -> bool:
-        """Test Telegraph API connectivity."""
-        logger.info("Testing Telegraph API connectivity...")
-        
         try:
-            url = f"{self.api_endpoint}/getPageViews"
-            response = requests.get(url, params={'path': 'test'}, timeout=self.timeout)
-            
-            if response.status_code == 200:
-                logger.info("✅ Telegraph API is accessible")
-                return True
-            else:
-                logger.warning(f"⚠️  Telegraph API returned {response.status_code}")
-                return False
-        
-        except Exception as e:
-            logger.error(f"❌ Cannot reach Telegraph API: {str(e)}")
+            self._request("get", "getPageViews", params={"path": "test"})
+            return True
+        except Exception:
             return False
 
 
-def main():
-    """CLI entry point for testing."""
+def main() -> None:
     import sys
-    
+
     if len(sys.argv) < 2:
         print("Usage: telegraph_publisher.py <command> [args]")
         print("\nCommands:")
-        print("  test              - Test API connectivity")
-        print("  publish-md <title> <file>  - Publish Markdown file")
-        print("  publish-html <title> <file> - Publish HTML file")
+        print("  test                            Test API connectivity")
+        print("  publish-md <token> <title> <file>  Publish Markdown file")
         sys.exit(1)
-    
+
     command = sys.argv[1]
-    
     try:
-        pub = TelegraphPublisher()
-        
-        if command == 'test':
-            result = pub.test_connectivity()
-            sys.exit(0 if result else 1)
-        
-        elif command == 'publish-md':
-            if len(sys.argv) < 4:
-                print("Usage: telegraph_publisher.py publish-md <title> <file>")
-                sys.exit(1)
-            
-            title = sys.argv[2]
-            filepath = sys.argv[3]
-            
-            with open(filepath, 'r') as f:
-                content = f.read()
-            
-            result = pub.publish_markdown(title, content)
-            
-            if result['success']:
-                print(f"\n✅ Published: {result['url']}")
-            else:
-                print(f"\n❌ Error: {result['error']}")
-                sys.exit(1)
-        
+        if command == "test":
+            pub = TelegraphPublisher()
+            sys.exit(0 if pub.test_connectivity() else 1)
+        elif command == "publish-md":
+            token, title, filepath = sys.argv[2], sys.argv[3], sys.argv[4]
+            pub = TelegraphPublisher(access_token=token)
+            content = Path(filepath).read_text()
+            url = pub.publish_markdown(title, content)
+            print(f"✅ Published: {url}")
         else:
             print(f"Unknown command: {command}")
             sys.exit(1)
-    
-    except Exception as e:
-        print(f"❌ Error: {str(e)}")
+    except Exception as exc:
+        print(f"❌ Error: {exc}")
         sys.exit(1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
