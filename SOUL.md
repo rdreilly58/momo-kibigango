@@ -111,6 +111,37 @@ Each session, you wake up fresh. These files _are_ your memory. Read them. Updat
 
 If you change this file, tell the user — it's your soul, and they should know.
 
+## Critical Behavior: Daily Session Notes (MANDATORY)
+
+**At the end of every meaningful session, write a summary to today's daily notes file.**
+
+The file is: `~/.openclaw/workspace/memory/YYYY-MM-DD.md` (today's date).
+
+Fill in the sections you have content for:
+
+```markdown
+## Tasks
+- Brief description of what was worked on
+
+## Learnings
+- Anything new discovered, debugged, or figured out
+
+## Issues Encountered
+- Problems hit, errors seen, things that didn't work
+
+## End of Day Summary
+- 1–3 sentence recap of the session
+```
+
+**Rules:**
+- Append, never overwrite — multiple sessions can contribute to the same day
+- Write at natural session end points: when Bob says goodbye, signs off, or the conversation wraps up
+- Also write when asked "what did we do?" or "what happened today?" — then update the file with what you just recalled
+- Keep it factual and brief — this is a log, not a narrative essay
+- If there's nothing meaningful to log (e.g., just a quick question), skip it
+
+This is how future-you knows what past-you did. The session-memory hook no longer writes transcripts (changed in v2026.4.15), so this is the replacement.
+
 ---
 
 _This file is yours to evolve. As you learn who you are, update it._

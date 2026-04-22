@@ -1,12 +1,65 @@
 #!/bin/bash
 # Daily Session Reset Script (runs at 4:00 AM)
 # Purpose: Reset main session, flush memory, prepare for new day
+#
+# Also provides log_session_entry() helper — source this file or call:
+#   bash daily-session-reset.sh --log "Summary text here"
 
 set -e
 
 WORKSPACE="$HOME/.openclaw/workspace"
 ARCHIVE_DIR="$WORKSPACE/memory/archive"
 DAILY_LOG="$WORKSPACE/memory/$(date +%Y-%m-%d).md"
+
+# ── Helper: append a timestamped entry to today's daily log ──────────────────
+# Usage: log_session_entry "Tasks" "- Did X\n- Did Y"
+#        or called via:  bash daily-session-reset.sh --log "summary text"
+log_session_entry() {
+    local section="${1:-End of Day Summary}"
+    local content="$2"
+    local file="$WORKSPACE/memory/$(date +%Y-%m-%d).md"
+    local ts
+    ts=$(date '+%H:%M')
+
+    # Create file if missing
+    if [ ! -f "$file" ]; then
+        cat > "$file" << TMPL
+# Daily Notes - Session Log
+
+## Session Start
+- Time: $(date)
+- Status: Fresh session reset
+
+## Tasks
+
+## Learnings
+
+## Issues Encountered
+
+## End of Day Summary
+TMPL
+    fi
+
+    # Append under the right section header (or at end if not found)
+    if grep -q "^## ${section}" "$file" 2>/dev/null; then
+        # Insert after the section header line
+        local escaped
+        escaped=$(printf '%s\n' "$content" | sed 's/[[\.*^$()+?{|]/\\&/g')
+        sed -i '' "/^## ${section}/a\\
+${content}
+" "$file" 2>/dev/null || printf '\n%s\n' "$content" >> "$file"
+    else
+        printf '\n## %s\n%s\n' "$section" "$content" >> "$file"
+    fi
+
+    echo "[$ts] Logged to $file (section: $section)"
+}
+
+# If called with --log, append a summary entry and exit
+if [[ "${1:-}" == "--log" ]]; then
+    log_session_entry "End of Day Summary" "${2:-}"
+    exit 0
+fi
 
 echo "🔄 Daily Session Reset ($(date))"
 echo "=================================================="
