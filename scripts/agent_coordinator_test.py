@@ -12,6 +12,7 @@ import tempfile
 import threading
 import time
 import unittest
+from datetime import datetime, timezone
 from pathlib import Path
 
 # ---------------------------------------------------------------------------
@@ -642,6 +643,115 @@ class TestCLI(unittest.TestCase):
         self.assertGreaterEqual(len(types), 4)
         for expected in ("coding", "observer", "research", "ops"):
             self.assertIn(expected, types)
+
+
+# ---------------------------------------------------------------------------
+# TestWiringHelpers
+# ---------------------------------------------------------------------------
+
+class TestWiringHelpers(unittest.TestCase):
+
+    def setUp(self):
+        self._tmpdir = tempfile.TemporaryDirectory()
+        self._ws = Path(self._tmpdir.name)
+
+    def tearDown(self):
+        self._tmpdir.cleanup()
+
+    def _sm(self):
+        return _make_sm(self._ws)
+
+    def _cli(self, *args):
+        return _run_cli(*args, workspace=self._ws)
+
+    def _parse(self, stdout):
+        return json.loads(stdout)
+
+    def test_find_by_session_found(self):
+        """submit→start with session_id, find_by_session returns it."""
+        sm = self._sm()
+        task_id = sm.submit("Find me by session", agent_type="coding")
+        sm.start(task_id, session_id="test-session-abc", model="claude-opus-4-6")
+        found = sm.find_by_session("test-session-abc")
+        self.assertIsNotNone(found)
+        self.assertEqual(found["id"], task_id)
+        self.assertEqual(found["session_id"], "test-session-abc")
+
+    def test_find_by_session_not_found(self):
+        """find_by_session on unknown session_id returns None."""
+        sm = self._sm()
+        sm.submit("Some task", agent_type="coding")
+        result = sm.find_by_session("no-such-session-xyz")
+        self.assertIsNone(result)
+
+    def test_find_by_session_cli(self):
+        """CLI find-session --session <id> returns ok:true with task."""
+        sm = self._sm()
+        task_id = sm.submit("CLI find session test", agent_type="coding")
+        sm.start(task_id, session_id="cli-session-999", model="claude-opus-4-6")
+        code, out, _ = self._cli("find-session", "--session", "cli-session-999")
+        self.assertEqual(code, 0)
+        data = self._parse(out)
+        self.assertTrue(data["ok"])
+        self.assertIsNotNone(data["task"])
+        self.assertEqual(data["task"]["id"], task_id)
+
+    def test_timeout_check_no_overdue(self):
+        """Running task within timeout is not returned."""
+        sm = self._sm()
+        task_id = sm.submit("Fresh task", agent_type="coding")
+        sm.start(task_id, session_id="s-fresh", model="claude-opus-4-6")
+        overdue = sm.timeout_check()
+        ids = [t["id"] for t in overdue]
+        self.assertNotIn(task_id, ids)
+
+    def test_timeout_check_overdue(self):
+        """Running task past timeout IS returned."""
+        sm = self._sm()
+        task_id = sm.submit("Overdue task", agent_type="coding")
+        sm.start(task_id, session_id="s-overdue", model="claude-opus-4-6")
+        # Manually backdate started_at to simulate timeout
+        with sm._lock():
+            state = sm._load()
+            for t in state["tasks"]:
+                if t["id"] == task_id:
+                    from datetime import timedelta
+                    past = datetime.now(timezone.utc).astimezone() - timedelta(seconds=1000)
+                    t["started_at"] = past.isoformat()
+            sm._save(state)
+        overdue = sm.timeout_check()
+        ids = [t["id"] for t in overdue]
+        self.assertIn(task_id, ids)
+
+    def test_timeout_check_cli(self):
+        """CLI timeout-check returns ok:true with tasks list."""
+        code, out, _ = self._cli("timeout-check")
+        self.assertEqual(code, 0)
+        data = self._parse(out)
+        self.assertTrue(data["ok"])
+        self.assertIn("tasks", data)
+        self.assertIsInstance(data["tasks"], list)
+
+    def test_start_without_session(self):
+        """start with session_id=None succeeds."""
+        sm = self._sm()
+        task_id = sm.submit("No session task", agent_type="observer")
+        # Pass None explicitly — should not raise
+        sm.start(task_id, session_id=None, model="claude-haiku-4-5-20251001")
+        task = sm.get_task(task_id)
+        self.assertEqual(task["status"], "running")
+        self.assertIsNone(task["session_id"])
+
+    def test_start_without_session_cli(self):
+        """CLI start --id <id> (no --session) succeeds."""
+        sm = self._sm()
+        task_id = sm.submit("CLI no session", agent_type="observer")
+        code, out, _ = self._cli("start", "--id", task_id)
+        self.assertEqual(code, 0)
+        data = self._parse(out)
+        self.assertTrue(data["ok"])
+        task = sm.get_task(task_id)
+        self.assertEqual(task["status"], "running")
 
 
 # ---------------------------------------------------------------------------

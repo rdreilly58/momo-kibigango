@@ -113,3 +113,7 @@ echo "   Daily files: $(ls -1 $WORKSPACE/memory/*.md 2>/dev/null | wc -l)"
 echo "   Archived files: $(ls -1 $ARCHIVE_DIR/*.md 2>/dev/null | wc -l)"
 echo ""
 echo "=================================================="
+
+# Purge old done/failed/cancelled tasks (keep last 20)
+python3 "$WORKSPACE/scripts/agent_coordinator.py" purge --keep 20 \
+  >/dev/null 2>&1 || true

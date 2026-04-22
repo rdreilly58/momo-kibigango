@@ -507,6 +507,42 @@ class StateManager:
             self._save(state)
             return len(to_remove)
 
+    def find_by_session(self, session_id: str) -> dict | None:
+        """Return the first task whose session_id field matches, or None."""
+        with self._lock():
+            state = self._load()
+        for task in state.get("tasks", []):
+            if task.get("session_id") == session_id:
+                return task
+        return None
+
+    def timeout_check(self) -> list:
+        """Return running tasks whose elapsed time exceeds their agent_type timeout."""
+        with self._lock():
+            state = self._load()
+
+        now = datetime.now(timezone.utc).astimezone()
+        result = []
+        for task in state.get("tasks", []):
+            if task.get("status") != "running":
+                continue
+            started_at_str = task.get("started_at")
+            if not started_at_str:
+                continue
+            try:
+                started_at = datetime.fromisoformat(started_at_str)
+                elapsed = (now - started_at).total_seconds()
+            except (ValueError, TypeError):
+                continue
+            try:
+                cfg = self._agent_dir.get(task.get("agent_type", "coding"))
+                timeout_seconds = cfg.get("timeout_seconds", 900)
+            except KeyError:
+                timeout_seconds = 900
+            if elapsed > timeout_seconds:
+                result.append(task)
+        return result
+
     def get_status_summary(self) -> dict:
         """Return counts by status plus agents.running."""
         with self._lock():
@@ -560,8 +596,15 @@ def _build_parser() -> argparse.ArgumentParser:
     # start
     p_start = sub.add_parser("start", help="Transition task to running")
     p_start.add_argument("--id", required=True)
-    p_start.add_argument("--session", required=True)
+    p_start.add_argument("--session", required=False, default=None)
     p_start.add_argument("--model", default=None)
+
+    # find-session
+    p_find_session = sub.add_parser("find-session", help="Find task by session_id")
+    p_find_session.add_argument("--session", required=True)
+
+    # timeout-check
+    sub.add_parser("timeout-check", help="List running tasks that have exceeded their timeout")
 
     # complete
     p_complete = sub.add_parser("complete", help="Mark task as done")
@@ -625,7 +668,8 @@ def main():
             if task is None:
                 _print_and_exit(_err(f"task not found: {args.id}"), 1)
             model = args.model or task.get("model") or "claude-opus-4-6"
-            sm.start(args.id, args.session, model)
+            session_id = args.session  # may be None — that's ok
+            sm.start(args.id, session_id, model)
             _print_and_exit(_ok(task_id=args.id))
 
         elif args.command == "complete":
@@ -661,6 +705,14 @@ def main():
             types = ad.list_types()
             details = {t: ad.get(t) for t in types}
             _print_and_exit(_ok(agent_types=details))
+
+        elif args.command == "find-session":
+            task = sm.find_by_session(args.session)
+            _print_and_exit(_ok(task=task))
+
+        elif args.command == "timeout-check":
+            tasks = sm.timeout_check()
+            _print_and_exit(_ok(tasks=tasks))
 
     except (ValueError, RuntimeError, KeyError) as e:
         _print_and_exit(_err(str(e)), 1)

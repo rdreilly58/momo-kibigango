@@ -20,6 +20,17 @@ spec.loader.exec_module(tc_module)
 TaskClassifier = tc_module.TaskClassifier
 TaskComplexity = tc_module.TaskComplexity
 
+COMPLEXITY_TO_AGENT_TYPE = {
+    "SIMPLE": "research",
+    "COMPLEX": "coding",
+}
+
+COMPLEXITY_TO_PRIORITY = {
+    "SIMPLE": 3,
+    "COMPLEX": 7,
+}
+
+
 class TaskRouter:
     """
     Complete routing system: classify → select model → load context → set thinking.
@@ -100,7 +111,26 @@ class TaskRouter:
         
         if verbose:
             print(json.dumps(result, indent=2))
-        
+
+        # Submit to coordinator (non-blocking — never breaks routing)
+        try:
+            import subprocess, os as _os
+            _coord = _os.path.join(_os.path.dirname(__file__), "agent_coordinator.py")
+            _complexity_val = complexity.value if hasattr(complexity, "value") else str(complexity)
+            _agent_type = COMPLEXITY_TO_AGENT_TYPE.get(_complexity_val, "coding")
+            _priority = COMPLEXITY_TO_PRIORITY.get(_complexity_val, 5)
+            _coord_result = subprocess.run(
+                ["python3", _coord, "submit",
+                 "--task", user_input[:200],
+                 "--type", _agent_type,
+                 "--priority", str(_priority)],
+                capture_output=True, text=True, timeout=5
+            )
+            import json as _json
+            result["coordinator_task_id"] = _json.loads(_coord_result.stdout).get("task_id")
+        except Exception:
+            result["coordinator_task_id"] = None
+
         return result
     
     @staticmethod

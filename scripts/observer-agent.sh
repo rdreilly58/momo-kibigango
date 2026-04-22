@@ -10,9 +10,23 @@
 
 set -euo pipefail
 
-WORKSPACE="$HOME/.openclaw/workspace"
+WORKSPACE="${WORKSPACE:-$HOME/.openclaw/workspace}"
 OBS_FILE="$WORKSPACE/memory/observations.md"
 STAMP="$WORKSPACE/memory/.observer-last-run"
+
+# Submit + immediately start coordinator task (observer has no external session ID)
+COORDINATOR_TASK_ID=""
+_COORD_RESULT=$(python3 "$WORKSPACE/scripts/agent_coordinator.py" \
+  submit --task "Observer agent run $(date +%Y-%m-%dT%H:%M)" \
+  --type observer --priority 3 2>/dev/null || echo '{}')
+COORDINATOR_TASK_ID=$(echo "$_COORD_RESULT" | python3 -c \
+  "import sys,json; print(json.load(sys.stdin).get('task_id',''))" 2>/dev/null || true)
+
+if [ -n "$COORDINATOR_TASK_ID" ]; then
+  python3 "$WORKSPACE/scripts/agent_coordinator.py" \
+    start --id "$COORDINATOR_TASK_ID" --model "claude-haiku-4-5-20251001" \
+    >/dev/null 2>&1 || true
+fi
 
 # Init stamp if missing (first run or recovery)
 if [ ! -f "$STAMP" ]; then
@@ -36,6 +50,12 @@ NEW_MEMORY=$(find "$WORKSPACE/memory" -name "*.md" -newer "$STAMP" \
 if [ -z "$NEW_COMMITS" ] && [ -z "$NEW_MEMORY" ]; then
   echo "[observer] No new activity — updating stamp only"
   echo "$(date +%s)" > "$STAMP"
+  if [ -n "$COORDINATOR_TASK_ID" ]; then
+    python3 "$WORKSPACE/scripts/agent_coordinator.py" \
+      complete --id "$COORDINATOR_TASK_ID" \
+      --summary "Observer completed: no new activity" \
+      >/dev/null 2>&1 || true
+  fi
   exit 0
 fi
 
@@ -74,6 +94,17 @@ bash "$WORKSPACE/scripts/generate-status.sh" 2>/dev/null || echo "[observer] STA
 # Update stamp
 echo "$(date +%s)" > "$STAMP"
 echo "[observer] Done — observations written"
+
+# Complete coordinator task before heartbeat
+COMMITS_FOUND=$(echo "$NEW_COMMITS" | grep -c . 2>/dev/null || echo 0)
+MEMORY_UPDATES=$(echo "$NEW_MEMORY" | grep -c . 2>/dev/null || echo 0)
+OBSERVER_EXIT_CODE=0
+if [ -n "$COORDINATOR_TASK_ID" ]; then
+  python3 "$WORKSPACE/scripts/agent_coordinator.py" \
+    complete --id "$COORDINATOR_TASK_ID" \
+    --summary "Observer completed: $COMMITS_FOUND new commits, $MEMORY_UPDATES memory updates" \
+    >/dev/null 2>&1 || true
+fi
 
 # ── Dead-man heartbeat ───────────────────────────────────────────────────────
 bash /Users/rreilly/.openclaw/workspace/scripts/cron-heartbeat.sh observer-agent $?

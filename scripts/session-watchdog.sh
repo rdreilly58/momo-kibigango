@@ -21,7 +21,7 @@ WARN_THRESHOLD_SEC=2700         # 45 min = warn (no alert yet)
 LOG_DIR="$HOME/.openclaw/logs"
 LOG_FILE="$LOG_DIR/session-watchdog.log"
 find "$LOG_DIR" -name "session-watchdog*.log" -mtime +30 -delete 2>/dev/null || true
-WORKSPACE="$HOME/.openclaw/workspace"
+WORKSPACE="${WORKSPACE:-$HOME/.openclaw/workspace}"
 TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
 
 # ── Idempotency guard: once per hour ─────────────────────────────────────────
@@ -120,6 +120,19 @@ fi
 # ── STALE ─────────────────────────────────────────────────────────────────────
 echo "[$TIMESTAMP] [watchdog] ❌ Session STALE — last activity ${AGE_MIN}m ago. Alerting + attempting restart..."
 
+# Look up stale session in coordinator and mark failed
+SESSION_ID="agent:main:main"
+_TASK=$(python3 "$WORKSPACE/scripts/agent_coordinator.py" \
+  find-session --session "$SESSION_ID" 2>/dev/null || echo '{}')
+_TASK_ID=$(echo "$_TASK" | python3 -c \
+  "import sys,json; d=json.load(sys.stdin); print(d.get('task',{}).get('id',''))" 2>/dev/null || true)
+if [ -n "$_TASK_ID" ]; then
+  python3 "$WORKSPACE/scripts/agent_coordinator.py" \
+    fail --id "$_TASK_ID" \
+    --error "Session $SESSION_ID stale >60m — watchdog triggered" \
+    >/dev/null 2>&1 || true
+fi
+
 # 1. Send Telegram alert
 LAST_SEEN=$(python3 -c "
 import datetime, sys
@@ -186,6 +199,16 @@ Error: ${PING_RESULT:0:200}"
 }
 
 echo "[$TIMESTAMP] [watchdog] Done."
+
+# Fail any tasks that have exceeded their timeout
+_TIMED_OUT=$(python3 "$WORKSPACE/scripts/agent_coordinator.py" \
+  timeout-check 2>/dev/null | python3 -c \
+  "import sys,json; [print(t['id']) for t in json.load(sys.stdin).get('tasks',[])]" 2>/dev/null || true)
+for _TID in $_TIMED_OUT; do
+  python3 "$WORKSPACE/scripts/agent_coordinator.py" \
+    fail --id "$_TID" --error "Exceeded agent_type timeout limit" \
+    >/dev/null 2>&1 || true
+done
 
 # ── Dead-man heartbeat ───────────────────────────────────────────────────────
 bash /Users/rreilly/.openclaw/workspace/scripts/cron-heartbeat.sh session-watchdog $?

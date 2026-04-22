@@ -81,5 +81,21 @@ EXIT_CODE=0
 
 _log "session_summarizer.py exited with code ${EXIT_CODE}"
 
-# ── 6. Always exit 0 ─────────────────────────────────────────────────────────
+# ── 6. Complete coordinator task for this session ─────────────────────────────
+SESSION_ID=$(echo "$STDIN_DATA" | python3 -c \
+  "import sys,json; print(json.load(sys.stdin).get('session_id',''))" 2>/dev/null || true)
+
+if [ -n "$SESSION_ID" ]; then
+  _TASK=$(python3 "$WORKSPACE/scripts/agent_coordinator.py" \
+    find-session --session "$SESSION_ID" 2>/dev/null || echo '{}')
+  _TASK_ID=$(echo "$_TASK" | python3 -c \
+    "import sys,json; d=json.load(sys.stdin); print(d.get('task',{}).get('id',''))" 2>/dev/null || true)
+  if [ -n "$_TASK_ID" ]; then
+    python3 "$WORKSPACE/scripts/agent_coordinator.py" \
+      complete --id "$_TASK_ID" --summary "Session ended cleanly" \
+      >/dev/null 2>&1 || true
+  fi
+fi
+
+# ── 7. Always exit 0 ─────────────────────────────────────────────────────────
 exit 0

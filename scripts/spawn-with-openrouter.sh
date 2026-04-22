@@ -5,11 +5,21 @@
 
 set -e
 
+WORKSPACE="${WORKSPACE:-$HOME/.openclaw/workspace}"
 TASK_DESCRIPTION="${1:-}"
 
 if [ -z "$TASK_DESCRIPTION" ]; then
   echo "Usage: bash spawn-with-openrouter.sh \"Task description\""
   exit 1
+fi
+
+# Submit task to coordinator (non-blocking)
+COORDINATOR_TASK_ID=""
+if command -v python3 &>/dev/null; then
+  _COORD_RESULT=$(python3 "$WORKSPACE/scripts/agent_coordinator.py" \
+    submit --task "${TASK_DESCRIPTION:-coding task}" --type coding --priority 7 2>/dev/null || echo '{}')
+  COORDINATOR_TASK_ID=$(echo "$_COORD_RESULT" | python3 -c \
+    "import sys,json; print(json.load(sys.stdin).get('task_id',''))" 2>/dev/null || true)
 fi
 
 echo "🤖 SMART SPAWN WITH OPENROUTER (Tier B)"
@@ -96,3 +106,7 @@ echo "  • Fallback chain: 3-tier protection"
 echo "════════════════════════════════════════════════════════"
 echo ""
 echo "✅ Ready to spawn (Tier B with OpenRouter support)"
+
+if [ -n "$COORDINATOR_TASK_ID" ]; then
+  echo "COORDINATOR_TASK_ID=$COORDINATOR_TASK_ID"
+fi
