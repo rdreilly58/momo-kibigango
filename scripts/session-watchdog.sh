@@ -25,6 +25,9 @@ WORKSPACE="${WORKSPACE:-$HOME/.openclaw/workspace}"
 TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
 
 # ── Idempotency guard: once per hour ─────────────────────────────────────────
+# ── Always write heartbeat on exit ───────────────────────────────────────────
+trap 'bash /Users/rreilly/.openclaw/workspace/scripts/cron-heartbeat.sh session-watchdog $?' EXIT
+
 LOCK_FILE="/tmp/session-watchdog-$(date +%Y-%m-%d-%H).lock"
 if [ -f "$LOCK_FILE" ] && [ "${1:-}" != "--force" ]; then
   echo "[$TIMESTAMP] [watchdog] Already ran this hour (lock: $LOCK_FILE). Skipping."
@@ -199,6 +202,8 @@ Error: ${PING_RESULT:0:200}"
 }
 
 echo "[$TIMESTAMP] [watchdog] Done."
+
+# NOTE: cron-heartbeat.sh is called via EXIT trap above — no explicit call needed here.
 
 # Fail any tasks that have exceeded their timeout
 _TIMED_OUT=$(python3 "$WORKSPACE/scripts/agent_coordinator.py" \
