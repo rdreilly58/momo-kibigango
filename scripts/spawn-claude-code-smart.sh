@@ -40,21 +40,9 @@ echo "Step 2: Task classified as: $CLASSIFIED_MODEL"
 echo "        Model: $CLASSIFIED_ALIAS"
 echo ""
 
-# Determine timeout based on model
-case "$CLASSIFIED_MODEL" in
-  haiku)
-    TIMEOUT=30  # Faster timeout for simple tasks
-    THINKING="off"
-    ;;
-  opus)
-    TIMEOUT=120  # Standard timeout
-    THINKING="medium"
-    ;;
-  gpt-4)
-    TIMEOUT=180  # Longer timeout for complex tasks
-    THINKING="full"
-    ;;
-esac
+# Timeout and thinking come from classifier output (already set via CLASSIFIED_TIMEOUT/CLASSIFIED_THINKING)
+TIMEOUT="${CLASSIFIED_TIMEOUT:-60}"
+THINKING="${CLASSIFIED_THINKING:-off}"
 
 echo "Step 3: Spawning Claude Code subagent..."
 echo "        Model: $CLASSIFIED_ALIAS"
@@ -88,13 +76,13 @@ echo ""
 echo "Cost Impact:"
 case "$CLASSIFIED_MODEL" in
   haiku)
-    echo "  ✅ Ultra-cheap: \$0.0001 per 1K tokens (150x savings vs Opus)"
+    echo "  ✅ Ultra-cheap: Haiku (~150x savings vs Opus)"
+    ;;
+  sonnet)
+    echo "  ✅ Balanced: Sonnet (default for most tasks)"
     ;;
   opus)
-    echo "  ✅ Balanced: \$0.015 per 1K tokens (standard)"
-    ;;
-  gpt-4)
-    echo "  💰 Premium: \$0.03 per 1K tokens (2x Opus cost, but best quality)"
+    echo "  💰 Deep reasoning: Opus (reserved for hard problems)"
     ;;
 esac
 

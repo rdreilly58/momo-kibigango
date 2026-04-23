@@ -217,6 +217,57 @@ else:
   echo ""
 }
 
+# ── Section: Memory & Context Health ─────────────────────────────────────────
+
+memory_section() {
+  echo "## Memory & Context"
+  echo ""
+
+  # LanceDB warm tier record count
+  local warm_count
+  warm_count=$("$WORKSPACE/venv/bin/python3" -c "
+import sys; sys.path.insert(0, '$WORKSPACE/scripts')
+try:
+    from memory_tier_manager import TierManager
+    mgr = TierManager()
+    s = mgr.stats()
+    print(s.get('tiers', {}).get('warm', {}).get('records', '?'))
+except Exception as e:
+    print('?')
+" 2>/dev/null || echo "?")
+
+  local flat_count
+  flat_count=$(ls "$WORKSPACE/memory/"*.md 2>/dev/null | wc -l | tr -d ' ')
+
+  echo "| Store | Count |"
+  echo "|-------|-------|"
+  echo "| LanceDB warm | ${warm_count} records |"
+  echo "| Flat memory files | ${flat_count} files |"
+  echo ""
+
+  # Recent session depth (last 3 entries from metrics file)
+  local metrics_file="$HOME/.openclaw/logs/session-depth-metrics.jsonl"
+  if [ -f "$metrics_file" ]; then
+    echo "**Recent session depths:**"
+    echo ""
+    tail -3 "$metrics_file" | python3 -c "
+import sys, json
+for line in sys.stdin:
+    try:
+        d = json.loads(line)
+        chars = d.get('transcript_chars', 0)
+        turns = d.get('turn_estimate', 0)
+        date  = d.get('date', '')
+        pct   = min(int(chars / 200000 * 100), 100)
+        bar   = '█' * (pct // 10) + '░' * (10 - pct // 10)
+        print(f'- {date}: {chars:,} chars (~{turns} turns) [{bar}] {pct}%')
+    except Exception:
+        pass
+" 2>/dev/null || echo "_No session metrics yet._"
+    echo ""
+  fi
+}
+
 # ── Assemble STATUS.md ────────────────────────────────────────────────────────
 
 {
@@ -235,6 +286,7 @@ else:
   crons_section
   observations_section
   tasks_section
+  memory_section
 
   echo "---"
   echo ""
