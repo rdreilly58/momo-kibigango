@@ -139,3 +139,9 @@ openclaw/
 
 # === AGENT COORDINATOR (runtime state, do not commit) ===
 STATE.yaml
+
+# === LANCEDB (binary vector store, regeneratable from flat files) ===
+lance_memory/
+
+# === CLAUDE CODE RUNTIME (transient worktree state) ===
+.claude/
