@@ -49,12 +49,71 @@ except Exception:
 " 2>/dev/null || true)
 fi
 
-# ── 3. Guard: transcript too short ──────────────────────────────────────────
+# ── 3. Guard: transcript too short → fallback to git-based summary ───────────
 TRANSCRIPT_LEN=${#TRANSCRIPT}
 _log "Transcript length: ${TRANSCRIPT_LEN} chars"
 
 if [ "$TRANSCRIPT_LEN" -lt 200 ]; then
-  _log "Transcript too short (${TRANSCRIPT_LEN} < 200) — skipping"
+  _log "Transcript empty (v2026.4.15 hook regression) — generating git-based fallback"
+
+  # Check recency guard first
+  if [ -f "$LAST_SUMMARY_STAMP" ]; then
+    LAST_RUN=$(cat "$LAST_SUMMARY_STAMP" 2>/dev/null || echo 0)
+    NOW=$(date +%s)
+    ELAPSED=$(( NOW - LAST_RUN ))
+    if [ "$ELAPSED" -lt "$MIN_INTERVAL" ]; then
+      _log "Last summary was ${ELAPSED}s ago — skipping fallback too"
+      exit 0
+    fi
+  fi
+
+  # Build fallback from git log + recently modified files
+  DAILY_NOTE="$WORKSPACE/memory/$(date '+%Y-%m-%d').md"
+  SESSION_TIME=$(date '+%H:%M')
+  GIT_LOG=$(cd "$WORKSPACE" && git log --oneline --since="12 hours ago" 2>/dev/null | head -5 || echo "")
+  MODIFIED=$(cd "$WORKSPACE" && git diff --name-only HEAD 2>/dev/null | head -10 || echo "")
+
+  # Only write if there's something to record
+  if [ -z "$GIT_LOG" ] && [ -z "$MODIFIED" ]; then
+    _log "No git activity and no changes — skipping fallback"
+    exit 0
+  fi
+
+  # Ensure daily note file exists with header
+  if [ ! -f "$DAILY_NOTE" ]; then
+    cat > "$DAILY_NOTE" << HEADER
+# Daily Notes - Session Log
+
+## Session Start
+- Time: $(date)
+- Status: Fresh session
+
+## Tasks
+
+## Learnings
+
+## Issues Encountered
+
+## End of Day Summary
+HEADER
+  fi
+
+  # Append fallback entry
+  {
+    echo ""
+    echo "### Auto-summary [$SESSION_TIME] (fallback — no transcript)"
+    if [ -n "$GIT_LOG" ]; then
+      echo "**Commits:**"
+      echo "$GIT_LOG" | sed 's/^/- /'
+    fi
+    if [ -n "$MODIFIED" ]; then
+      echo "**Uncommitted changes:**"
+      echo "$MODIFIED" | sed 's/^/- /'
+    fi
+  } >> "$DAILY_NOTE" 2>/dev/null || true
+
+  date +%s > "$LAST_SUMMARY_STAMP" 2>/dev/null || true
+  _log "Fallback summary written to $DAILY_NOTE"
   exit 0
 fi
 

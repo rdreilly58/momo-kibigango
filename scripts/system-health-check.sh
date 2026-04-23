@@ -66,11 +66,11 @@ report() {
 
 # Check Gateway connectivity
 check_gateway() {
-  if curl -s http://localhost:8080/health >/dev/null 2>&1; then
-    report "OK" "OpenClaw Gateway" "Running (port 8080)"
+  if curl -s http://localhost:18789/health >/dev/null 2>&1; then
+    report "OK" "OpenClaw Gateway" "Running (port 18789)"
     return 0
   else
-    report "ERROR" "OpenClaw Gateway" "Not responding on port 8080"
+    report "ERROR" "OpenClaw Gateway" "Not responding on port 18789"
     return 1
   fi
 }
@@ -96,7 +96,7 @@ check_api_keys() {
   local missing=0
   
   # Check BRAVE_API_KEY
-  if [ -z "$BRAVE_API_KEY" ]; then
+  if [ -z "${BRAVE_API_KEY:-}" ]; then
     report "WARN" "API Keys" "BRAVE_API_KEY not set in environment"
     missing=$((missing + 1))
   else

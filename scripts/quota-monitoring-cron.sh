@@ -27,6 +27,10 @@ check_openai_quota() {
 
 check_brave_quota() {
     # Brave doesn't expose quota via API, but we monitor by checking connectivity
+    if [ -z "${BRAVE_API_KEY:-}" ]; then
+        log "⚠️  Brave Search: BRAVE_API_KEY not configured — skipping"
+        return
+    fi
     if curl -s -f "https://api.search.brave.com/res/v1/web/search?q=test&count=1" \
         -H "X-Subscription-Token: $BRAVE_API_KEY" > /dev/null 2>&1; then
         log "✅ Brave Search: Operating normally"

@@ -94,6 +94,8 @@ Sections: Tasks / Learnings / Issues Encountered / End of Day Summary.
 Write at natural end points (goodbye, sign-off, wrap-up). Append, never overwrite. Skip if trivial.
 See CLAUDE.md for full template.
 
+**Triggers:** Any farewell ("thanks", "good night", "done for now", "talk later", "bye") = write the note immediately before responding. Do not wait to be asked. The Stop hook writes a git-based fallback automatically if you miss it — but your agent-written summary is always better.
+
 ---
 
 _This file is yours to evolve. As you learn who you are, update it._
