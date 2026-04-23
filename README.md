@@ -1,6 +1,6 @@
 # 🍑 Momotaro — AI Agent Workspace
 
-Personal AI agent workspace powered by [OpenClaw](https://openclaw.ai), running on an M4 Mac Mini (24GB RAM, macOS 25.x). Momotaro is a persistent autonomous assistant with memory, tools, and multi-channel communication (Telegram, Rocket.Chat, Discord).
+Personal AI agent workspace powered by [OpenClaw](https://openclaw.ai), running on an M4 Mac Mini (24GB RAM, macOS 25.x). Momotaro is a persistent autonomous assistant with memory, tools, and multi-channel communication (Telegram, Discord).
 
 ## Overview
 
@@ -11,7 +11,7 @@ This workspace is the operational home for Momotaro — an AI agent that manages
 ```
 ┌───────────────────────────────────────────────────────────┐
 │                   COMMUNICATION LAYER                      │
-│   Telegram (primary) │ Rocket.Chat (work) │ Discord (soon) │
+│        Telegram (primary)       │    Discord (soon)      │
 └─────────────────────────┬─────────────────────────────────┘
                           │
 ┌─────────────────────────▼─────────────────────────────────┐
@@ -207,7 +207,6 @@ Key scripts in `scripts/`:
 | Channel | Status | Notes |
 |---------|--------|-------|
 | Telegram | ✅ Active | Primary channel, fully operational |
-| Rocket.Chat | ✅ Active | Work channel, custom plugin (fixed April 2) |
 | Discord | 🔲 Planned | Setup pending |
 
 ## Cost Optimization
@@ -237,15 +236,12 @@ The cascade proxy (momo-kibidango) scores response quality based on length, cohe
 Made a serious mistake updating a recurring calendar event by assuming Thursday instead of reading the Friday date from message metadata. This deleted all future instances of the event. **Always read timestamps from metadata. Never calculate or infer.** This is now an enforced rule.
 
 ### 5. Config File Rewrites Are Dangerous (April 2026)
-A Python script that read `openclaw.json`, modified one field, and wrote it back silently dropped the entire `channels.rocketchat` section — breaking the Rocket.Chat channel completely. JSON5 → JSON conversion lost data. **Rule:** Never do full-file read-modify-write on config files. Use `openclaw config set` for single-field changes, and always backup first.
+A Python script that read `openclaw.json`, modified one field, and wrote it back silently dropped an entire config section. JSON5 → JSON conversion lost data. **Rule:** Never do full-file read-modify-write on config files. Use `openclaw config set` for single-field changes, and always backup first.
 
 ### 6. LaunchAgents Accumulate and Conflict (April 2026)
-Found 6+ standalone Rocket.Chat LaunchAgent services running simultaneously, each intercepting messages differently. Legacy scripts from earlier experiments were still active, causing message duplication and routing failures. **Clean up old LaunchAgents aggressively.** Rename unused plists to `.disabled`, don't just unload them.
+Found multiple standalone LaunchAgent services running simultaneously, each intercepting messages differently. Legacy scripts from earlier experiments were still active, causing message duplication and routing failures. **Clean up old LaunchAgents aggressively.** Rename unused plists to `.disabled`, don't just unload them.
 
-### 7. Docker Healthchecks Need Container-Aware Tooling (April 2026)
-Rocket.Chat Docker container was perpetually "unhealthy" because the healthcheck used `curl` (not installed in the container) and `localhost` (doesn't resolve inside containers). Fixed by switching to `wget --spider -q http://127.0.0.1:3000/health`. **Always verify that healthcheck tools exist inside the container.**
-
-### 8. Local Models on 16GB Need Quantization (April 2026)
+### 7. Local Models on 16GB Need Quantization (April 2026)
 Attempted to load 3 Qwen2.5 models (0.5B + 1.5B + 3B) in float16 for speculative decoding — OOM killed repeatedly. Even the smallest trio at float16 plus PyTorch overhead plus OS takes ~16GB. **Lesson:** On consumer hardware, always plan for int4/int8 quantization or use MLX backend (more memory efficient on Apple Silicon).
 
 ### 9. Sudo Access Is a Feature, Not a Risk (March 2026)
@@ -261,7 +257,6 @@ Brave Search API key was in the config file but the Gateway couldn't find it. Ro
 ### ✅ Operational
 - **OpenClaw Gateway** — Running, Claude Opus 4.0 default
 - **Telegram channel** — Primary comms, fully functional
-- **Rocket.Chat channel** — Work comms via custom plugin, fixed April 2
 - **Memory system** — Local embeddings search + daily logs + curated memory
 - **ReillyDesignStudio** — Production on Vercel, auto-deploying
 - **Roblox automation** — Full pipeline operational
@@ -285,7 +280,7 @@ Brave Search API key was in the config file but the Gateway couldn't find it. Ro
 - **Runtime:** Node.js v25.9.0, Python 3.x, Docker
 - **Models:** Claude Opus 4.0 (primary), Claude Haiku 4.5 (fast/fallback)
 - **DNS:** Cloudflare (reillydesignstudio.com, momo-kibidango.org)
-- **Hosting:** Vercel (websites), AWS Route 53 (DNS), Docker (Rocket.Chat)
+- **Hosting:** Vercel (websites), AWS Route 53 (DNS)
 
 ---
 
@@ -296,7 +291,7 @@ This workspace is designed for [OpenClaw](https://openclaw.ai). To run your own:
 1. Install OpenClaw: `npm install -g openclaw`
 2. Initialize workspace: `openclaw init`
 3. Configure your `SOUL.md`, `USER.md`, and `AGENTS.md`
-4. Connect channels (Telegram, Rocket.Chat, etc.)
+4. Connect channels (Telegram, Discord, etc.)
 5. Start the gateway: `openclaw gateway start`
 
 See [OpenClaw docs](https://docs.openclaw.ai) for full setup guide.

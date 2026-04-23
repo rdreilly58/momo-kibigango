@@ -46,10 +46,17 @@ except Exception:
 " 2>/dev/null || true)
 
   PROMPT_TEXT=$(echo "$STDIN_DATA" | python3 -c "
-import sys, json
+import sys, json, re
 try:
     d = json.load(sys.stdin)
-    print(d.get('prompt', '')[:200], end='')
+    raw = d.get('prompt', '')
+    # Strip Telegram/metadata preamble (JSON blocks, conversation info headers)
+    # Keep only the actual user message content
+    clean = re.sub(r'Conversation info.*?```\s*', '', raw, flags=re.DOTALL)
+    clean = re.sub(r'Sender.*?```\s*', '', clean, flags=re.DOTALL)
+    clean = re.sub(r'\{[^}]{0,500}\}', '', clean)  # strip inline JSON objects
+    clean = clean.strip()
+    print(clean[:300], end='')
 except Exception:
     pass
 " 2>/dev/null || true)
@@ -72,7 +79,7 @@ fi
 # ── 4. Semantic search — embed query, rank by cosine similarity ───────────────
 QUERY="${PROMPT_TEXT:-recent session context}"
 
-MEMORIES=$("$PYTHON" "$WORKSPACE/scripts/memory_retrieve.py" "$QUERY" --top-k 5 --min-score 0.78 2>/dev/null \
+MEMORIES=$("$PYTHON" "$WORKSPACE/scripts/memory_retrieve.py" "$QUERY" --top-k 5 --min-score 0.83 2>/dev/null \
   || echo "  (semantic retrieval unavailable)")
 
 _log "Retrieved memories (${#MEMORIES} chars) for session start"
