@@ -33,11 +33,12 @@ if str(_SCRIPTS) not in sys.path:
     sys.path.insert(0, str(_SCRIPTS))
 
 
-def _semantic_search(query: str, top_k: int) -> list[dict]:
+def _semantic_search(query: str, top_k: int, min_score: float = 0.78) -> list[dict]:
     """Use memory_mcp_server's local embedding engine."""
     try:
         import memory_mcp_server as mms  # type: ignore
-        return mms.semantic_search(query, top_k=top_k)
+
+        return mms.semantic_search(query, top_k=top_k, min_score=min_score)
     except Exception as e:
         return [{"source": "error", "score": 0.0, "text": str(e), "preview": str(e)}]
 
@@ -57,6 +58,12 @@ def main() -> int:
     p.add_argument("query", help="Natural-language search query")
     p.add_argument("--top-k", type=int, default=5, help="Max results (default: 5)")
     p.add_argument(
+        "--min-score",
+        type=float,
+        default=0.78,
+        help="Minimum cosine similarity threshold (default: 0.78)",
+    )
+    p.add_argument(
         "--format",
         choices=["markdown", "json"],
         default="markdown",
@@ -64,7 +71,7 @@ def main() -> int:
     )
     args = p.parse_args()
 
-    results = _semantic_search(args.query, top_k=args.top_k)
+    results = _semantic_search(args.query, top_k=args.top_k, min_score=args.min_score)
 
     if args.format == "json":
         # Strip raw embeddings (numpy arrays not JSON-serialisable)

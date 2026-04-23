@@ -25,7 +25,9 @@ if _VENV.exists():
     sys.path.insert(0, str(_VENV))
 
 # Ensure Homebrew bin is on PATH (MCP servers launched by OpenClaw may have stripped PATH)
-os.environ["PATH"] = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:" + os.environ.get("PATH", "")
+os.environ["PATH"] = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:" + os.environ.get(
+    "PATH", ""
+)
 
 import numpy as np
 from sentence_transformers import SentenceTransformer
@@ -35,7 +37,9 @@ from mcp.server.fastmcp import FastMCP
 # Configuration
 # ---------------------------------------------------------------------------
 
-WORKSPACE = Path(os.environ.get("OPENCLAW_WORKSPACE", Path.home() / ".openclaw" / "workspace"))
+WORKSPACE = Path(
+    os.environ.get("OPENCLAW_WORKSPACE", Path.home() / ".openclaw" / "workspace")
+)
 MODEL_NAME = "all-MiniLM-L6-v2"
 
 EMAIL_ACCOUNTS = [
@@ -153,11 +157,19 @@ def _cosine_scores(query_emb: np.ndarray) -> np.ndarray:
     return (matrix / safe_norms) @ query_emb / query_norm
 
 
-def semantic_search(query: str, top_k: int = DEFAULT_TOP_K) -> list[dict]:
+MIN_SCORE_THRESHOLD = (
+    0.78  # Drop chunks below this cosine similarity — reduces retrieval noise
+)
+
+
+def semantic_search(
+    query: str, top_k: int = DEFAULT_TOP_K, min_score: float = MIN_SCORE_THRESHOLD
+) -> list[dict]:
     """
     Core search function — build/refresh index then rank chunks by similarity.
 
     Returns list of dicts: {source, score, text, preview}
+    Only returns results with cosine similarity >= min_score to filter noise.
     """
     if _needs_reindex():
         _build_index()
@@ -169,16 +181,25 @@ def semantic_search(query: str, top_k: int = DEFAULT_TOP_K) -> list[dict]:
     query_emb = model.encode(query, convert_to_numpy=True)
     scores = _cosine_scores(query_emb)
 
-    top_indices = np.argsort(scores)[::-1][:top_k]
+    # Rank all, then filter by threshold — return up to top_k passing results
+    ranked = np.argsort(scores)[::-1]
     results = []
-    for idx in top_indices:
+    for idx in ranked:
+        if len(results) >= top_k:
+            break
+        score = float(scores[idx])
+        if score < min_score:
+            break  # sorted descending — once below threshold, all remaining are too
         entry = _index[int(idx)]
-        results.append({
-            "source": entry["source"],
-            "score": round(float(scores[idx]), 4),
-            "text": entry["chunk"],
-            "preview": entry["chunk"][:200] + ("..." if len(entry["chunk"]) > 200 else ""),
-        })
+        results.append(
+            {
+                "source": entry["source"],
+                "score": round(score, 4),
+                "text": entry["chunk"],
+                "preview": entry["chunk"][:200]
+                + ("..." if len(entry["chunk"]) > 200 else ""),
+            }
+        )
 
     return results
 
@@ -268,12 +289,15 @@ def _get_tier_manager():
         if str(scripts_dir) not in sys.path:
             sys.path.insert(0, str(scripts_dir))
         from memory_tier_manager import TierManager
+
         _tier_manager = TierManager()
     return _tier_manager
 
 
 @mcp.tool()
-def memory_search(query: str, top_k: int = DEFAULT_TOP_K, include_cold: bool = False) -> str:
+def memory_search(
+    query: str, top_k: int = DEFAULT_TOP_K, include_cold: bool = False
+) -> str:
     """
     Tiered hybrid semantic search across Hot cache, LanceDB warm store, and
     optionally SQLite cold archive.
@@ -293,6 +317,12 @@ def memory_search(query: str, top_k: int = DEFAULT_TOP_K, include_cold: bool = F
     try:
         mgr = _get_tier_manager()
         results = mgr.search(query, k=top_k, include_cold=include_cold)
+        # Filter noise: drop results below score threshold (cold tier exempt — already ranked low)
+        results = [
+            r
+            for r in results
+            if r.get("_tier") == "cold" or r.get("_score", 0) >= MIN_SCORE_THRESHOLD
+        ]
         # Add preview field for backwards compatibility
         for r in results:
             if "preview" not in r:
@@ -302,8 +332,11 @@ def memory_search(query: str, top_k: int = DEFAULT_TOP_K, include_cold: bool = F
     except Exception as exc:
         # Fall back to legacy flat-file search if tier manager fails
         results = semantic_search(query, top_k=top_k)
-        return json.dumps({"results": results, "fallback": True, "error": str(exc)},
-                          ensure_ascii=False, indent=2)
+        return json.dumps(
+            {"results": results, "fallback": True, "error": str(exc)},
+            ensure_ascii=False,
+            indent=2,
+        )
 
 
 @mcp.tool()
@@ -332,8 +365,14 @@ def memory_store(
     try:
         tag_list = [t.strip() for t in tags.split(",") if t.strip()]
         mgr = _get_tier_manager()
-        mem_id = mgr.store(title, content, namespace=namespace, tier=tier,
-                           tags=tag_list, priority=priority)
+        mem_id = mgr.store(
+            title,
+            content,
+            namespace=namespace,
+            tier=tier,
+            tags=tag_list,
+            priority=priority,
+        )
         return json.dumps({"id": mem_id, "status": "stored"}, ensure_ascii=False)
     except Exception as exc:
         return json.dumps({"error": str(exc)}, ensure_ascii=False)
@@ -448,22 +487,33 @@ def memory_graph_search(query: str, depth: int = 1) -> str:
                     nid = n["memory"]["id"]
                     if nid not in seen_ids:
                         seen_ids.add(nid)
-                        graph_nodes.append({
-                            "title": n["memory"]["title"],
-                            "content": n["memory"]["content"][:200],
-                            "depth": n["depth"],
-                            "relation": n["relation"],
-                            "direction": n["direction"],
-                        })
+                        graph_nodes.append(
+                            {
+                                "title": n["memory"]["title"],
+                                "content": n["memory"]["content"][:200],
+                                "depth": n["depth"],
+                                "relation": n["relation"],
+                                "direction": n["direction"],
+                            }
+                        )
     except Exception as exc:
-        return json.dumps({"seeds": seeds, "graph": [], "error": str(exc)},
-                          ensure_ascii=False, indent=2)
+        return json.dumps(
+            {"seeds": seeds, "graph": [], "error": str(exc)},
+            ensure_ascii=False,
+            indent=2,
+        )
 
-    return json.dumps({
-        "seeds": [{"source": s["source"], "score": s["score"], "preview": s["preview"]}
-                  for s in seeds],
-        "graph": graph_nodes,
-    }, ensure_ascii=False, indent=2)
+    return json.dumps(
+        {
+            "seeds": [
+                {"source": s["source"], "score": s["score"], "preview": s["preview"]}
+                for s in seeds
+            ],
+            "graph": graph_nodes,
+        },
+        ensure_ascii=False,
+        indent=2,
+    )
 
 
 @mcp.tool()
@@ -481,16 +531,21 @@ def memory_get(filename: str) -> str:
     content = get_memory_file(filename)
     if content is None:
         available = [str(f.relative_to(WORKSPACE)) for f in _memory_files()]
-        return json.dumps({
-            "error": f"File not found: {filename}",
-            "available_files": available,
-        }, ensure_ascii=False, indent=2)
+        return json.dumps(
+            {
+                "error": f"File not found: {filename}",
+                "available_files": available,
+            },
+            ensure_ascii=False,
+            indent=2,
+        )
     return content
 
 
 # ---------------------------------------------------------------------------
 # Email + Calendar MCP tools
 # ---------------------------------------------------------------------------
+
 
 @mcp.tool()
 def email_list_unread(account: str = "all") -> str:
@@ -512,7 +567,9 @@ def email_list_unread(account: str = "all") -> str:
     results: dict = {}
 
     for acct in accounts:
-        code, out, err = _run(f"gog gmail search 'is:unread' -a {acct} --json", timeout=20)
+        code, out, err = _run(
+            f"gog gmail search 'is:unread' -a {acct} --json", timeout=20
+        )
         if code != 0:
             results[acct] = {"error": err[:200] or "gog returned non-zero"}
             continue
@@ -525,7 +582,9 @@ def email_list_unread(account: str = "all") -> str:
                     "from": m.get("from", ""),
                     "subject": m.get("subject", "(no subject)"),
                     "date": m.get("date", ""),
-                    "flags": [l for l in m.get("labels", []) if l in ("IMPORTANT", "STARRED")],
+                    "flags": [
+                        l for l in m.get("labels", []) if l in ("IMPORTANT", "STARRED")
+                    ],
                 }
                 for m in msgs[:15]
             ]
@@ -557,7 +616,9 @@ def email_search(query: str, account: str = "all", max_results: int = 10) -> str
 
     for acct in accounts:
         safe_query = query.replace("'", "'\\''")
-        code, out, err = _run(f"gog gmail search '{safe_query}' -a {acct} --json", timeout=20)
+        code, out, err = _run(
+            f"gog gmail search '{safe_query}' -a {acct} --json", timeout=20
+        )
         if code != 0:
             results[acct] = {"error": err[:200] or "gog returned non-zero"}
             continue
@@ -595,22 +656,39 @@ def email_read(message_id: str, account: str) -> str:
     if not _gog_available():
         return json.dumps({"error": "gog CLI not found on PATH"})
 
-    safe_id = message_id.replace("'", "").replace(";", "").replace("&", "").replace("$", "").replace("(", "").replace(")", "")
+    safe_id = (
+        message_id.replace("'", "")
+        .replace(";", "")
+        .replace("&", "")
+        .replace("$", "")
+        .replace("(", "")
+        .replace(")", "")
+    )
     safe_acct = account.replace("'", "")
-    code, out, err = _run(f"gog gmail read '{safe_id}' -a {safe_acct} --json", timeout=20)
+    code, out, err = _run(
+        f"gog gmail read '{safe_id}' -a {safe_acct} --json", timeout=20
+    )
 
     if code != 0:
-        return json.dumps({"error": err[:300] or "gog returned non-zero", "message_id": message_id})
+        return json.dumps(
+            {"error": err[:300] or "gog returned non-zero", "message_id": message_id}
+        )
 
     try:
         data = json.loads(out)
-        return json.dumps({
-            "from": data.get("from", ""),
-            "to": data.get("to", ""),
-            "subject": data.get("subject", "(no subject)"),
-            "date": data.get("date", ""),
-            "body": data.get("body", data.get("text", data.get("snippet", "")))[:4000],
-        }, ensure_ascii=False, indent=2)
+        return json.dumps(
+            {
+                "from": data.get("from", ""),
+                "to": data.get("to", ""),
+                "subject": data.get("subject", "(no subject)"),
+                "date": data.get("date", ""),
+                "body": data.get("body", data.get("text", data.get("snippet", "")))[
+                    :4000
+                ],
+            },
+            ensure_ascii=False,
+            indent=2,
+        )
     except json.JSONDecodeError:
         # gog may return plain text for some messages
         return json.dumps({"body": out[:4000]})
@@ -665,6 +743,7 @@ def calendar_today(account: str = _DEFAULT_CALENDAR_ACCOUNT) -> str:
         elif "date" in start:
             try:
                 from datetime import date as _date
+
                 ev_date = _date.fromisoformat(start["date"])
                 time_str = "All day"
             except Exception:
@@ -692,15 +771,21 @@ def calendar_today(account: str = _DEFAULT_CALENDAR_ACCOUNT) -> str:
                 except Exception:
                     pass
 
-    return json.dumps({
-        "today": today_events[:10],
-        "tomorrow_morning": tomorrow_events[:5],
-        "as_of": now.strftime("%Y-%m-%d %H:%M %Z"),
-    }, ensure_ascii=False, indent=2)
+    return json.dumps(
+        {
+            "today": today_events[:10],
+            "tomorrow_morning": tomorrow_events[:5],
+            "as_of": now.strftime("%Y-%m-%d %H:%M %Z"),
+        },
+        ensure_ascii=False,
+        indent=2,
+    )
 
 
 @mcp.tool()
-def calendar_range(start_date: str, end_date: str, account: str = _DEFAULT_CALENDAR_ACCOUNT) -> str:
+def calendar_range(
+    start_date: str, end_date: str, account: str = _DEFAULT_CALENDAR_ACCOUNT
+) -> str:
     """
     Fetch calendar events between two dates (inclusive).
 
@@ -718,6 +803,7 @@ def calendar_range(start_date: str, end_date: str, account: str = _DEFAULT_CALEN
     # Validate dates
     try:
         from datetime import date as _date
+
         d_start = _date.fromisoformat(start_date)
         d_end = _date.fromisoformat(end_date)
         if d_end < d_start:
@@ -736,6 +822,7 @@ def calendar_range(start_date: str, end_date: str, account: str = _DEFAULT_CALEN
         return json.dumps({"error": "JSON parse error"})
 
     from datetime import date as _date
+
     matched = []
 
     for ev in events:
@@ -760,15 +847,19 @@ def calendar_range(start_date: str, end_date: str, account: str = _DEFAULT_CALEN
             continue
 
         if d_start <= ev_date <= d_end:
-            matched.append({
-                "title": summary,
-                "date": ev_date.isoformat(),
-                "time": time_str,
-                "location": location,
-            })
+            matched.append(
+                {
+                    "title": summary,
+                    "date": ev_date.isoformat(),
+                    "time": time_str,
+                    "location": location,
+                }
+            )
 
     matched.sort(key=lambda e: (e["date"], e["time"]))
-    return json.dumps({"events": matched, "count": len(matched)}, ensure_ascii=False, indent=2)
+    return json.dumps(
+        {"events": matched, "count": len(matched)}, ensure_ascii=False, indent=2
+    )
 
 
 # ---------------------------------------------------------------------------
