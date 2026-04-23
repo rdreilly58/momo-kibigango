@@ -72,7 +72,7 @@ fi
 # ── 4. Semantic search — embed query, rank by cosine similarity ───────────────
 QUERY="${PROMPT_TEXT:-recent session context}"
 
-MEMORIES=$("$PYTHON" "$WORKSPACE/scripts/memory_retrieve.py" "$QUERY" --top-k 5 2>/dev/null \
+MEMORIES=$("$PYTHON" "$WORKSPACE/scripts/memory_retrieve.py" "$QUERY" --top-k 5 --min-score 0.78 2>/dev/null \
   || echo "  (semantic retrieval unavailable)")
 
 _log "Retrieved memories (${#MEMORIES} chars) for session start"

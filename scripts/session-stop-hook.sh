@@ -97,5 +97,40 @@ if [ -n "$SESSION_ID" ]; then
   fi
 fi
 
-# ── 7. Always exit 0 ─────────────────────────────────────────────────────────
+# ── 7. Log context depth metrics ─────────────────────────────────────────────
+# Transcript length is a proxy for context size consumed this session.
+# Written to a rolling metrics file for the morning briefing to surface.
+METRICS_FILE="$HOME/.openclaw/logs/session-depth-metrics.jsonl"
+NOW_TS=$(date +%s)
+NOW_ISO=$(date '+%Y-%m-%d %H:%M')
+TURN_ESTIMATE=$(echo "$TRANSCRIPT" | python3 -c "
+import sys
+t = sys.stdin.read()
+# Estimate turns: count 'Human:' / 'Assistant:' boundary patterns
+turns = max(t.count('\\nhuman:'), t.count('\\nHuman:'), t.count('\\nuser:'), 1)
+print(turns)
+" 2>/dev/null || echo 0)
+
+python3 - <<PYEOF 2>/dev/null || true
+import json
+entry = {
+    "ts": $NOW_TS,
+    "date": "$NOW_ISO",
+    "transcript_chars": $TRANSCRIPT_LEN,
+    "turn_estimate": $TURN_ESTIMATE,
+    "session_id": "${SESSION_ID:-unknown}",
+}
+with open("$METRICS_FILE", "a") as f:
+    f.write(json.dumps(entry) + "\n")
+# Keep only last 30 entries
+with open("$METRICS_FILE") as f:
+    lines = f.readlines()
+if len(lines) > 30:
+    with open("$METRICS_FILE", "w") as f:
+        f.writelines(lines[-30:])
+PYEOF
+
+_log "Context depth: ${TRANSCRIPT_LEN} chars, ~${TURN_ESTIMATE} turns"
+
+# ── 8. Always exit 0 ─────────────────────────────────────────────────────────
 exit 0
