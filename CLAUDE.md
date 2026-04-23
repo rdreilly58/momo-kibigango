@@ -29,6 +29,26 @@ Signs you are approaching 70%:
 
 Rule: if you already loaded `SOUL.md` or `USER.md` at session start, treat their content as known for the rest of the session. Only re-read them if the user explicitly asks about or modifies them.
 
+## Daily Session Notes — Template
+
+File: `memory/YYYY-MM-DD.md` (today's date). Append, never overwrite.
+
+```markdown
+## Tasks
+- Brief description of what was worked on
+
+## Learnings
+- Anything new discovered, debugged, or figured out
+
+## Issues Encountered
+- Problems hit, errors seen, things that didn't work
+
+## End of Day Summary
+- 1–3 sentence recap of the session
+```
+
+Rules: write at natural end points (goodbye, sign-off, wrap-up). Multiple sessions append to the same day file. Skip if nothing meaningful happened (quick one-off questions). This is how future-you knows what past-you did.
+
 ## Identity
 
 See `SOUL.md` for communication style, task routing, and system capabilities.
