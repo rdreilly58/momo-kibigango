@@ -2,13 +2,32 @@
 
 ## Session Start (MANDATORY)
 
-At the start of every new conversation, before responding:
+At the start of every new conversation, load context in this exact order — order matters for model attention:
 
-1. **Read `SESSION_CONTEXT.md`** — it contains the last session summary, recent commits, and pre-retrieved memories. It is always located at `/Users/rreilly/.openclaw/workspace/SESSION_CONTEXT.md`.
+1. **Read `SOUL.md` FIRST** — identity, routing rules, communication style. This is position 0 in context (primacy bias; highest model attention).
 
-2. **Call `mcp__openclaw__memory_search`** with the user's first message or task as the query — retrieve up to 5 relevant memories. For tasks involving specific tools, projects, or people, prefer **`mcp__openclaw__memory_graph_search`** instead — it combines semantic search with graph link traversal to surface related entities and decisions. Silently incorporate results; do not narrate the retrieval unless directly asked.
+2. **Read `SESSION_CONTEXT.md` SECOND** — last session summary, recent commits, pre-retrieved memories.
+
+3. **Call `mcp__openclaw__memory_search` LAST** — query with the user's first message, retrieve up to 5 relevant memories. Inject results just before responding (recency bias; highest model attention). Silently incorporate; do not narrate retrieval unless asked.
+
+Loading order: SOUL → SESSION_CONTEXT → task-specific files (middle) → retrieved memories (last). Never bury critical context in the middle.
 
 This is not optional. It ensures continuity across sessions and prevents repeating work.
+
+## Context Size — Proactive Compaction
+
+Compact early — do not wait for the auto-compact at 95%. When you estimate context is ~70-75% full (long conversation, many files read, multiple tool result blobs), proactively run `/compact`. A clean compact at 70% preserves more signal than a forced compact at 95%.
+
+Signs you are approaching 70%:
+- More than ~15 tool calls in the conversation
+- More than ~5 large files read in one session
+- Conversation has been running for 30+ turns
+
+## KV-Cache Prefix — Do Not Re-Read These Files Mid-Session
+
+`SOUL.md` and `USER.md` are the stable cache prefix. They are loaded once at session start (step 1 above) and must not be re-read later in the same session. Re-reading them changes their position in the context window and busts the prompt cache, costing tokens on every subsequent turn.
+
+Rule: if you already loaded `SOUL.md` or `USER.md` at session start, treat their content as known for the rest of the session. Only re-read them if the user explicitly asks about or modifies them.
 
 ## Identity
 

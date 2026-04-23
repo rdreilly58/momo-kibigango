@@ -125,21 +125,39 @@
 
 ## Implementation
 
-**Classifier logic:**
-1. **Complex keywords** — if message contains complex keywords → Opus
-2. **Simple keywords + short** — if simple keyword AND message < 50 words → Haiku
-3. **Word count** — if message > 50 words → Sonnet minimum (not Haiku)
-4. **Default** — Sonnet (not Haiku — Sonnet is the safe default)
+**Classifier logic** (implemented in `scripts/task-classifier.py` — single source of truth):
+1. **Code patterns** (```` ``` ````, `def `, `class `) → MEDIUM (Sonnet) minimum
+2. **Opus keywords** (refactor, architecture, audit, migrate, research+synthesize) → COMPLEX
+3. **Sonnet keywords** (write, email, explain, fix, code, review) → MEDIUM
+4. **Multi-line / chained query** → MEDIUM minimum
+5. **Simple keywords + short (≤10 tokens)** → SIMPLE (Haiku)
+6. **Default** → MEDIUM (Sonnet — never default to Haiku or Opus)
 
-**Context loader:**
+**Context loader (load order matters — primacy/recency bias):**
 ```
+FIRST:  SOUL.md (always — position 0 = highest attention)
+SECOND: SESSION_CONTEXT.md (always)
+
 if SIMPLE:
-  load(SOUL, USER)
+  load nothing else
 elif MEDIUM:
-  load(SOUL, USER, MEMORY)
+  load(USER, MEMORY)
 else:  # COMPLEX
-  load(SOUL, USER, MEMORY, TOOLS, relevant_projects, today's_memory)
+  load(USER, MEMORY, TOOLS, relevant_projects, today's_memory)
+
+LAST: retrieved memories via memory_search (position N = highest attention)
 ```
+
+**Tool schema ceiling (active schemas in context):**
+
+Research shows model reliability degrades sharply above ~19 active tool schemas.
+Current always-loaded tools: ~10 (Read, Write, Edit, Bash, Grep, Glob, Agent, Skill, ToolSearch, ScheduleWakeup).
+All other tools are deferred — only loaded via ToolSearch when explicitly needed.
+
+Rules by tier:
+- **SIMPLE (Haiku):** Do NOT call ToolSearch. Use only the 10 always-loaded tools. Fetching extra schemas wastes tokens and can degrade simple task performance.
+- **MEDIUM (Sonnet):** Only call ToolSearch for the specific tool(s) the task requires. Never load schemas "just in case."
+- **COMPLEX (Opus):** Load only what the task needs. Avoid loading unrelated MCP tools (e.g., don't load music_generate for a coding task).
 
 ---
 
@@ -178,22 +196,6 @@ else:  # COMPLEX
 
 ---
 
-## Speculative Decoding (Available)
-
-**Status:** Skill installed — `openclaw-skills:speculative-decoding`
-
-**Expected benefits:**
-- 1.8-2.1x speedup without quality loss
-- Small fast model generates draft
-- Large model verifies in parallel
-- Combines speed + quality
-
-**When to use:**
-- Long-form generation tasks (emails, reports, code)
-- When latency is the user's primary concern
-- See skill SKILL.md for activation details
-
----
 
 ## Review & Adjust
 
