@@ -145,3 +145,12 @@ lance_memory/
 
 # === CLAUDE CODE RUNTIME (transient worktree state) ===
 .claude/
+
+# === RUNTIME STATE (auto-generated, changes every session) ===
+STATUS.md
+memory/observations.md
+memory/.last-summary-run
+memory/.observer-last-run
+memory/2026-*.md
+memory/DAILY_METRICS_*.md
+logs/session-start.json

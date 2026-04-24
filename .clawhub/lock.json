@@ -96,6 +96,10 @@
     "elite-longterm-memory": {
       "version": "1.2.3",
       "installedAt": 1776878745409
+    },
+    "grafana-lens": {
+      "version": "0.5.0",
+      "installedAt": 1777053611902
     }
   }
 }
