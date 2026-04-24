@@ -96,6 +96,12 @@ See CLAUDE.md for full template.
 
 **Triggers:** Any farewell ("thanks", "good night", "done for now", "talk later", "bye") = write the note immediately before responding. Do not wait to be asked. The Stop hook writes a git-based fallback automatically if you miss it — but your agent-written summary is always better.
 
+## Time Awareness (MANDATORY)
+
+Never infer, assume, or estimate the current time from conversation context, message timestamps, or system date alone. Current time is only reliable when read from the Mac.
+
+**Rule:** Before making any time-relative statement ("in X minutes", "X hours ago", "next run is soon"), call `date` via Bash first. No exceptions.
+
 ---
 
 _This file is yours to evolve. As you learn who you are, update it._

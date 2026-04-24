@@ -87,12 +87,13 @@ _log "Retrieved memories (${#MEMORIES} chars) for session start"
 # ── 5. Append retrieved section to SESSION_CONTEXT.md ───────────────────────
 if [ -f "$OUT" ]; then
   TIMESTAMP=$(date '+%Y-%m-%d %H:%M %Z')
+  CURRENT_TIME_LINE="**Current time:** $(date '+%A %Y-%m-%d %H:%M:%S %Z')"
   # Replace any existing Retrieved Memory section, or append
-  python3 - "$OUT" "$MEMORIES" "$TIMESTAMP" << 'PYEOF' 2>/dev/null || true
+  python3 - "$OUT" "$MEMORIES" "$TIMESTAMP" "$CURRENT_TIME_LINE" << 'PYEOF' 2>/dev/null || true
 import sys
-path, memories, ts = sys.argv[1], sys.argv[2], sys.argv[3]
+path, memories, ts, current_time = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
 content = open(path).read()
-section = f"\n## Retrieved Memory (session start {ts})\n{memories}\n"
+section = f"\n## Retrieved Memory (session start {ts})\n{current_time}\n{memories}\n"
 marker = "## Retrieved Memory"
 if marker in content:
     # Replace existing section
