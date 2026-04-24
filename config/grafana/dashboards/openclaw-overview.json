@@ -165,7 +165,7 @@
         "barWidth": 0.6,
         "groupWidth": 0.7,
         "fillOpacity": 80,
-        "legend": { "displayMode": "list", "placement": "bottom" },
+        "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull"] },
         "tooltip": { "mode": "multi" },
         "xField": "Time"
       },
