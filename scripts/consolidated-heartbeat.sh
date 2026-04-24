@@ -62,7 +62,7 @@ if [ "$BRIEFING" = "--morning" ]; then
   # 3. System Health
   REPORT="${REPORT}🖥️  System Health:\n"
   
-  if curl -s http://localhost:8080/health >/dev/null 2>&1; then
+  if curl -s http://localhost:18789/health >/dev/null 2>&1; then
     REPORT="${REPORT}  ✅ Gateway: Running\n"
   else
     REPORT="${REPORT}  ❌ Gateway: Down\n"
