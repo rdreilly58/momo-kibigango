@@ -152,6 +152,14 @@
       "title": "Memory Entries by Tier",
       "gridPos": { "x": 12, "y": 14, "w": 12, "h": 8 },
       "datasource": { "uid": "openclaw-prometheus", "type": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "min": 0,
+          "custom": {
+            "scaleDistribution": { "type": "log", "log": 2 }
+          }
+        }
+      },
       "targets": [{ "expr": "openclaw_memory_entries_by_tier", "legendFormat": "{{tier}}" }]
     },
     {
