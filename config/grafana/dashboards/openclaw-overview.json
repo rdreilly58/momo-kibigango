@@ -155,16 +155,15 @@
       "fieldConfig": {
         "defaults": {
           "custom": {
-            "stacking": { "mode": "normal" },
             "fillOpacity": 80,
-            "lineWidth": 0
+            "lineWidth": 0,
+            "scaleDistribution": { "type": "log", "log": 2 }
           }
         }
       },
       "options": {
-        "barWidth": 0.97,
+        "barWidth": 0.6,
         "groupWidth": 0.7,
-        "stacking": "normal",
         "fillOpacity": 80,
         "legend": { "displayMode": "list", "placement": "bottom" },
         "tooltip": { "mode": "multi" },
