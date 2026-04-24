@@ -12,7 +12,7 @@
 set -euo pipefail
 
 WORKSPACE="${HOME}/.openclaw/workspace"
-MEMORY_DIR="${WORKSPACE}/memory"
+MEMORY_DIR="${TEST_MEMORY_DIR:-${WORKSPACE}/memory}"
 LOG_DIR="${HOME}/.openclaw/logs"
 LOG_FILE="${LOG_DIR}/memory-smart-prune.log"
 PYTHON="${WORKSPACE}/venv/bin/python3"

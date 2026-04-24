@@ -5,8 +5,9 @@
 # Cron: add to weekly quota monitor or run standalone.
 # Usage: bash scripts/check-env-drift.sh
 
-ENV_A="$HOME/.openclaw/.env"
-ENV_B="$HOME/.openclaw/workspace/.env"
+# Allow test overrides via DRIFT_ENV_A / DRIFT_ENV_B
+ENV_A="${DRIFT_ENV_A:-$HOME/.openclaw/.env}"
+ENV_B="${DRIFT_ENV_B:-$HOME/.openclaw/workspace/.env}"
 
 DRIFT=0
 
