@@ -23,12 +23,34 @@ import argparse
 import json
 import os
 import re
+import signal
+import socket
 import sqlite3
+import sys
 import time
+import traceback
+from collections import deque
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from typing import Iterator
 from urllib.parse import urlparse, parse_qs
+import threading
+
+# ── Ring buffer for time-series history ───────────────────────────────────────
+# Keeps last 4 hours at 15s resolution = ~960 entries, ~500KB max
+_HISTORY_LOCK = threading.Lock()
+_HISTORY: deque[tuple[float, str]] = deque(maxlen=960)
+_LAST_SCRAPE_TS: float = 0.0
+_SCRAPE_INTERVAL: float = 15.0  # seconds between background scrapes
+
+# ── In-process counters (reset on restart) ───────────────────────────────────
+_COUNTER_LOCK = threading.Lock()
+_CRON_RUNS_TOTAL: dict[str, dict[str, int]] = {}  # job → {status → count}
+_LOG_ERRORS_TOTAL: dict[str, int] = {}  # log_name → total_errors_seen
+
+# ── Log scan cache (keyed by log name) ────────────────────────────────────────
+_LOG_CACHE_LOCK = threading.Lock()
+_LOG_SCAN_CACHE: dict[str, tuple[float, int]] = {}  # log_name → (mtime, error_count)
 
 # ── Paths ──────────────────────────────────────────────────────────────────────
 WORKSPACE = Path.home() / ".openclaw" / "workspace"
@@ -38,15 +60,14 @@ DB_PATH = WORKSPACE / "ai-memory.db"
 SESSIONS_FILE = (
     Path.home() / ".openclaw" / "agents" / "main" / "sessions" / "sessions.json"
 )
+CRON_JOBS_FILE = Path.home() / ".openclaw" / "cron" / "jobs.json"
+CRON_STATE_FILE = Path.home() / ".openclaw" / "cron" / "jobs-state.json"
+HISTORY_FILE = LOGS_DIR / "metrics-exporter-history.json"
 
-# Expected cron jobs — alert if missing heartbeat
+# Shell-script crons that write heartbeat files to HB_DIR
+# (OpenClaw-native agent-turn crons are tracked separately via jobs-state.json)
 KNOWN_CRONS = [
-    "auto-flush-session-context",
-    "daily-session-reset",
-    "evening-briefing",
-    "morning-briefing",
     "observer-agent",
-    "quota-monitoring",
     "session-watchdog",
     "system-health-check",
 ]
@@ -54,13 +75,19 @@ KNOWN_CRONS = [
 # Cron max-age thresholds in seconds (matches cron-dead-man.sh)
 CRON_MAX_AGE: dict[str, int] = {
     "session-watchdog": 3 * 3600,
-    "auto-flush-session-context": 4 * 3600,
     "system-health-check": 4 * 3600,
-    "daily-session-reset": 26 * 3600,
     "observer-agent": 3 * 3600,
-    "morning-briefing": 26 * 3600,
-    "evening-briefing": 26 * 3600,
-    "quota-monitoring": 26 * 3600,
+}
+
+# OpenClaw-native cron jobs tracked via jobs-state.json.
+# Maps display slug → (OpenClaw cron job name, max_age_seconds)
+NATIVE_CRON_MAP: dict[str, tuple[str, int]] = {
+    "morning-briefing": ("Morning Briefing", 26 * 3600),
+    "evening-briefing": ("Evening Briefing", 26 * 3600),
+    "daily-session-reset": ("Daily Session Reset", 26 * 3600),
+    "quota-monitoring-morning": ("API Quota Monitor (Morning)", 26 * 3600),
+    "quota-monitoring-evening": ("API Quota Monitor (Evening)", 26 * 3600),
+    "auto-update-system": ("Auto-Update System (Daily 2:00 AM EDT)", 26 * 3600),
 }
 
 SESSION_KEYS = [
@@ -85,6 +112,44 @@ def _gauge(
         yield f"# HELP {name} {help_text}"
         yield f"# TYPE {name} gauge"
     yield f"{name}{label_str} {value}"
+
+
+def _increment_cron_counter(job: str, success: bool) -> None:
+    status = "success" if success else "fail"
+    with _COUNTER_LOCK:
+        if job not in _CRON_RUNS_TOTAL:
+            _CRON_RUNS_TOTAL[job] = {"success": 0, "fail": 0}
+        _CRON_RUNS_TOTAL[job][status] += 1
+
+
+def _increment_log_error_counter(log_name: str, delta: int) -> None:
+    with _COUNTER_LOCK:
+        _LOG_ERRORS_TOTAL[log_name] = _LOG_ERRORS_TOTAL.get(log_name, 0) + max(0, delta)
+
+
+def _counter_metrics() -> list[str]:
+    """Emit Prometheus counter metrics for cron runs and log errors."""
+    lines: list[str] = []
+    lines += ["# HELP openclaw_cron_runs_total Total cron runs since exporter start"]
+    lines += ["# TYPE openclaw_cron_runs_total counter"]
+    with _COUNTER_LOCK:
+        cron_snap = {k: dict(v) for k, v in _CRON_RUNS_TOTAL.items()}
+        log_snap = dict(_LOG_ERRORS_TOTAL)
+
+    for job, counts in sorted(cron_snap.items()):
+        for status, count in sorted(counts.items()):
+            lines.append(
+                f'openclaw_cron_runs_total{{job="{job}",status="{status}"}} {count}'
+            )
+
+    lines += [
+        "# HELP openclaw_log_errors_total Total log errors seen since exporter start"
+    ]
+    lines += ["# TYPE openclaw_log_errors_total counter"]
+    for log_name, count in sorted(log_snap.items()):
+        lines.append(f'openclaw_log_errors_total{{log="{log_name}"}} {count}')
+
+    return lines
 
 
 def _cron_metrics() -> list[str]:
@@ -123,11 +188,85 @@ def _cron_metrics() -> list[str]:
             lines.append(f"openclaw_cron_last_run_age_seconds{{{lbl}}} {age:.0f}")
             lines.append(f"openclaw_cron_last_exit_code{{{lbl}}} {exit_code}")
             lines.append(f"openclaw_cron_stale{{{lbl}}} {stale}")
+            _increment_cron_counter(job, success=(exit_code == 0))
         except Exception as e:
             lines.append(f"openclaw_cron_present{{{lbl}}} 0")
             lines.append(f"openclaw_cron_last_run_age_seconds{{{lbl}}} -1")
             lines.append(f"openclaw_cron_last_exit_code{{{lbl}}} -1")
             lines.append(f"openclaw_cron_stale{{{lbl}}} 1")
+
+    return lines
+
+
+def _native_cron_metrics() -> list[str]:
+    """Collect metrics for OpenClaw-native agent-turn crons via jobs-state.json.
+
+    These crons fire as agent turns and never write heartbeat files, so we read
+    their last-run timestamps directly from the OpenClaw cron state database.
+    """
+    lines: list[str] = []
+    lines += [
+        "# HELP openclaw_native_cron_last_run_age_seconds Seconds since OpenClaw native cron last ran"
+    ]
+    lines += ["# TYPE openclaw_native_cron_last_run_age_seconds gauge"]
+    lines += [
+        "# HELP openclaw_native_cron_stale Whether native cron is past its max-age threshold (1=stale)"
+    ]
+    lines += ["# TYPE openclaw_native_cron_stale gauge"]
+    lines += [
+        "# HELP openclaw_native_cron_present Whether cron job exists in OpenClaw (1=yes)"
+    ]
+    lines += ["# TYPE openclaw_native_cron_present gauge"]
+
+    now = time.time()
+
+    # Build name → job_id map from jobs.json
+    name_to_id: dict[str, str] = {}
+    try:
+        jobs_data = json.loads(CRON_JOBS_FILE.read_text())
+        raw_jobs = jobs_data.get("jobs", [])
+        job_iter = raw_jobs.values() if isinstance(raw_jobs, dict) else raw_jobs
+        for job in job_iter:
+            name_to_id[job.get("name", "")] = job.get("id", "")
+    except Exception:
+        pass
+
+    # Load state map: job_id → updatedAtMs
+    id_to_updated_ms: dict[str, int] = {}
+    try:
+        state_data = json.loads(CRON_STATE_FILE.read_text())
+        for job_id, state in state_data.get("jobs", {}).items():
+            ms = state.get("updatedAtMs", 0)
+            if ms:
+                id_to_updated_ms[job_id] = ms
+    except Exception:
+        pass
+
+    for slug, (cron_name, max_age) in NATIVE_CRON_MAP.items():
+        lbl = f'job="{slug}"'
+        job_id = name_to_id.get(cron_name, "")
+        updated_ms = id_to_updated_ms.get(job_id, 0) if job_id else 0
+
+        if not job_id:
+            # Job not found in OpenClaw config
+            lines.append(f"openclaw_native_cron_present{{{lbl}}} 0")
+            lines.append(f"openclaw_native_cron_last_run_age_seconds{{{lbl}}} -1")
+            lines.append(f"openclaw_native_cron_stale{{{lbl}}} 1")
+            continue
+
+        lines.append(f"openclaw_native_cron_present{{{lbl}}} 1")
+
+        if updated_ms == 0:
+            lines.append(f"openclaw_native_cron_last_run_age_seconds{{{lbl}}} -1")
+            lines.append(f"openclaw_native_cron_stale{{{lbl}}} 1")
+        else:
+            age = now - (updated_ms / 1000.0)
+            stale = 1 if age > max_age else 0
+            lines.append(
+                f"openclaw_native_cron_last_run_age_seconds{{{lbl}}} {age:.0f}"
+            )
+            lines.append(f"openclaw_native_cron_stale{{{lbl}}} {stale}")
+            _increment_cron_counter(slug, success=(stale == 0))
 
     return lines
 
@@ -215,7 +354,10 @@ def _session_metrics() -> list[str]:
 
 
 def _log_metrics() -> list[str]:
-    """Count recent error/warning lines in key log files."""
+    """Count recent error/warning lines in key log files.
+
+    Results are cached by mtime — the file is only re-read when it changes.
+    """
     lines: list[str] = []
     lines += [
         "# HELP openclaw_log_errors_recent Error/WARNING lines in last 200 log lines"
@@ -233,13 +375,28 @@ def _log_metrics() -> list[str]:
             lines.append(f'openclaw_log_errors_recent{{log="{log_name}"}} 0')
             continue
         try:
-            with open(log_path) as f:
-                tail = f.readlines()[-200:]
-            errors = sum(
-                1
-                for l in tail
-                if any(w in l for w in ["ERROR", "STALE", "FAILED", "❌"])
-            )
+            current_mtime = log_path.stat().st_mtime
+
+            # Check cache
+            with _LOG_CACHE_LOCK:
+                cached = _LOG_SCAN_CACHE.get(log_name)
+
+            if cached is not None and cached[0] == current_mtime:
+                # File unchanged — use cached count
+                errors = cached[1]
+            else:
+                # File changed or not yet cached — rescan
+                with open(log_path) as f:
+                    tail = f.readlines()[-200:]
+                errors = sum(
+                    1
+                    for l in tail
+                    if any(w in l for w in ["ERROR", "STALE", "FAILED", "❌"])
+                )
+                with _LOG_CACHE_LOCK:
+                    _LOG_SCAN_CACHE[log_name] = (current_mtime, errors)
+                _increment_log_error_counter(log_name, errors)
+
             lines.append(f'openclaw_log_errors_recent{{log="{log_name}"}} {errors}')
         except Exception:
             lines.append(f'openclaw_log_errors_recent{{log="{log_name}"}} -1')
@@ -249,9 +406,6 @@ def _log_metrics() -> list[str]:
 
 def _system_metrics() -> list[str]:
     lines: list[str] = []
-    lines += ["# HELP openclaw_exporter_scrape_timestamp Unix timestamp of this scrape"]
-    lines += ["# TYPE openclaw_exporter_scrape_timestamp gauge"]
-    lines.append(f"openclaw_exporter_scrape_timestamp {time.time():.0f}")
 
     # Session context file age
     sc_file = WORKSPACE / "SESSION_CONTEXT.md"
@@ -266,20 +420,192 @@ def _system_metrics() -> list[str]:
     return lines
 
 
+def _process_metrics() -> list[str]:
+    """Collect CPU, memory, disk, and gateway process metrics."""
+    lines: list[str] = []
+
+    # Try psutil first (rich metrics), fall back to basic /proc-style
+    try:
+        import psutil
+
+        # CPU
+        cpu_pct = psutil.cpu_percent(interval=None)
+        lines += ["# HELP openclaw_system_cpu_percent System CPU usage percent"]
+        lines += ["# TYPE openclaw_system_cpu_percent gauge"]
+        lines.append(f"openclaw_system_cpu_percent {cpu_pct:.1f}")
+
+        # Memory
+        mem = psutil.virtual_memory()
+        lines += ["# HELP openclaw_system_memory_used_bytes System RAM used bytes"]
+        lines += ["# TYPE openclaw_system_memory_used_bytes gauge"]
+        lines.append(f"openclaw_system_memory_used_bytes {mem.used}")
+        lines += ["# HELP openclaw_system_memory_total_bytes System RAM total bytes"]
+        lines += ["# TYPE openclaw_system_memory_total_bytes gauge"]
+        lines.append(f"openclaw_system_memory_total_bytes {mem.total}")
+        lines += ["# HELP openclaw_system_memory_percent System RAM usage percent"]
+        lines += ["# TYPE openclaw_system_memory_percent gauge"]
+        lines.append(f"openclaw_system_memory_percent {mem.percent:.1f}")
+
+        # Disk
+        disk = psutil.disk_usage(str(Path.home()))
+        lines += ["# HELP openclaw_disk_used_bytes Home disk used bytes"]
+        lines += ["# TYPE openclaw_disk_used_bytes gauge"]
+        lines.append(f"openclaw_disk_used_bytes {disk.used}")
+        lines += ["# HELP openclaw_disk_free_bytes Home disk free bytes"]
+        lines += ["# TYPE openclaw_disk_free_bytes gauge"]
+        lines.append(f"openclaw_disk_free_bytes {disk.free}")
+        lines += ["# HELP openclaw_disk_percent Home disk usage percent"]
+        lines += ["# TYPE openclaw_disk_percent gauge"]
+        lines.append(f"openclaw_disk_percent {disk.percent:.1f}")
+
+        # This exporter's own process
+        proc = psutil.Process(os.getpid())
+        lines += [
+            "# HELP openclaw_exporter_memory_rss_bytes Exporter process RSS bytes"
+        ]
+        lines += ["# TYPE openclaw_exporter_memory_rss_bytes gauge"]
+        lines.append(f"openclaw_exporter_memory_rss_bytes {proc.memory_info().rss}")
+        lines += [
+            "# HELP openclaw_exporter_uptime_seconds Exporter process uptime seconds"
+        ]
+        lines += ["# TYPE openclaw_exporter_uptime_seconds gauge"]
+        lines.append(
+            f"openclaw_exporter_uptime_seconds {time.time() - proc.create_time():.0f}"
+        )
+
+        # Gateway process detection
+        gateway_running = 0
+        gateway_pid = -1
+        for p in psutil.process_iter(["name", "cmdline", "pid"]):
+            try:
+                cmdline = " ".join(p.info.get("cmdline") or [])
+                if "openclaw" in cmdline.lower() and "gateway" in cmdline.lower():
+                    gateway_running = 1
+                    gateway_pid = p.info["pid"]
+                    break
+            except (psutil.NoSuchProcess, psutil.AccessDenied):
+                pass
+        lines += [
+            "# HELP openclaw_gateway_running Whether the OpenClaw gateway process is running (1=yes)"
+        ]
+        lines += ["# TYPE openclaw_gateway_running gauge"]
+        lines.append(f"openclaw_gateway_running {gateway_running}")
+
+    except ImportError:
+        # psutil not available — emit a stub so dashboards don't break
+        lines += [
+            "# HELP openclaw_system_cpu_percent System CPU usage percent (psutil unavailable)"
+        ]
+        lines += ["# TYPE openclaw_system_cpu_percent gauge"]
+        lines.append("openclaw_system_cpu_percent -1")
+
+    return lines
+
+
 def collect_all_metrics() -> str:
     """Collect all metrics and return as Prometheus text."""
     sections = [
         _cron_metrics(),
+        _native_cron_metrics(),
         _memory_metrics(),
         _session_metrics(),
         _log_metrics(),
         _system_metrics(),
+        _process_metrics(),
+        _counter_metrics(),
     ]
     all_lines: list[str] = []
     for section in sections:
         all_lines.extend(section)
         all_lines.append("")  # blank line between groups
     return "\n".join(all_lines) + "\n"
+
+
+# ── Ring buffer persistence ────────────────────────────────────────────────────
+
+
+def _save_history() -> None:
+    """Persist ring buffer to disk for restart recovery."""
+    global HISTORY_FILE
+    try:
+        with _HISTORY_LOCK:
+            entries = list(_HISTORY)
+        # Store as list of [timestamp, metrics_text] pairs
+        # Limit to last 480 entries (~2h) to keep file size reasonable
+        to_save = entries[-480:] if len(entries) > 480 else entries
+        hf = HISTORY_FILE
+        hf.parent.mkdir(parents=True, exist_ok=True)
+        tmp = hf.with_suffix(".tmp")
+        tmp.write_text(json.dumps([[ts, text] for ts, text in to_save]))
+        tmp.rename(hf)
+    except Exception:
+        import traceback
+
+        traceback.print_exc()
+
+
+def _load_history() -> None:
+    """Load persisted ring buffer from disk at startup."""
+    global HISTORY_FILE
+    hf = HISTORY_FILE
+    if not hf.exists():
+        return
+    try:
+        raw = json.loads(hf.read_text())
+        entries = [(float(ts), text) for ts, text in raw if isinstance(text, str)]
+        # Only load entries from the last 4 hours
+        cutoff = time.time() - 4 * 3600
+        fresh = [(ts, text) for ts, text in entries if ts >= cutoff]
+        with _HISTORY_LOCK:
+            for entry in fresh:
+                _HISTORY.append(entry)
+        if fresh:
+            print(
+                f"[openclaw-metrics] Loaded {len(fresh)} history entries from disk ({fresh[0][0]:.0f}–{fresh[-1][0]:.0f})",
+                flush=True,
+            )
+    except Exception:
+        import traceback
+
+        traceback.print_exc()
+
+
+def _handle_shutdown(signum, frame):
+    print(
+        f"[openclaw-metrics] Shutting down (signal {signum}), saving history...",
+        flush=True,
+    )
+    _save_history()
+    sys.exit(0)
+
+
+# ── Background scraper thread ──────────────────────────────────────────────────
+
+
+def _background_scraper():
+    """Collect metrics every SCRAPE_INTERVAL seconds and store in ring buffer."""
+    global _LAST_SCRAPE_TS
+    scrape_count = 0
+    while True:
+        try:
+            ts = time.time()
+            text = collect_all_metrics()
+            with _HISTORY_LOCK:
+                _HISTORY.append((ts, text))
+                _LAST_SCRAPE_TS = ts
+            scrape_count += 1
+            if scrape_count % 60 == 0:
+                _save_history()
+        except Exception:
+            traceback.print_exc()
+        time.sleep(_SCRAPE_INTERVAL)
+
+
+def _start_background_scraper():
+    t = threading.Thread(
+        target=_background_scraper, daemon=True, name="metrics-scraper"
+    )
+    t.start()
 
 
 # ── Prometheus text parser ─────────────────────────────────────────────────────
@@ -337,11 +663,25 @@ _SELECTOR_RE = re.compile(r"^([a-zA-Z_:][a-zA-Z0-9_:]*)(\{([^}]*)\})?$")
 
 
 def _match_labels(labels: dict, filter_str: str) -> bool:
-    """Check if a labels dict matches a PromQL label filter string."""
-    for m in _LABEL_RE.finditer(filter_str):
-        k, v = m.group(1), m.group(2)
-        if labels.get(k) != v:
-            return False
+    """Check if a labels dict matches a PromQL label filter string.
+    Supports =, =~, !=, !~ operators.
+    """
+    # Match label matchers: key op "value"
+    for m in re.finditer(r'([a-zA-Z_][a-zA-Z0-9_]*)(=~|!=|!~|=)"([^"]*)"', filter_str):
+        k, op, v = m.group(1), m.group(2), m.group(3)
+        actual = labels.get(k, "")
+        if op == "=":
+            if actual != v:
+                return False
+        elif op == "!=":
+            if actual == v:
+                return False
+        elif op == "=~":
+            if not re.fullmatch(v, actual):
+                return False
+        elif op == "!~":
+            if re.fullmatch(v, actual):
+                return False
     return True
 
 
@@ -350,29 +690,140 @@ def eval_instant(parsed: dict, query: str, ts: float) -> list[dict]:
     series = parsed["series"]
     query = query.strip()
 
-    # sum(expr) or sum(expr) by (...)
-    sum_m = re.match(r"^sum\((.+?)\)(?:\s+by\s*\(([^)]*)\))?$", query, re.IGNORECASE)
-    if sum_m:
-        inner = sum_m.group(1).strip()
-        by_labels_str = sum_m.group(2) or ""
+    # ── Aggregation operators: sum/avg/min/max/count ──────────────────────────
+    # Matches: func(inner) or func(inner) by (labels) or func(inner) without (labels)
+    agg_m = re.match(
+        r"^(sum|avg|min|max|count)\s*\((.+?)\)(?:\s+(?:by|without)\s*\(([^)]*)\))?$",
+        query,
+        re.IGNORECASE,
+    )
+    if agg_m:
+        func = agg_m.group(1).lower()
+        inner = agg_m.group(2).strip()
+        by_labels_str = agg_m.group(3) or ""
         by_labels = [l.strip() for l in by_labels_str.split(",") if l.strip()]
         inner_results = eval_instant(parsed, inner, ts)
+        if not inner_results:
+            return []
         if not by_labels:
-            total = sum(float(r["value"][1]) for r in inner_results)
-            return [{"metric": {}, "value": [ts, str(total)]}]
-        # sum by (label)
-        groups: dict[tuple, float] = {}
+            vals = [float(r["value"][1]) for r in inner_results]
+            if func == "sum":
+                result_val = sum(vals)
+            elif func == "avg":
+                result_val = sum(vals) / len(vals)
+            elif func == "min":
+                result_val = min(vals)
+            elif func == "max":
+                result_val = max(vals)
+            elif func == "count":
+                result_val = float(len(vals))
+            else:
+                result_val = sum(vals)
+            return [{"metric": {}, "value": [ts, str(result_val)]}]
+        # grouped by labels
+        groups: dict[tuple, list[float]] = {}
         group_labels: dict[tuple, dict] = {}
         for r in inner_results:
             key = tuple(r["metric"].get(l, "") for l in by_labels)
-            groups[key] = groups.get(key, 0.0) + float(r["value"][1])
+            groups.setdefault(key, []).append(float(r["value"][1]))
             group_labels[key] = {l: r["metric"].get(l, "") for l in by_labels}
+        results = []
+        for key, vals in groups.items():
+            if func == "sum":
+                v = sum(vals)
+            elif func == "avg":
+                v = sum(vals) / len(vals)
+            elif func == "min":
+                v = min(vals)
+            elif func == "max":
+                v = max(vals)
+            elif func == "count":
+                v = float(len(vals))
+            else:
+                v = sum(vals)
+            results.append({"metric": group_labels[key], "value": [ts, str(v)]})
+        return results
+
+    # ── topk / bottomk ────────────────────────────────────────────────────────
+    topk_m = re.match(
+        r"^(topk|bottomk)\s*\(\s*(\d+)\s*,\s*(.+?)\s*\)$", query, re.IGNORECASE
+    )
+    if topk_m:
+        func = topk_m.group(1).lower()
+        k = int(topk_m.group(2))
+        inner = topk_m.group(3).strip()
+        inner_results = eval_instant(parsed, inner, ts)
+        sorted_results = sorted(
+            inner_results,
+            key=lambda r: float(r["value"][1]),
+            reverse=(func == "topk"),
+        )
+        return sorted_results[:k]
+
+    # ── rate() / irate() / increase() ────────────────────────────────────────
+    # These are range-vector functions in real PromQL but our metrics are gauges,
+    # not counters, so we approximate: compute per-second change using ring buffer.
+    rate_m = re.match(
+        r"^(rate|irate|increase)\s*\((.+?)\[([^\]]+)\]\s*\)$", query, re.IGNORECASE
+    )
+    if rate_m:
+        func = rate_m.group(1).lower()
+        metric_expr = rate_m.group(2).strip()
+        # For instant eval, we approximate using the most-recent two history snapshots
+        with _HISTORY_LOCK:
+            hist = list(_HISTORY)
+        if len(hist) < 2:
+            # No history — return zeros for each series
+            base = eval_instant(parsed, metric_expr, ts)
+            return [{"metric": r["metric"], "value": [ts, "0"]} for r in base]
+        # Use the two most recent snapshots
+        ts2, text2 = hist[-1]
+        ts1, text1 = hist[-2]
+        dt = ts2 - ts1
+        if dt <= 0:
+            base = eval_instant(parsed, metric_expr, ts)
+            return [{"metric": r["metric"], "value": [ts, "0"]} for r in base]
+        p1 = parse_metrics_text(text1)
+        p2 = parse_metrics_text(text2)
+        r1 = {
+            json.dumps(r["metric"], sort_keys=True): float(r["value"][1])
+            for r in eval_instant(p1, metric_expr, ts1)
+        }
+        r2_list = eval_instant(p2, metric_expr, ts2)
+        results = []
+        for r in r2_list:
+            key = json.dumps(r["metric"], sort_keys=True)
+            v2 = float(r["value"][1])
+            v1 = r1.get(key, v2)
+            delta = v2 - v1
+            if func == "increase":
+                rate_val = delta
+            else:  # rate or irate: per-second
+                rate_val = delta / dt if dt > 0 else 0.0
+            results.append(
+                {"metric": r["metric"], "value": [ts, str(max(0.0, rate_val))]}
+            )
+        return results
+
+    # ── label_values() — used by Grafana template variables ──────────────────
+    lv_m = re.match(
+        r"^label_values\s*\(\s*(.+?)\s*,\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*\)$",
+        query,
+        re.IGNORECASE,
+    )
+    if lv_m:
+        metric_expr = lv_m.group(1).strip()
+        label_name = lv_m.group(2).strip()
+        base = eval_instant(parsed, metric_expr, ts)
+        values = sorted(
+            {r["metric"].get(label_name, "") for r in base if label_name in r["metric"]}
+        )
         return [
-            {"metric": group_labels[k], "value": [ts, str(v)]}
-            for k, v in groups.items()
+            {"metric": {"__name__": label_name, label_name: v}, "value": [ts, "1"]}
+            for v in values
         ]
 
-    # Simple selector: metric_name or metric_name{label="val",...}
+    # ── Simple selector ───────────────────────────────────────────────────────
     m = _SELECTOR_RE.match(query)
     if m:
         name = m.group(1)
@@ -393,25 +844,86 @@ def eval_instant(parsed: dict, query: str, ts: float) -> list[dict]:
 def eval_range(
     parsed: dict, query: str, start: float, end: float, step: float
 ) -> list[dict]:
-    """Return a matrix result by repeating the instant value across the time range."""
-    instant = eval_instant(parsed, query, end)
+    """Return a matrix result using historical ring buffer data when available."""
+    # Build a map of timestamp → parsed snapshot from history
+    with _HISTORY_LOCK:
+        history_snap = list(_HISTORY)  # [(ts, text), ...]
+
+    # Filter history to the requested range
+    in_range = [(ts, text) for ts, text in history_snap if start <= ts <= end + step]
+
+    if len(in_range) < 2:
+        # Fall back to current-instant duplication (original behavior)
+        instant = eval_instant(parsed, query, end)
+        timestamps = []
+        t = start
+        while t <= end + 0.001:
+            timestamps.append(t)
+            t += step
+        if not timestamps or timestamps[-1] < end:
+            timestamps.append(end)
+        results = []
+        for r in instant:
+            val = r["value"][1]
+            results.append(
+                {"metric": r["metric"], "values": [[t, val] for t in timestamps]}
+            )
+        return results
+
+    # Build a time-bucketed map: for each step bucket, use the nearest historical sample
     timestamps = []
     t = start
     while t <= end + 0.001:
         timestamps.append(t)
         t += step
-    if not timestamps or (timestamps and timestamps[-1] < end):
+    if not timestamps or timestamps[-1] < end:
         timestamps.append(end)
 
-    results = []
-    for r in instant:
-        val = r["value"][1]
-        values = [[t, val] for t in timestamps]
-        results.append({"metric": r["metric"], "values": values})
-    return results
+    # For each timestamp bucket, find the closest historical sample
+    def _find_nearest(ts: float) -> tuple | None:
+        best = None
+        best_diff = float("inf")
+        for h_ts, h_text in in_range:
+            diff = abs(h_ts - ts)
+            if diff < best_diff:
+                best_diff = diff
+                best = (h_ts, h_text)
+        return best
+
+    # Group results by metric identity
+    metric_series: dict[str, dict] = {}  # key → {"metric": {}, "values": []}
+
+    for bucket_ts in timestamps:
+        nearest = _find_nearest(bucket_ts)
+        if nearest is None:
+            continue
+        _, h_text = nearest
+        h_parsed = parse_metrics_text(h_text)
+        instant = eval_instant(h_parsed, query, bucket_ts)
+        for r in instant:
+            # Build a stable key from metric labels
+            key = json.dumps(r["metric"], sort_keys=True)
+            if key not in metric_series:
+                metric_series[key] = {"metric": r["metric"], "values": []}
+            metric_series[key]["values"].append([bucket_ts, r["value"][1]])
+
+    return list(metric_series.values()) if metric_series else []
 
 
 # ── HTTP server ────────────────────────────────────────────────────────────────
+
+
+class ReusePortHTTPServer(HTTPServer):
+    """HTTPServer subclass that sets SO_REUSEADDR and SO_REUSEPORT before bind."""
+
+    def server_bind(self):
+        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        if hasattr(socket, "SO_REUSEPORT"):
+            try:
+                self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+            except OSError:
+                pass
+        super().server_bind()
 
 
 class MetricsHandler(BaseHTTPRequestHandler):
@@ -430,7 +942,20 @@ class MetricsHandler(BaseHTTPRequestHandler):
         params = parse_qs(parsed_url.query)
 
         if path in ("/metrics", "/"):
-            body = collect_all_metrics().encode()
+            try:
+                body = collect_all_metrics().encode()
+            except Exception:
+                print("[openclaw-metrics] ERROR in collect_all_metrics:", flush=True)
+                traceback.print_exc()
+                error_body = b"# ERROR collecting metrics\n"
+                self.send_response(500)
+                self.send_header(
+                    "Content-Type", "text/plain; version=0.0.4; charset=utf-8"
+                )
+                self.send_header("Content-Length", str(len(error_body)))
+                self.end_headers()
+                self.wfile.write(error_body)
+                return
             self.send_response(200)
             self.send_header("Content-Type", "text/plain; version=0.0.4; charset=utf-8")
             self.send_header("Content-Length", str(len(body)))
@@ -571,14 +1096,29 @@ def main():
         print(collect_all_metrics(), end="")
         return
 
-    server = HTTPServer(("0.0.0.0", args.port), MetricsHandler)
+    # Register shutdown handlers
+    signal.signal(signal.SIGTERM, _handle_shutdown)
+    # SIGINT already handled by KeyboardInterrupt in serve_forever
+
+    # Load persisted history before starting background scraper
+    _load_history()
+
+    server = ReusePortHTTPServer(("0.0.0.0", args.port), MetricsHandler)
     print(
-        f"[openclaw-metrics] Serving on http://0.0.0.0:{args.port}/metrics", flush=True
+        f"[openclaw-metrics] PID={os.getpid()} Serving on http://0.0.0.0:{args.port}/metrics",
+        flush=True,
     )
+
+    _start_background_scraper()
+
     try:
         server.serve_forever()
     except KeyboardInterrupt:
-        print("\n[openclaw-metrics] Stopped.")
+        print("\n[openclaw-metrics] Stopped.", flush=True)
+    except Exception:
+        print("[openclaw-metrics] FATAL: unhandled exception:", flush=True)
+        traceback.print_exc()
+        sys.exit(1)
 
 
 if __name__ == "__main__":

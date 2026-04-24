@@ -7,7 +7,28 @@
   "schemaVersion": 38,
   "version": 1,
   "refresh": "1m",
-  "time": { "from": "now-3h", "to": "now" },
+  "time": { "from": "now-2h", "to": "now" },
+  "templating": {
+    "list": [
+      {
+        "name": "job",
+        "label": "Cron Job",
+        "type": "query",
+        "datasource": {"type": "prometheus", "uid": "openclaw-prometheus"},
+        "query": {
+          "query": "label_values(openclaw_cron_stale, job)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 2,
+        "includeAll": true,
+        "allValue": ".*",
+        "multi": true,
+        "current": {},
+        "sort": 1,
+        "hide": 0
+      }
+    ]
+  },
   "panels": [
     {
       "id": 1,
@@ -102,9 +123,9 @@
         ]
       },
       "targets": [
-        { "expr": "openclaw_cron_last_run_age_seconds", "legendFormat": "{{job}}", "instant": true },
-        { "expr": "openclaw_cron_last_exit_code", "legendFormat": "{{job}}", "instant": true },
-        { "expr": "openclaw_cron_stale", "legendFormat": "{{job}}", "instant": true }
+        { "expr": "openclaw_cron_last_run_age_seconds{job=~\"$job\"}", "legendFormat": "{{job}}", "instant": true },
+        { "expr": "openclaw_cron_last_exit_code{job=~\"$job\"}", "legendFormat": "{{job}}", "instant": true },
+        { "expr": "openclaw_cron_stale{job=~\"$job\"}", "legendFormat": "{{job}}", "instant": true }
       ],
       "transformations": [
         { "id": "merge", "options": {} },
@@ -140,6 +161,115 @@
       "gridPos": { "x": 0, "y": 22, "w": 24, "h": 8 },
       "datasource": { "uid": "openclaw-prometheus", "type": "prometheus" },
       "targets": [{ "expr": "openclaw_log_errors_recent", "legendFormat": "{{log}}" }]
+    },
+    {
+      "id": 9,
+      "title": "Session Context Age",
+      "type": "stat",
+      "datasource": {"type": "prometheus", "uid": "openclaw-prometheus"},
+      "gridPos": {"h": 4, "w": 6, "x": 0, "y": 30},
+      "targets": [
+        {
+          "datasource": {"type": "prometheus", "uid": "openclaw-prometheus"},
+          "expr": "openclaw_session_context_age_seconds",
+          "legendFormat": "SESSION_CONTEXT.md age",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 3600},
+              {"color": "red", "value": 14400}
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {"calcs": ["lastNotNull"]},
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto"
+      }
+    },
+    {
+      "id": 10,
+      "title": "CPU Usage Over Time",
+      "type": "timeseries",
+      "datasource": {"type": "prometheus", "uid": "openclaw-tsdb"},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 34},
+      "targets": [
+        {
+          "datasource": {"type": "prometheus", "uid": "openclaw-tsdb"},
+          "expr": "openclaw_system_cpu_percent",
+          "legendFormat": "CPU %",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "color": {"mode": "palette-classic"},
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 70},
+              {"color": "red", "value": 90}
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {"mode": "single"},
+        "legend": {"displayMode": "list", "placement": "bottom"}
+      }
+    },
+    {
+      "id": 11,
+      "title": "Memory Usage Over Time",
+      "type": "timeseries",
+      "datasource": {"type": "prometheus", "uid": "openclaw-tsdb"},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 34},
+      "targets": [
+        {
+          "datasource": {"type": "prometheus", "uid": "openclaw-tsdb"},
+          "expr": "openclaw_system_memory_percent",
+          "legendFormat": "RAM %",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "color": {"mode": "palette-classic"},
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 80},
+              {"color": "red", "value": 90}
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {"mode": "single"},
+        "legend": {"displayMode": "list", "placement": "bottom"}
+      }
     }
   ]
 }

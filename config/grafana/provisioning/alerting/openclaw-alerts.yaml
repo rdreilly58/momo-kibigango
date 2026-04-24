@@ -1,0 +1,208 @@
+apiVersion: 1
+
+groups:
+  - orgId: 1
+    name: OpenClaw Critical
+    folder: OpenClaw
+    interval: 1m
+    rules:
+
+      - uid: openclaw-gateway-down
+        title: "Gateway Down"
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 120
+              to: 0
+            datasourceUid: openclaw-prometheus
+            model:
+              expr: openclaw_gateway_running
+              instant: true
+              refId: A
+          - refId: C
+            relativeTimeRange:
+              from: 120
+              to: 0
+            datasourceUid: "__expr__"
+            model:
+              type: threshold
+              refId: C
+              conditions:
+                - evaluator:
+                    params: [1]
+                    type: lt
+                  operator:
+                    type: and
+                  query:
+                    params: [A]
+                  reducer:
+                    type: last
+        noDataState: Alerting
+        execErrState: Alerting
+        for: 2m
+        annotations:
+          summary: "OpenClaw gateway process is not running"
+          description: "openclaw_gateway_running = {{ $values.A }}. Gateway has been down for more than 2 minutes."
+        labels:
+          severity: critical
+
+      - uid: openclaw-session-stale
+        title: "Session Stale"
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 120
+              to: 0
+            datasourceUid: openclaw-prometheus
+            model:
+              expr: openclaw_session_stale
+              instant: true
+              refId: A
+          - refId: C
+            relativeTimeRange:
+              from: 120
+              to: 0
+            datasourceUid: "__expr__"
+            model:
+              type: threshold
+              refId: C
+              conditions:
+                - evaluator:
+                    params: [1]
+                    type: gte
+                  operator:
+                    type: and
+                  query:
+                    params: [A]
+                  reducer:
+                    type: last
+        noDataState: Alerting
+        execErrState: Alerting
+        for: 5m
+        annotations:
+          summary: "OpenClaw session is stale (no activity > 1h)"
+          description: "Session age is {{ $values.A }}s. No agent activity detected for over an hour."
+        labels:
+          severity: warning
+
+      - uid: openclaw-disk-high
+        title: "Disk Usage High"
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 120
+              to: 0
+            datasourceUid: openclaw-prometheus
+            model:
+              expr: openclaw_disk_percent
+              instant: true
+              refId: A
+          - refId: C
+            relativeTimeRange:
+              from: 120
+              to: 0
+            datasourceUid: "__expr__"
+            model:
+              type: threshold
+              refId: C
+              conditions:
+                - evaluator:
+                    params: [85]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [A]
+                  reducer:
+                    type: last
+        noDataState: NoData
+        execErrState: Error
+        for: 10m
+        annotations:
+          summary: "Home disk usage above 85%"
+          description: "Disk is {{ $values.A }}% full. Consider cleanup."
+        labels:
+          severity: warning
+
+      - uid: openclaw-cron-stale
+        title: "Shell Cron Stale"
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 120
+              to: 0
+            datasourceUid: openclaw-prometheus
+            model:
+              expr: "max(openclaw_cron_stale) by (job)"
+              instant: true
+              refId: A
+          - refId: C
+            relativeTimeRange:
+              from: 120
+              to: 0
+            datasourceUid: "__expr__"
+            model:
+              type: threshold
+              refId: C
+              conditions:
+                - evaluator:
+                    params: [1]
+                    type: gte
+                  operator:
+                    type: and
+                  query:
+                    params: [A]
+                  reducer:
+                    type: last
+        noDataState: NoData
+        execErrState: Error
+        for: 5m
+        annotations:
+          summary: "Shell-script cron {{ $labels.job }} is stale"
+          description: "Cron {{ $labels.job }} has not run within its expected window."
+        labels:
+          severity: warning
+
+      - uid: openclaw-native-cron-stale
+        title: "Native Cron Stale"
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 120
+              to: 0
+            datasourceUid: openclaw-prometheus
+            model:
+              expr: "max(openclaw_native_cron_stale) by (job)"
+              instant: true
+              refId: A
+          - refId: C
+            relativeTimeRange:
+              from: 120
+              to: 0
+            datasourceUid: "__expr__"
+            model:
+              type: threshold
+              refId: C
+              conditions:
+                - evaluator:
+                    params: [1]
+                    type: gte
+                  operator:
+                    type: and
+                  query:
+                    params: [A]
+                  reducer:
+                    type: last
+        noDataState: NoData
+        execErrState: Error
+        for: 5m
+        annotations:
+          summary: "Native cron {{ $labels.job }} is stale"
+          description: "OpenClaw-native cron {{ $labels.job }} has not run within its expected window."
+        labels:
+          severity: warning

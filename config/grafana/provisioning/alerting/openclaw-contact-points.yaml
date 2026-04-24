@@ -1,0 +1,22 @@
+apiVersion: 1
+
+contactPoints:
+  - orgId: 1
+    name: Telegram
+    receivers:
+      - uid: openclaw-telegram
+        type: telegram
+        settings:
+          botToken: "8716932495:AAHG9u1SNZEhM9q-LIqGBLYr-zeJz3XVdRE"
+          chatid: "8755120444"
+          message: |
+            🚨 {{ .CommonLabels.alertname }}
+            Status: {{ .Status | toUpper }}
+            Severity: {{ .CommonLabels.severity }}
+            {{ range .Alerts }}
+            • {{ .Annotations.summary }}
+              {{ .Annotations.description }}
+            {{ end }}
+          parse_mode: "HTML"
+          disable_notification: false
+        disableResolveMessage: false
