@@ -55,7 +55,7 @@
     {
       "id": 2,
       "type": "stat",
-      "title": "Session Age",
+      "title": "Last Activity",
       "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 },
       "datasource": { "uid": "openclaw-prometheus", "type": "prometheus" },
       "options": {
@@ -69,7 +69,7 @@
           "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 2700 }, { "color": "red", "value": 3600 }] }
         }
       },
-      "targets": [{ "expr": "openclaw_session_age_seconds", "legendFormat": "Session Age" }]
+      "targets": [{ "expr": "openclaw_session_last_activity_seconds", "legendFormat": "Last Activity" }]
     },
     {
       "id": 3,
@@ -135,16 +135,22 @@
     {
       "id": 6,
       "type": "timeseries",
-      "title": "Session Age Over Time",
+      "title": "Session Timing",
       "gridPos": { "x": 0, "y": 14, "w": 12, "h": 8 },
       "datasource": { "uid": "openclaw-prometheus", "type": "prometheus" },
       "fieldConfig": {
         "defaults": {
-          "unit": "s",
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 2700 }, { "color": "red", "value": 3600 }] }
+          "unit": "s"
         }
       },
-      "targets": [{ "expr": "openclaw_session_age_seconds", "legendFormat": "Session Age" }]
+      "options": {
+        "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull"] },
+        "tooltip": { "mode": "multi" }
+      },
+      "targets": [
+        { "expr": "openclaw_session_duration_seconds", "legendFormat": "Session Duration" },
+        { "expr": "openclaw_session_last_activity_seconds", "legendFormat": "Since Last Message" }
+      ]
     },
     {
       "id": 7,

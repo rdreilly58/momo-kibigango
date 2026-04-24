@@ -96,6 +96,12 @@ SESSION_KEYS = [
     "agent:main:telegram:direct:8755120444",
 ]
 
+# Key that resets per-message — used for "last activity" metric only
+SESSION_ACTIVITY_KEY = "agent:main:telegram:direct:8755120444"
+
+# File that anchors today's session start time (written once per calendar day)
+SESSION_START_FILE = LOGS_DIR / "session-start.json"
+
 
 # ── Metric helpers ─────────────────────────────────────────────────────────────
 
@@ -312,42 +318,63 @@ def _memory_metrics() -> list[str]:
     return lines
 
 
+def _ensure_session_start() -> float:
+    """Return today's session start timestamp, creating the anchor file if needed."""
+    import datetime
+
+    today = datetime.date.today().isoformat()
+    try:
+        if SESSION_START_FILE.exists():
+            rec = json.loads(SESSION_START_FILE.read_text())
+            if rec.get("date") == today:
+                return float(rec["start_ts"])
+        # New day (or file missing) — write anchor now
+        start_ts = time.time()
+        SESSION_START_FILE.write_text(json.dumps({"date": today, "start_ts": start_ts}))
+        return start_ts
+    except Exception:
+        return time.time()
+
+
 def _session_metrics() -> list[str]:
     lines: list[str] = []
     lines += [
-        "# HELP openclaw_session_age_seconds Age of most recent session activity in seconds"
+        "# HELP openclaw_session_last_activity_seconds Seconds since last Telegram message",
+        "# TYPE openclaw_session_last_activity_seconds gauge",
+        "# HELP openclaw_session_duration_seconds Seconds since today's session started",
+        "# TYPE openclaw_session_duration_seconds gauge",
+        "# HELP openclaw_session_stale Whether session is considered stale (>3600s, 1=stale)",
+        "# TYPE openclaw_session_stale gauge",
     ]
-    lines += ["# TYPE openclaw_session_age_seconds gauge"]
-    lines += [
-        "# HELP openclaw_session_stale Whether session is considered stale (>3600s, 1=stale)"
-    ]
-    lines += ["# TYPE openclaw_session_stale gauge"]
 
+    now_ms = time.time() * 1000
+    now = time.time()
+
+    # ── Session duration (monotonically rising, resets at midnight) ───────────
+    session_start = _ensure_session_start()
+    duration_sec = now - session_start
+    lines.append(f"openclaw_session_duration_seconds {duration_sec:.0f}")
+
+    # ── Last activity (time since last Telegram message) ─────────────────────
     if not SESSIONS_FILE.exists():
-        lines.append("openclaw_session_age_seconds -1")
+        lines.append("openclaw_session_last_activity_seconds -1")
         lines.append("openclaw_session_stale 1")
         return lines
 
     try:
         data = json.loads(SESSIONS_FILE.read_text())
-        now_ms = time.time() * 1000
-        best_ts = 0
-        for key in SESSION_KEYS:
-            ts = int(data.get(key, {}).get("updatedAt", 0))
-            if ts > best_ts:
-                best_ts = ts
-
-        if best_ts == 0:
-            lines.append("openclaw_session_age_seconds -1")
+        ts = int(data.get(SESSION_ACTIVITY_KEY, {}).get("updatedAt", 0))
+        if ts == 0:
+            lines.append("openclaw_session_last_activity_seconds -1")
             lines.append("openclaw_session_stale 1")
         else:
-            age_sec = (now_ms - best_ts) / 1000
-            stale = 1 if age_sec > 3600 else 0
-            lines.append(f"openclaw_session_age_seconds {age_sec:.0f}")
+            activity_age = (now_ms - ts) / 1000
+            stale = 1 if activity_age > 3600 else 0
+            lines.append(f"openclaw_session_last_activity_seconds {activity_age:.0f}")
             lines.append(f"openclaw_session_stale {stale}")
     except Exception as e:
         lines.append(f"# ERROR reading sessions: {e}")
-        lines.append("openclaw_session_age_seconds -1")
+        lines.append("openclaw_session_last_activity_seconds -1")
         lines.append("openclaw_session_stale 1")
 
     return lines
