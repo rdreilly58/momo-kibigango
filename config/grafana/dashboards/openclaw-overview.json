@@ -148,18 +148,27 @@
     },
     {
       "id": 7,
-      "type": "timeseries",
+      "type": "barchart",
       "title": "Memory Entries by Tier",
       "gridPos": { "x": 12, "y": 14, "w": 12, "h": 8 },
       "datasource": { "uid": "openclaw-prometheus", "type": "prometheus" },
       "fieldConfig": {
         "defaults": {
           "custom": {
-            "stacking": { "mode": "normal", "group": "A" },
-            "fillOpacity": 60,
-            "lineWidth": 1
+            "stacking": { "mode": "normal" },
+            "fillOpacity": 80,
+            "lineWidth": 0
           }
         }
+      },
+      "options": {
+        "barWidth": 0.97,
+        "groupWidth": 0.7,
+        "stacking": "normal",
+        "fillOpacity": 80,
+        "legend": { "displayMode": "list", "placement": "bottom" },
+        "tooltip": { "mode": "multi" },
+        "xField": "Time"
       },
       "targets": [{ "expr": "openclaw_memory_entries_by_tier", "legendFormat": "{{tier}}" }]
     },
