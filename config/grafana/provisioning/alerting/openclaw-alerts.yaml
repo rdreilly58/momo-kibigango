@@ -206,3 +206,43 @@ groups:
           description: "OpenClaw-native cron {{ $labels.job }} has not run within its expected window."
         labels:
           severity: warning
+
+      - uid: openclaw-brave-api-down
+        title: "Brave API Down"
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: openclaw-prometheus
+            model:
+              expr: openclaw_brave_api_up
+              instant: true
+              refId: A
+          - refId: C
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              type: classic_conditions
+              refId: C
+              conditions:
+                - evaluator:
+                    type: lt
+                    params: [1]
+                  operator:
+                    type: and
+                  query:
+                    params: [A]
+                  reducer:
+                    type: last
+        noDataState: NoData
+        execErrState: Alerting
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Brave Search API is not responding"
+          description: "openclaw_brave_api_up={{ $values.A.Value }} — web search will fail silently"

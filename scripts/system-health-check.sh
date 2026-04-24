@@ -5,6 +5,15 @@
 
 set -Eeuo pipefail
 
+# ── Idempotency lock (prevent concurrent runs) ────────────────────────────────
+LOCK_FILE="/tmp/system-health-check-$(date +%Y-%m-%d-%H).lock"
+if [ -e "$LOCK_FILE" ]; then
+    echo "[system-health-check] Already ran this hour (lock: $LOCK_FILE). Skipping." >&2
+    exit 0
+fi
+touch "$LOCK_FILE"
+trap 'rm -f "$LOCK_FILE"' EXIT
+
 WORKSPACE="$HOME/.openclaw/workspace"
 SCRIPT_DIR="$WORKSPACE/scripts"
 LOG_DIR="$HOME/.openclaw/logs"

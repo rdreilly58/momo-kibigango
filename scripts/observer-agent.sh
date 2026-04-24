@@ -10,6 +10,15 @@
 
 set -euo pipefail
 
+# ── Idempotency lock (prevent concurrent runs) ────────────────────────────────
+LOCK_FILE="/tmp/observer-agent-$(date +%Y-%m-%d-%H).lock"
+if [ -e "$LOCK_FILE" ]; then
+    echo "[observer-agent] Already ran this hour (lock: $LOCK_FILE). Skipping." >&2
+    exit 0
+fi
+touch "$LOCK_FILE"
+trap 'rm -f "$LOCK_FILE"' EXIT
+
 WORKSPACE="${WORKSPACE:-$HOME/.openclaw/workspace}"
 OBS_FILE="$WORKSPACE/memory/observations.md"
 STAMP="$WORKSPACE/memory/.observer-last-run"

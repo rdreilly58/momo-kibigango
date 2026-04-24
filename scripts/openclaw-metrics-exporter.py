@@ -529,6 +529,68 @@ def _process_metrics() -> list[str]:
     return lines
 
 
+# ── Brave API probe cache (check at most once per 5 minutes) ─────────────────
+_BRAVE_CACHE_LOCK = threading.Lock()
+_BRAVE_LAST_CHECK: float = 0.0
+_BRAVE_LAST_STATUS: int = -1  # -1=unknown, 0=down, 1=up
+
+
+def _brave_api_metrics() -> list[str]:
+    """Probe Brave Search API and emit openclaw_brave_api_up (cached 5 min)."""
+    global _BRAVE_LAST_CHECK, _BRAVE_LAST_STATUS
+    import urllib.request
+
+    lines = [
+        "# HELP openclaw_brave_api_up Brave Search API reachable (1=up, 0=down, -1=unknown)",
+        "# TYPE openclaw_brave_api_up gauge",
+    ]
+
+    with _BRAVE_CACHE_LOCK:
+        now = time.time()
+        if now - _BRAVE_LAST_CHECK < 300:  # use cached value
+            lines.append(f"openclaw_brave_api_up {_BRAVE_LAST_STATUS}")
+            return lines
+        _BRAVE_LAST_CHECK = now
+
+    try:
+        import subprocess
+
+        key = subprocess.run(
+            [
+                "security",
+                "find-generic-password",
+                "-s",
+                "BraveSearchAPI",
+                "-a",
+                "openclaw",
+                "-w",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=5,
+        ).stdout.strip()
+        if not key:
+            key = os.environ.get("BRAVE_API_KEY", "")
+
+        if not key:
+            status = -1
+        else:
+            req = urllib.request.Request(
+                "https://api.search.brave.com/res/v1/web/search?q=openclaw+health",
+                headers={"Accept": "application/json", "X-Subscription-Token": key},
+            )
+            with urllib.request.urlopen(req, timeout=8) as resp:
+                status = 1 if resp.status == 200 else 0
+    except Exception:
+        status = 0
+
+    with _BRAVE_CACHE_LOCK:
+        _BRAVE_LAST_STATUS = status
+
+    lines.append(f"openclaw_brave_api_up {status}")
+    return lines
+
+
 def collect_all_metrics() -> str:
     """Collect all metrics and return as Prometheus text."""
     sections = [
@@ -540,6 +602,7 @@ def collect_all_metrics() -> str:
         _system_metrics(),
         _process_metrics(),
         _counter_metrics(),
+        _brave_api_metrics(),
     ]
     all_lines: list[str] = []
     for section in sections:

@@ -7,6 +7,17 @@
 
 set -e
 
+# ── Idempotency lock (prevent concurrent runs, one reset per day) ─────────────
+if [ "${1:-}" != "--log" ]; then
+    LOCK_FILE="/tmp/daily-session-reset-$(date +%Y-%m-%d).lock"
+    if [ -e "$LOCK_FILE" ]; then
+        echo "[daily-session-reset] Already ran today (lock: $LOCK_FILE). Skipping." >&2
+        exit 0
+    fi
+    touch "$LOCK_FILE"
+    trap 'rm -f "$LOCK_FILE"' EXIT
+fi
+
 # Allow test harness to override workspace (OPENCLAW_TEST_WORKSPACE=...)
 WORKSPACE="${OPENCLAW_TEST_WORKSPACE:-$HOME/.openclaw/workspace}"
 ARCHIVE_DIR="$WORKSPACE/memory/archive"
