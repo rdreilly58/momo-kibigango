@@ -155,7 +155,9 @@
       "fieldConfig": {
         "defaults": {
           "custom": {
-            "scaleDistribution": { "type": "log", "log": 2 }
+            "stacking": { "mode": "normal", "group": "A" },
+            "fillOpacity": 60,
+            "lineWidth": 1
           }
         }
       },
