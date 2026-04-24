@@ -154,7 +154,6 @@
       "datasource": { "uid": "openclaw-prometheus", "type": "prometheus" },
       "fieldConfig": {
         "defaults": {
-          "min": 0,
           "custom": {
             "scaleDistribution": { "type": "log", "log": 2 }
           }
