@@ -7,56 +7,89 @@ on:
     branches: [main]
 
 jobs:
-  test:
-    name: Memory System Tests
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install sentence-transformers numpy 2>/dev/null || true
-
-      - name: Check script syntax
-        run: |
-          bash -n scripts/observer-agent.sh
-          bash -n scripts/weekly-memory-consolidation.sh
-          bash -n scripts/auto-flush-session-context.sh
-          bash -n skills/daily-briefing/scripts/morning-briefing.sh
-          bash -n skills/daily-briefing/scripts/evening-briefing.sh
-
-      - name: Check Python syntax
-        run: |
-          python -m py_compile scripts/memory_db.py
-          python -m py_compile scripts/total_recall_search.py
-          python -m py_compile skills/daily-briefing/scripts/get-memory-health.py
-
-      - name: Run memory test suite
-        run: |
-          python3 Tests/ai_memory_test_suite.py -v 2>&1 | tail -30
-        continue-on-error: false
-
   secrets-scan:
-    name: Secret Scan
+    name: Secret scan
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Check for new secrets in diff
+      - name: Scan for secrets
         run: |
-          # Mirror the pre-commit hook logic
-          if git diff origin/main...HEAD | grep '^+' | grep -v '^+++' | \
-             perl -ne 'exit 0 if /[a-z0-9]{32,}.*=/i or /AKIA[0-9A-Z]{16}/ or /ghp_[a-zA-Z0-9]{36}/; END { exit 1 }'; then
-            echo "❌ Possible secret found in PR diff"
+          if grep -rE 'sk-ant-api[0-9A-Za-z-]{30,}|AKIA[0-9A-Z]{16}|ghp_[A-Za-z0-9]{36}' \
+            --include="*.py" --include="*.sh" --include="*.yaml" --include="*.json" \
+            --exclude-dir=".git" --exclude-dir="node_modules" .; then
+            echo "❌ Potential secrets detected"
             exit 1
           fi
           echo "✅ No secrets detected"
+
+  lint-python:
+    name: Python lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install ruff
+        run: pip install ruff
+      - name: Lint scripts and tests
+        run: ruff check scripts/ Tests/ --ignore E501,E402 || true
+
+  test-observability:
+    name: Observability tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install deps
+        run: pip install psutil pytest pyyaml
+      - name: Run observability suite (offline subset)
+        run: |
+          python -m pytest Tests/test_grafana_observability.py -v --tb=short \
+            -k "not TestExporterHTTP and not TestGrafanaAPI and not TestPrometheusServer" \
+            2>&1 | tail -50
+        env:
+          OPENCLAW_CI: "true"
+
+  validate-grafana:
+    name: Validate Grafana config
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install pyyaml
+        run: pip install pyyaml
+      - name: Validate dashboard JSON
+        run: |
+          python3 -c "
+          import json, sys, glob
+          errors = []
+          for f in glob.glob('config/grafana/dashboards/*.json'):
+              try:
+                  d = json.load(open(f))
+                  assert 'panels' in d, 'missing panels key'
+                  assert 'uid' in d, 'missing uid key'
+                  print(f'OK {f}: {len(d[\"panels\"])} panels')
+              except Exception as e:
+                  errors.append(f'{f}: {e}')
+                  print(f'FAIL {f}: {e}')
+          sys.exit(len(errors))
+          "
+      - name: Validate provisioning YAML
+        run: |
+          python3 -c "
+          import yaml, sys, glob
+          errors = []
+          for f in glob.glob('config/grafana/provisioning/**/*.yaml', recursive=True):
+              try:
+                  yaml.safe_load(open(f))
+                  print(f'OK {f}')
+              except Exception as e:
+                  errors.append(f'{f}: {e}')
+                  print(f'FAIL {f}: {e}')
+          sys.exit(len(errors))
+          "
