@@ -191,5 +191,45 @@ PYEOF
 
 _log "Context depth: ${TRANSCRIPT_LEN} chars, ~${TURN_ESTIMATE} turns"
 
-# ── 8. Always exit 0 ─────────────────────────────────────────────────────────
+# ── 8. Estimate session cost ──────────────────────────────────────────────────
+# Rough cost estimate: Sonnet 4-6 pricing ~$3/$15 per M in/out tokens.
+# Transcript chars ÷ 4 ≈ tokens (conservative; mix of input + output).
+python3 - <<PYEOF 2>/dev/null || true
+import json, math
+
+transcript_chars = $TRANSCRIPT_LEN
+turns = max(int("$TURN_ESTIMATE"), 1)
+
+# Approximate token split: ~70% input cache reads, 20% input cache writes, 10% output
+total_tokens = transcript_chars / 4
+input_tokens  = int(total_tokens * 0.90)
+output_tokens = int(total_tokens * 0.10)
+
+# Sonnet 4-6 pricing (USD per 1M tokens)
+INPUT_COST_PER_M  = 3.00   # cache miss / fresh input
+OUTPUT_COST_PER_M = 15.00
+
+est_cost_usd = (input_tokens / 1_000_000 * INPUT_COST_PER_M) + \
+               (output_tokens / 1_000_000 * OUTPUT_COST_PER_M)
+
+metrics_path = "$METRICS_FILE"
+# Append cost to last entry in the metrics file
+try:
+    with open(metrics_path) as f:
+        lines = f.readlines()
+    if lines:
+        last = json.loads(lines[-1])
+        last["input_tokens_est"] = input_tokens
+        last["output_tokens_est"] = output_tokens
+        last["cost_usd_est"] = round(est_cost_usd, 4)
+        lines[-1] = json.dumps(last) + "\n"
+        with open(metrics_path, "w") as f:
+            f.writelines(lines)
+except Exception:
+    pass
+
+print(f"[stop-hook] Cost estimate: ~\${est_cost_usd:.4f} USD ({input_tokens:,} in + {output_tokens:,} out tokens)")
+PYEOF
+
+# ── 9. Always exit 0 ─────────────────────────────────────────────────────────
 exit 0

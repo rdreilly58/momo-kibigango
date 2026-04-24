@@ -6,6 +6,10 @@
 EMAIL="rdreilly2010@gmail.com"
 WORKSPACE="$HOME/.openclaw/workspace"
 
+# ── Dead-man heartbeat trap — fires on ANY exit path ─────────────────────────
+SEND_EXIT=1  # default to failure; updated after successful send
+trap 'bash "${WORKSPACE}/scripts/cron-heartbeat.sh" morning-briefing "${SEND_EXIT}"' EXIT
+
 # Fetch comprehensive GA4 data
 GA4_REPORT=$(python3 << 'PYTHON_EOF'
 from datetime import datetime, timedelta
@@ -232,8 +236,6 @@ Have a productive day! 🍑
 
 # Send via gog with full path and account
 /opt/homebrew/bin/gog gmail send --account "$EMAIL" --to "$EMAIL" --subject "$SUBJECT" --body "$BODY" 2>&1 | tee -a /tmp/morning-briefing.log
+SEND_EXIT=${PIPESTATUS[0]}
 
-exit $?
-
-# ── Dead-man heartbeat ───────────────────────────────────────────────────────
-bash /Users/rreilly/.openclaw/workspace/scripts/cron-heartbeat.sh morning-briefing $?
+exit "$SEND_EXIT"

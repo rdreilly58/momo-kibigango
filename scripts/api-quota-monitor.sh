@@ -241,7 +241,17 @@ main() {
   check_local_embeddings || true
   check_cloudflare_quota || true
   check_aws_quota || true
-  
+
+  # ── .env drift check ────────────────────────────────────────────────────────
+  echo ""
+  echo "🔑 ENV DRIFT CHECK"
+  bash "${WORKSPACE}/scripts/check-env-drift.sh" 2>&1 || true
+
+  # ── Anthropic rate-limit probe ───────────────────────────────────────────────
+  echo ""
+  echo "📊 ANTHROPIC RATE LIMITS"
+  bash "${WORKSPACE}/scripts/anthropic-rate-limit-monitor.sh" --log-only 2>&1 || true
+
   echo ""
   echo "Log: $LOG_DIR/quota.log"
   echo ""
