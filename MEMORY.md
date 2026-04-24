@@ -95,6 +95,16 @@
 
 ---
 
+## 📋 Lessons Learned
+
+- **File**: `memory/lessons-learned.md`
+- Running record of non-trivial problems, root causes, fixes, and prevention steps
+- **Convention**: `fix:` commits should reference the relevant entry with `(see lessons-learned.md#anchor)` in the commit body
+- Observer agent flags new `fix:` commits → reminds to add a lessons entry
+- Quarterly review cron (Jan/Apr/Jul/Oct 1st, 09:03) surfaces entries older than 90 days for promotion to MEMORY.md or archival
+
+---
+
 ## 📝 Pending Tasks
 
 Tracked in Things 3 (migrated 2026-04-16). Use `things today` or `things inbox` — not this file.

@@ -81,6 +81,15 @@ if [ -n "$NEW_COMMITS" ]; then
     "Observer: ${COUNT} commits ${DATE}" \
     "$SUMMARY" \
     --tier short --ns workspace --tags "observation,auto,commits" 2>/dev/null || true
+
+  # Flag fix: commits — remind to write a lessons-learned entry
+  FIX_COMMITS=$(echo "$NEW_COMMITS" | grep -i "^[a-f0-9]* fix:" || true)
+  if [ -n "$FIX_COMMITS" ]; then
+    FIX_COUNT=$(echo "$FIX_COMMITS" | wc -l | tr -d ' ')
+    FIX_SUMMARY=$(echo "$FIX_COMMITS" | head -3 | tr '\n' '; ' | sed 's/; $//')
+    LESSONS_ENTRY="- 📝 ${TIME} **ACTION NEEDED — ${FIX_COUNT} fix commit(s) detected** — consider adding entries to memory/lessons-learned.md: ${FIX_SUMMARY} <!-- dc:type=reminder dc:importance=7.0 dc:date=${DATE} -->"
+    echo "$LESSONS_ENTRY" >> "$OBS_FILE"
+  fi
 fi
 
 if [ -n "$NEW_MEMORY" ]; then
