@@ -1,0 +1,23 @@
+{
+  "_doc": "Per-agent spending caps in USD. Checked by scripts/spending-cap-check.sh, which reads ~/.openclaw/logs/subagent-costs/*.log and alerts via notify_user when daily or rolling-30d totals breach a cap. Set 0 to disable a cap. 'overall' applies to summed cost across all agents.",
+  "daily_usd": {
+    "code": 5.00,
+    "ops": 2.00,
+    "research": 1.00,
+    "memory": 0.50,
+    "finance": 0.50,
+    "unknown": 1.00,
+    "overall": 8.00
+  },
+  "rolling_30d_usd": {
+    "code": 75.00,
+    "ops": 30.00,
+    "research": 20.00,
+    "memory": 10.00,
+    "finance": 10.00,
+    "unknown": 15.00,
+    "overall": 120.00
+  },
+  "warn_at_pct": 80,
+  "alert_at_pct": 100
+}
