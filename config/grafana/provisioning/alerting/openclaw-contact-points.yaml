@@ -30,13 +30,16 @@ contactPoints:
       - uid: openclaw-ntfy
         type: webhook
         settings:
-          url: "https://ntfy.sh/openclaw-bob-e6453b5d6b02"
+          # Self-hosted ntfy on loopback — requires NTFY_TOPIC_URL exported into
+          # Grafana's environment (launchctl setenv + brew services restart grafana).
+          # Grafana supports $VAR interpolation in provisioning files.
+          # NTFY_TOPIC_URL=http://127.0.0.1:8085/openclaw (set in ~/.openclaw/.env)
+          url: "$NTFY_TOPIC_URL"
           httpMethod: POST
-          # ntfy reads message body and these custom headers — Grafana sends
-          # the alert payload as JSON; ntfy will surface it as the message body.
-          # Title/Priority headers are static here; per-alert customization
-          # belongs in an ntfy receiver if Grafana adds native support later.
-          # Auth not required for public ntfy.sh; topic name is the only secret.
+          # Basic auth for self-hosted ntfy — set NTFY_USER / NTFY_PASS via
+          # launchctl setenv (see SECRETS.md for the procedure).
+          basicAuthUser: "$NTFY_USER"
+          basicAuthPassword: "$NTFY_PASS"
         disableResolveMessage: false
 
   - orgId: 1

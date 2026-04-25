@@ -1,12 +1,15 @@
 apiVersion: 1
 
-# Alert fan-out:
-#   - Telegram: every critical|warning alert (current default)
-#   - Ntfy:     every critical|warning alert (parallel notification firehose)
-#   - Slack:    critical-only (lower noise, professional channel)
+# Severity-tiered alert routing. Four tiers, each with its own urgency/cadence:
 #
-# Each route below uses `continue: true` so the engine keeps matching after
-# delivery, which is how Grafana fans an alert out to multiple receivers.
+#   info     — log-only (no notification fan-out). For trend signals.
+#   warning  — Telegram + Ntfy. 30s group_wait, 4h repeat. Default tier.
+#   critical — Telegram + Ntfy + Slack. 10s group_wait, 1h repeat.
+#   page     — Telegram + Ntfy + Slack. 0s group_wait, 15m repeat. Wakes you up.
+#
+# Each tier's branch fans out via `continue: true` so the engine keeps walking
+# the routes after a match — that's how Grafana delivers one alert to multiple
+# receivers. Ntfy priority/title still controlled by the contact-point header.
 
 policies:
   - orgId: 1
@@ -16,15 +19,53 @@ policies:
     group_interval: 5m
     repeat_interval: 4h
     routes:
-      - receiver: Telegram
-        matchers:
-          - severity =~ "critical|warning"
-        continue: true
-      - receiver: Ntfy
-        matchers:
-          - severity =~ "critical|warning"
-        continue: true
-      - receiver: Slack
-        matchers:
+      # ── page (highest urgency) ──────────────────────────────────────────
+      - matchers:
+          - severity = "page"
+        group_wait: 0s
+        group_interval: 1m
+        repeat_interval: 15m
+        routes:
+          - receiver: Telegram
+            continue: true
+          - receiver: Ntfy
+            continue: true
+          - receiver: Slack
+            continue: false
+
+      # ── critical ────────────────────────────────────────────────────────
+      - matchers:
           - severity = "critical"
+        group_wait: 10s
+        group_interval: 5m
+        repeat_interval: 1h
+        routes:
+          - receiver: Telegram
+            continue: true
+          - receiver: Ntfy
+            continue: true
+          - receiver: Slack
+            continue: false
+
+      # ── warning (default fan-out) ───────────────────────────────────────
+      - matchers:
+          - severity = "warning"
+        group_wait: 30s
+        group_interval: 5m
+        repeat_interval: 4h
+        routes:
+          - receiver: Telegram
+            continue: true
+          - receiver: Ntfy
+            continue: false
+
+      # ── info (log-only, no fan-out) ─────────────────────────────────────
+      # Matches and stops — falls into root receiver but with very long
+      # repeat so it doesn't actually re-page. Still visible in Grafana UI.
+      - matchers:
+          - severity = "info"
+        group_wait: 5m
+        group_interval: 1h
+        repeat_interval: 168h
+        receiver: Telegram
         continue: false

@@ -6,7 +6,9 @@
 # Requires env vars (set in config/briefing.env or ~/.openclaw/.env):
 #   TELEGRAM_BOT_TOKEN  — Telegram bot token (optional)
 #   TELEGRAM_CHAT_ID    — Telegram chat ID (optional)
-#   NTFY_TOPIC_URL      — ntfy.sh full topic URL, e.g. https://ntfy.sh/<topic> (optional)
+#   NTFY_TOPIC_URL      — ntfy full topic URL, e.g. http://127.0.0.1:8085/<topic> (optional)
+#   NTFY_USER           — ntfy basic-auth username (optional; required for self-hosted)
+#   NTFY_PASS           — ntfy basic-auth password (optional; required for self-hosted)
 #   SLACK_WEBHOOK_URL   — Slack incoming webhook URL (optional)
 #   HEALTHCHECK_URL     — healthchecks.io ping URL (optional)
 #
@@ -16,6 +18,7 @@
 
 notify_telegram() {
     local message="$1"
+    local parse_mode="${2:-}"   # "", "HTML", or "MarkdownV2"
     local token="${TELEGRAM_BOT_TOKEN:-}"
     local chat="${TELEGRAM_CHAT_ID:-}"
 
@@ -26,11 +29,19 @@ notify_telegram() {
         body=$(jq -n \
             --arg text "$message" \
             --arg chat_id "$chat" \
-            '{chat_id: $chat_id, text: $text}')
+            --arg parse_mode "$parse_mode" \
+            'if $parse_mode == "" then
+                {chat_id: $chat_id, text: $text}
+             else
+                {chat_id: $chat_id, text: $text, parse_mode: $parse_mode}
+             end')
     else
-        # Fallback: escape double quotes only (sufficient for plain-text alerts)
         local escaped="${message//\"/\\\"}"
-        body="{\"chat_id\":\"${chat}\",\"text\":\"${escaped}\"}"
+        if [[ -n "$parse_mode" ]]; then
+            body="{\"chat_id\":\"${chat}\",\"text\":\"${escaped}\",\"parse_mode\":\"${parse_mode}\"}"
+        else
+            body="{\"chat_id\":\"${chat}\",\"text\":\"${escaped}\"}"
+        fi
     fi
 
     curl -fsS -m 30 --retry 3 \
@@ -50,7 +61,9 @@ notify_telegram_failure() {
     notify_telegram "$msg"
 }
 
-# ── ntfy.sh ─────────────────────────────────────────────────────────────────
+# ── ntfy ────────────────────────────────────────────────────────────────────
+# Supports both public ntfy.sh (no auth) and self-hosted ntfy with basic auth.
+# Set NTFY_USER + NTFY_PASS in ~/.openclaw/.env to enable auth.
 
 notify_ntfy() {
     local message="$1"
@@ -64,7 +77,14 @@ notify_ntfy() {
     local -a headers=(-H "Title: ${title}" -H "Priority: ${priority}")
     [[ -n "$tags" ]] && headers+=(-H "Tags: ${tags}")
 
+    local -a auth_args=()
+    if [[ -n "${NTFY_USER:-}" && -n "${NTFY_PASS:-}" ]]; then
+        auth_args=(-u "${NTFY_USER}:${NTFY_PASS}")
+    fi
+
+    # ${auth_args[@]+"${auth_args[@]}"} is safe under `set -u` when empty.
     curl -fsS -m 30 --retry 3 \
+        ${auth_args[@]+"${auth_args[@]}"} \
         "${headers[@]}" \
         -d "$message" \
         "$url" \
@@ -139,6 +159,52 @@ notify_user() {
     if [[ "$channels" == "all" || ",$channels," == *,slack,* ]]; then
         notify_slack "$message"
     fi
+}
+
+# ── Severity-tiered routing ─────────────────────────────────────────────────
+#
+# notify_severity <tier> "message" [title]
+#
+# Mirrors the Grafana notification policy in
+# config/grafana/provisioning/alerting/openclaw-notification-policy.yaml so
+# script-emitted alerts and Grafana-emitted alerts behave consistently.
+#
+# Tiers:
+#   info     — ntfy only, low priority. No interrupt. For trend signals.
+#   warning  — telegram + ntfy, default priority. Day-time noticeable.
+#   critical — telegram + ntfy (high) + slack. Hour-scale response.
+#   page     — telegram + ntfy (urgent) + slack. Wakes you up. rotating_light.
+#
+# Override per-call with NOTIFY_CHANNELS to scope (e.g. NOTIFY_CHANNELS=ntfy).
+
+notify_severity() {
+    local tier="$1"
+    local message="$2"
+    local title="${3:-OpenClaw}"
+
+    case "$tier" in
+        info)
+            NOTIFY_CHANNELS="${NOTIFY_CHANNELS:-ntfy}" \
+                notify_user "$message" "$title" "low" ""
+            ;;
+        warning|warn)
+            NOTIFY_CHANNELS="${NOTIFY_CHANNELS:-telegram,ntfy}" \
+                notify_user "⚠️  $message" "$title" "default" "warning"
+            ;;
+        critical|crit)
+            NOTIFY_CHANNELS="${NOTIFY_CHANNELS:-all}" \
+                notify_user "🚨 $message" "$title" "high" "rotating_light"
+            ;;
+        page)
+            NOTIFY_CHANNELS="${NOTIFY_CHANNELS:-all}" \
+                notify_user "📟 PAGE: $message" "$title" "urgent" "rotating_light,sos"
+            ;;
+        *)
+            echo "notify_severity: unknown tier '$tier' — treating as warning" >&2
+            NOTIFY_CHANNELS="${NOTIFY_CHANNELS:-telegram,ntfy}" \
+                notify_user "$message" "$title" "default" ""
+            ;;
+    esac
 }
 
 # ── healthchecks.io ─────────────────────────────────────────────────────────

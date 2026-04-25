@@ -19,6 +19,12 @@
 
 set -uo pipefail
 
+# Load secrets and notification helpers
+set -a; source "$HOME/.openclaw/.env" 2>/dev/null || true; set +a
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=lib/notify.sh
+source "$SCRIPT_DIR/lib/notify.sh"
+
 WORKSPACE="$HOME/.openclaw/workspace"
 HB_DIR="$HOME/.openclaw/logs/cron-heartbeats"
 LOG_DIR="$HOME/.openclaw/logs"
@@ -58,6 +64,9 @@ JOB_REGISTRY=(
   "observer-agent:14400:important"           # every 2h → 4h
   "github-backup:14400:important"            # every 2h → 4h
   "quota-monitoring:21600:important"         # every 4h → 6h
+  "spending-cap-check:9000:important"        # hourly → 2.5h
+  "backup-openclaw:93600:important"          # daily 3:15 → 26h
+  "restore-drill:691200:routine"             # weekly Sun → 8d
 
   # ROUTINE — non-critical maintenance
   "auto-flush-session-context:93600:routine" # daily midnight → 26h
@@ -66,20 +75,6 @@ JOB_REGISTRY=(
   "collect-daily-metrics:93600:routine"      # daily 10pm → 26h
   "session-checkpoint:7200:routine"          # per-session → 2h
 )
-
-# ── Telegram helper ───────────────────────────────────────────────────────────
-send_telegram() {
-  local text="$1"
-  local bot_token chat_id
-  bot_token=$(python3 -c "import json; c=json.load(open('$HOME/.openclaw/config.json')); print(c.get('telegram',{}).get('botToken',''))" 2>/dev/null || true)
-  chat_id=$(python3 -c "import json; c=json.load(open('$HOME/.openclaw/config.json')); print(c.get('telegram',{}).get('chatId',''))" 2>/dev/null || true)
-  if [ -n "$bot_token" ] && [ -n "$chat_id" ]; then
-    curl -s -X POST "https://api.telegram.org/bot${bot_token}/sendMessage" \
-      -d "chat_id=${chat_id}" \
-      -d "text=${text}" \
-      -d "parse_mode=HTML" > /dev/null 2>&1 || true
-  fi
-}
 
 # ── Alert dedup: only alert once per job per 2h window ───────────────────────
 _already_alerted() {
@@ -148,7 +143,7 @@ Last run: ${last_run} (${age_min}m ago)
 Limit: ${max_min}m
 
 Check <code>~/.openclaw/logs/</code> for details."
-      [ $DRY_RUN -eq 0 ] && send_telegram "$msg"
+      [ $DRY_RUN -eq 0 ] && notify_telegram "$msg" "HTML"
       _log "ALERT sent for critical job: $job_name"
     else
       _log "ALERT deduped for $job_name (alerted within 2h)"

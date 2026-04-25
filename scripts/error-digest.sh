@@ -10,6 +10,12 @@
 
 set -uo pipefail
 
+# Load secrets and notification helpers
+set -a; source "$HOME/.openclaw/.env" 2>/dev/null || true; set +a
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=lib/notify.sh
+source "$SCRIPT_DIR/lib/notify.sh"
+
 LOG_DIR="$HOME/.openclaw/logs"
 WORKSPACE="$HOME/.openclaw/workspace"
 HOURS="${1:-24}"
@@ -17,31 +23,6 @@ CUTOFF=$(date -v-${HOURS}H '+%s' 2>/dev/null || date -d "${HOURS} hours ago" '+%
 TIMESTAMP=$(date '+%Y-%m-%d %H:%M %Z')
 TMP=$(mktemp /tmp/error-digest.XXXXXX)
 trap 'rm -f "$TMP"' EXIT
-
-# ── Telegram credentials ──────────────────────────────────────────────────────
-TELEGRAM_BOT_TOKEN=$(python3 -c "
-import json,sys
-try: c=json.load(open('$HOME/.openclaw/config.json')); print(c.get('telegram',{}).get('botToken',''))
-except: pass
-" 2>/dev/null || true)
-
-TELEGRAM_CHAT_ID=$(python3 -c "
-import json,sys
-try: c=json.load(open('$HOME/.openclaw/config.json')); print(c.get('telegram',{}).get('chatId',''))
-except: pass
-" 2>/dev/null || true)
-
-send_telegram() {
-  local text="$1"
-  if [ -n "${TELEGRAM_BOT_TOKEN:-}" ] && [ -n "${TELEGRAM_CHAT_ID:-}" ]; then
-    curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
-      -d "chat_id=${TELEGRAM_CHAT_ID}" \
-      --data-urlencode "text=${text}" \
-      -d "parse_mode=HTML" > /dev/null 2>&1 || true
-  else
-    echo "[digest] No Telegram credentials — printing to stdout only"
-  fi
-}
 
 # ── Scan logs for errors ──────────────────────────────────────────────────────
 TOTAL_ERRORS=0
@@ -119,5 +100,5 @@ $(cat "$TMP")
 <i>${TIMESTAMP}</i>"
 
 echo "$MESSAGE"
-send_telegram "$MESSAGE"
+notify_telegram "$MESSAGE" "HTML"
 echo "[$TIMESTAMP] [digest] Digest sent."
