@@ -8,7 +8,7 @@ notification firehose; Slack is the new production-grade chat option.
 |----------|--------------------|-------------|--------------|
 | Telegram | bidirectional      | live        | already configured |
 | ntfy.sh  | push only          | live        | install iOS app, subscribe to topic |
-| Slack    | push only (pilot)  | scaffolded  | create Slack app + paste webhook URL |
+| Slack    | bidirectional      | live        | webhook (outbound) + Socket Mode app (inbound) |
 
 ## ntfy.sh
 
@@ -43,46 +43,93 @@ scripts/notify.sh --channel ntfy --priority high --tags rotating_light \
 
 ## Slack
 
-Slack delivery is scaffolded but inactive until you provide an incoming
-webhook URL.
+Slack runs in two halves: an **incoming webhook** for outbound posts (cron
+scripts, Grafana alerts) and a **Socket Mode app** for inbound `/momo`
+slash commands, DMs, and `@mentions`. Both share the channel
+`#openclaw-alerts`.
 
-### One-time setup
+### Outbound — incoming webhook
 
 1. Visit <https://api.slack.com/apps> → *Create New App* → *From scratch*.
 2. Name it `OpenClaw`, pick your workspace.
 3. Side menu → *Incoming Webhooks* → toggle *Activate* on.
-4. Click *Add New Webhook to Workspace*, choose the channel (e.g.
-   `#openclaw-alerts`), authorize.
+4. Click *Add New Webhook to Workspace*, choose `#openclaw-alerts`, authorize.
 5. Copy the webhook URL (starts with `https://hooks.slack.com/services/...`).
 
-### Wire the URL in two places
+Wire the URL in two places:
 
 ```bash
 # 1. CLI / cron-script delivery (lib/notify.sh reads this)
 echo 'SLACK_WEBHOOK_URL=https://hooks.slack.com/services/XXX/YYY/ZZZ' \
   >> ~/.openclaw/.env
 
-# Or in-place edit if the placeholder is already there:
-sed -i '' \
-  's|^SLACK_WEBHOOK_URL=$|SLACK_WEBHOOK_URL=https://hooks.slack.com/services/XXX/YYY/ZZZ|' \
-  ~/.openclaw/.env
-```
-
-```bash
-# 2. Grafana alert delivery
-sed -i '' \
-  's|__REPLACE_WITH_SLACK_WEBHOOK_URL__|https://hooks.slack.com/services/XXX/YYY/ZZZ|' \
-  config/grafana/provisioning/alerting/openclaw-contact-points.yaml
-
-# Restart Grafana to pick up the change:
+# 2. Grafana alert delivery — already references $SLACK_WEBHOOK_URL via env
+launchctl setenv SLACK_WEBHOOK_URL "https://hooks.slack.com/services/XXX/YYY/ZZZ"
 brew services restart grafana
 ```
 
-### Test
+Test:
 
 ```bash
 source ~/.openclaw/.env
-scripts/notify.sh --channel slack "Slack live test"
+scripts/notify.sh --channel slack "Slack outbound test"
+```
+
+### Inbound — Socket Mode + `/momo`
+
+`scripts/slack_listener.py` is a Slack Bolt daemon that holds a Socket Mode
+connection to Slack and routes inbound traffic into the agent inbox.
+Supported triggers:
+
+- `/momo <text>` — slash command from any channel where the OpenClaw app is
+  installed.
+- `@OpenClaw <text>` — channel mentions where the bot has been invited.
+- Direct messages to the OpenClaw app.
+
+All three append a JSON record to `~/.openclaw/queue/slack-inbound.jsonl`
+with `session_key=agent:main:slack:direct:<user_id>` (parity with the
+Telegram bridge).
+
+#### One-time setup
+
+1. <https://api.slack.com/apps> → *Create New App* → *From a manifest*. Pick
+   your workspace, paste `config/slack-app-manifest.yaml`, *Create*.
+2. *OAuth & Permissions* → *Install to Workspace* → *Allow*. Copy the
+   **Bot User OAuth Token** (`xoxb-...`).
+3. *Basic Information* → *App-Level Tokens* → *Generate Token and Scopes* →
+   name `socket`, scope `connections:write`. Copy the token (`xapp-...`).
+4. *App Home* → *Show Tabs* → *Messages Tab* → check **Allow users to send
+   Slash commands and messages from the messages tab**. (Without this, DMs
+   are rejected client-side.)
+5. *OAuth & Permissions* → *Reinstall to Workspace* (so the App Home toggle
+   takes effect).
+
+#### Wire and start
+
+```bash
+cat >> ~/.openclaw/.env <<EOF
+
+SLACK_BOT_TOKEN=xoxb-...
+SLACK_APP_TOKEN=xapp-...
+EOF
+chmod 600 ~/.openclaw/.env
+
+launchctl load ~/Library/LaunchAgents/ai.openclaw.slack-listener.plist
+tail -F ~/.openclaw/logs/slack-listener.log     # expect "⚡️ Bolt app is running!"
+```
+
+#### Test
+
+In any channel where the app is installed:
+
+```
+/momo hi momo
+```
+
+You should see "Got it (N chars). Queued for OpenClaw." Confirm enqueued:
+
+```bash
+tail -1 ~/.openclaw/queue/slack-inbound.jsonl
 ```
 
 ## Programmatic use

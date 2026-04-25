@@ -1,0 +1,32 @@
+display_information:
+  name: OpenClaw
+  description: Bidirectional bridge between Slack and the OpenClaw agent runtime.
+  background_color: "#1a1a1a"
+features:
+  bot_user:
+    display_name: OpenClaw
+    always_online: true
+  slash_commands:
+    - command: /momo
+      description: Send a message to the OpenClaw agent inbox
+      usage_hint: "<your message>"
+      should_escape: false
+oauth_config:
+  scopes:
+    bot:
+      - app_mentions:read
+      - chat:write
+      - commands
+      - im:history
+      - im:read
+      - im:write
+settings:
+  event_subscriptions:
+    bot_events:
+      - app_mention
+      - message.im
+  interactivity:
+    is_enabled: true
+  org_deploy_enabled: false
+  socket_mode_enabled: true
+  token_rotation_enabled: false
