@@ -1,5 +1,13 @@
 apiVersion: 1
 
+# Alert fan-out:
+#   - Telegram: every critical|warning alert (current default)
+#   - Ntfy:     every critical|warning alert (parallel notification firehose)
+#   - Slack:    critical-only (lower noise, professional channel)
+#
+# Each route below uses `continue: true` so the engine keeps matching after
+# delivery, which is how Grafana fans an alert out to multiple receivers.
+
 policies:
   - orgId: 1
     receiver: Telegram
@@ -11,4 +19,12 @@ policies:
       - receiver: Telegram
         matchers:
           - severity =~ "critical|warning"
+        continue: true
+      - receiver: Ntfy
+        matchers:
+          - severity =~ "critical|warning"
+        continue: true
+      - receiver: Slack
+        matchers:
+          - severity = "critical"
         continue: false

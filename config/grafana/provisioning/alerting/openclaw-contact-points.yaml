@@ -20,3 +20,37 @@ contactPoints:
           parse_mode: "HTML"
           disable_notification: false
         disableResolveMessage: false
+
+  - orgId: 1
+    name: Ntfy
+    receivers:
+      - uid: openclaw-ntfy
+        type: webhook
+        settings:
+          url: "https://ntfy.sh/openclaw-bob-e6453b5d6b02"
+          httpMethod: POST
+          # ntfy reads message body and these custom headers — Grafana sends
+          # the alert payload as JSON; ntfy will surface it as the message body.
+          # Title/Priority headers are static here; per-alert customization
+          # belongs in an ntfy receiver if Grafana adds native support later.
+          # Auth not required for public ntfy.sh; topic name is the only secret.
+        disableResolveMessage: false
+
+  - orgId: 1
+    name: Slack
+    receivers:
+      - uid: openclaw-slack
+        type: slack
+        settings:
+          # Replace with the incoming-webhook URL after creating the Slack app.
+          # See config/notifications.md for setup steps. Until set, Grafana
+          # delivery to Slack will fail silently — no other channels affected.
+          url: "__REPLACE_WITH_SLACK_WEBHOOK_URL__"
+          title: "{{ .CommonLabels.alertname }} — {{ .Status | toUpper }}"
+          text: |
+            *Severity:* {{ .CommonLabels.severity }}
+            {{ range .Alerts }}
+            • {{ .Annotations.summary }}
+              {{ .Annotations.description }}
+            {{ end }}
+        disableResolveMessage: false
