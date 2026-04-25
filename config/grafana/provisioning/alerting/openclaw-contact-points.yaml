@@ -7,11 +7,13 @@ contactPoints:
       - uid: openclaw-telegram
         type: telegram
         settings:
-          # Grafana provisioning supports $VAR env-var interpolation. Both
-          # values must be exported into Grafana's environment — see SECRETS.md
-          # for the launchctl setenv + brew services restart procedure.
+          # botToken is sensitive — interpolated from launchctl env (see SECRETS.md).
+          # chatid is just an identifier (Bob's Telegram user ID), and Grafana's
+          # env interpolation strips quotes, causing "cannot unmarshal number
+          # into Go struct field Config.chatid of type string" startup failure.
+          # So chatid lives as a literal here.
           botToken: "$TELEGRAM_BOT_TOKEN"
-          chatid: "$TELEGRAM_CHAT_ID"
+          chatid: "8755120444"
           message: |
             🚨 {{ .CommonLabels.alertname }}
             Status: {{ .Status | toUpper }}
@@ -48,10 +50,10 @@ contactPoints:
       - uid: openclaw-slack
         type: slack
         settings:
-          # Replace with the incoming-webhook URL after creating the Slack app.
-          # See config/notifications.md for setup steps. Until set, Grafana
-          # delivery to Slack will fail silently — no other channels affected.
-          url: "__REPLACE_WITH_SLACK_WEBHOOK_URL__"
+          # Webhook URL is provisioned via Grafana env interpolation. Set in
+          # Grafana's environment (launchctl setenv SLACK_WEBHOOK_URL ...) so
+          # the secret never lands in git. See config/SECRETS.md.
+          url: "$SLACK_WEBHOOK_URL"
           title: "{{ .CommonLabels.alertname }} — {{ .Status | toUpper }}"
           text: |
             *Severity:* {{ .CommonLabels.severity }}
