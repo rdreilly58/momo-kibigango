@@ -1,5 +1,6 @@
 #!/bin/bash
 # test_subagents.sh — Validate subagent definitions + related infrastructure
+# Tier: 1
 # Tests: YAML frontmatter, file integrity, settings.json wiring, cron, hook
 #
 # Usage: bash scripts/tests/test_subagents.sh

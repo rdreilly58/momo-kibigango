@@ -1,5 +1,6 @@
 #!/bin/bash
 # test_hardening_apr24.sh — Test suite for the Apr 24 8-item hardening pass
+# Tier: 1
 #
 # Tests all 9 changes from commit 42d766e.
 # Run: bash scripts/tests/test_hardening_apr24.sh

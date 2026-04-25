@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # test_finance.sh — Validate the personal finance system
+# Tier: 1
 set -euo pipefail
 
 PASS=0

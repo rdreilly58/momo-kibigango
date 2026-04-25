@@ -1,5 +1,6 @@
 #!/bin/bash
 # Test notify_severity routing tiers without making real HTTP calls.
+# Tier: 1
 
 unset TELEGRAM_BOT_TOKEN TELEGRAM_CHAT_ID NTFY_TOPIC_URL SLACK_WEBHOOK_URL NOTIFY_CHANNELS
 

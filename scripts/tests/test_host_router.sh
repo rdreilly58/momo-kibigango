@@ -1,5 +1,6 @@
 #!/bin/bash
 # test_host_router.sh — Smoke tests for host-router.sh and agent-router.sh --host
+# Tier: 1
 #
 # Simulates healthy/unhealthy host states by pointing the router at
 # temporary fixture files. No real network calls are made.
