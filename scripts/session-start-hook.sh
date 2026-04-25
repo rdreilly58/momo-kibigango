@@ -84,6 +84,31 @@ MEMORIES=$("$PYTHON" "$WORKSPACE/scripts/memory_retrieve.py" "$QUERY" --top-k 5 
 
 _log "Retrieved memories (${#MEMORIES} chars) for session start"
 
+# ── 4b. Detect agent routing suggestion from prompt ─────────────────────────
+SUGGESTED_AGENT=$(python3 -c "
+import re, sys
+prompt = '''$PROMPT_TEXT'''
+prompt_lower = prompt.lower()
+
+# Pattern → agent mapping (order matters — first match wins)
+routes = [
+    (r'cron|health.?check|crontab|logs?[ /]|keychain|secret|launchctl|disk|deploy|infra|server|monitor', 'ops'),
+    (r'memor|remember|daily.?note|lesson|MEMORY\.md|consolidat|prune|forget', 'memory'),
+    (r'find|search|explore|how does|what does|read docs|investigat|where is|look up', 'research'),
+    (r'write code|implement|refactor|fix bug|add feature|edit file|coding|create.*function|modify', 'code'),
+]
+
+for pattern, agent in routes:
+    if re.search(pattern, prompt_lower):
+        print(agent, end='')
+        sys.exit(0)
+print('', end='')
+" 2>/dev/null || true)
+
+if [ -n "$SUGGESTED_AGENT" ]; then
+  _log "Agent suggestion: $SUGGESTED_AGENT (based on prompt analysis)"
+fi
+
 # ── 5. Append retrieved section to SESSION_CONTEXT.md ───────────────────────
 if [ -f "$OUT" ]; then
   TIMESTAMP=$(date '+%Y-%m-%d %H:%M %Z')
@@ -93,7 +118,11 @@ if [ -f "$OUT" ]; then
 import sys
 path, memories, ts, current_time = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
 content = open(path).read()
-section = f"\n## Retrieved Memory (session start {ts})\n{current_time}\n{memories}\n"
+agent_hint = ""
+suggested = "$SUGGESTED_AGENT"
+if suggested:
+    agent_hint = f"\n**Suggested agent:** `{suggested}` (based on prompt analysis)\n"
+section = f"\n## Retrieved Memory (session start {ts})\n{current_time}{agent_hint}\n{memories}\n"
 marker = "## Retrieved Memory"
 if marker in content:
     # Replace existing section

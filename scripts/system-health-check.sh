@@ -1,6 +1,8 @@
 #!/bin/bash
 # OpenClaw System Health Check
 # Monitors critical systems and alerts on failures
+# Cron: Every 2 hours (6am–10pm)
+# Agent: ops (if manual intervention needed, delegate to ops agent)
 # Usage: system-health-check.sh [--verbose] [--telegram]
 
 set -Eeuo pipefail

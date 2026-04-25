@@ -7,6 +7,7 @@
 #   Phase 3: Rebuild LanceDB warm index from cleaned files
 #
 # Cron: 0 9 * * 3 (Wednesday 9am — avoids Monday metrics run)
+# Agent: memory (if manual consolidation needed, delegate to memory agent)
 # Log: ~/.openclaw/logs/memory-smart-prune.log
 
 set -euo pipefail

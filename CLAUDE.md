@@ -49,6 +49,27 @@ File: `memory/YYYY-MM-DD.md` (today's date). Append, never overwrite.
 
 Rules: write at natural end points (goodbye, sign-off, wrap-up). Multiple sessions append to the same day file. Skip if nothing meaningful happened (quick one-off questions). This is how future-you knows what past-you did.
 
+## Agent Delegation — When to Use Subagents
+
+Four specialized subagents are defined in `~/.claude/agents/`. Use the `Agent` tool with the matching `subagent_type` to delegate work and protect main context from bloat.
+
+### Routing Table
+
+| Signal in user prompt | Delegate to | Why |
+|---|---|---|
+| cron, health check, crontab, logs, keychain, secrets, launchctl, disk, deploy, infra | **ops** | System administration, cron wiring, monitoring, keychain ops |
+| write code, implement, refactor, fix bug, add feature, PR, edit file, coding | **code** | Code changes across any language/project in the workspace |
+| find, search, explore, how does X work, what does X do, read docs, investigate | **research** | Read-only exploration and synthesis — never modifies files |
+| memory, remember, daily notes, lessons learned, MEMORY.md, consolidate, prune | **memory** | Memory file management, session notes, lessons-learned entries |
+
+### Rules
+
+1. **Delegate when the task is self-contained.** If the user asks "wire this to cron" — that's a clean ops delegation. If they ask "refactor and then wire to cron" — do the refactor in code, then delegate the cron wiring to ops.
+2. **Don't delegate trivial lookups.** A single `grep` or `read` doesn't need an agent. Use agents when the task requires 3+ tool calls or domain expertise.
+3. **Research first, code second.** When you're unsure how something works, delegate to research before delegating to code. Research returns findings; code acts on them.
+4. **Memory agent for batch memory work.** Single memory writes are fine in main context. Delegate to memory for consolidation, pruning, or multi-file updates.
+5. **Parallel where independent.** If you need both research and ops work that don't depend on each other, launch both agents simultaneously.
+
 ## Identity
 
 See `SOUL.md` for communication style, task routing, and system capabilities.
