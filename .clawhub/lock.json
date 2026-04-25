@@ -100,6 +100,18 @@
     "grafana-lens": {
       "version": "0.5.0",
       "installedAt": 1777053611902
+    },
+    "expense-tracker-pro": {
+      "version": "1.0.0",
+      "installedAt": 1777135526060
+    },
+    "intelligent-budget-tracker": {
+      "version": "1.0.1",
+      "installedAt": 1777135527787
+    },
+    "personal-finance": {
+      "version": "1.0.0",
+      "installedAt": 1777135529392
     }
   }
 }

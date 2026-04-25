@@ -51,7 +51,7 @@ Rules: write at natural end points (goodbye, sign-off, wrap-up). Multiple sessio
 
 ## Agent Delegation — When to Use Subagents
 
-Four specialized subagents are defined in `~/.claude/agents/`. Use the `Agent` tool with the matching `subagent_type` to delegate work and protect main context from bloat.
+Five specialized subagents are defined in `~/.claude/agents/`. Use the `Agent` tool with the matching `subagent_type` to delegate work and protect main context from bloat.
 
 ### Routing Table
 
@@ -61,6 +61,7 @@ Four specialized subagents are defined in `~/.claude/agents/`. Use the `Agent` t
 | write code, implement, refactor, fix bug, add feature, PR, edit file, coding | **code** | Code changes across any language/project in the workspace |
 | find, search, explore, how does X work, what does X do, read docs, investigate | **research** | Read-only exploration and synthesis — never modifies files |
 | memory, remember, daily notes, lessons learned, MEMORY.md, consolidate, prune | **memory** | Memory file management, session notes, lessons-learned entries |
+| expense, spending, budget, debt, credit card, bank statement, import CSV, finance report, payoff | **finance** | Personal finance — expense tracking, bank imports, debt management, reports |
 
 ### Rules
 

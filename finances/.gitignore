@@ -1,0 +1,13 @@
+# Never commit financial data
+imports/
+reports/
+budgets/
+credit-cards/
+debts/
+*.csv
+*.pdf
+*.ofx
+*.qfx
+*.json
+!.gitignore
+!README.md

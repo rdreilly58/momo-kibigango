@@ -10,6 +10,7 @@ This document shows how the four OpenClaw subagents are wired into workflows and
 | **code** | Sonnet | Read, Edit, Write, Glob, Grep, Bash | Code implementation, refactoring, bug fixes, feature development |
 | **research** | Haiku | Read, Grep, Glob, Bash, WebFetch, WebSearch | Exploration, documentation review, web research, context gathering (read-only) |
 | **memory** | Haiku | Read, Write, Edit, Glob, Grep, Bash | Memory management, session documentation, lessons-learned entries |
+| **finance** | Sonnet | Read, Write, Edit, Glob, Grep, Bash | Personal finance — expense tracking, bank CSV import, debt management, credit cards, budget reports |
 
 ## Routing Rules
 
@@ -20,6 +21,7 @@ File: `scripts/session-start-hook.sh` — Analyzes every user prompt and suggest
 **Suggestion patterns:**
 - **ops**: cron, health check, crontab, logs, keychain, secrets, launchctl, disk, deploy, infra, monitoring
 - **memory**: memory, remember, daily notes, lessons learned, MEMORY.md, consolidate, prune
+- **finance**: expense, spending, budget, debt, credit card, bank statement, import CSV, finance report, payoff, BoA, Capital One, Fidelity
 - **research**: find, search, explore, how does, what does, read docs, investigate
 - **code**: write code, implement, refactor, fix bug, add feature, edit file, coding
 
@@ -180,9 +182,31 @@ Covers:
 4. Passes findings to **code** agent → implements fix
 5. Returns both findings and code changes to user
 
+### Example 4: User asks to import a bank statement and check debt
+
+**Input:** "Import my Bank of America statement and show my debt situation"
+
+**Flow:**
+1. session-start-hook detects "import", "bank", "statement", "debt" → suggests **finance**
+2. Main agent delegates to **finance** agent
+3. finance agent runs `import-bank-csv.sh` to normalize and import the CSV
+4. finance agent runs `debt-tracker.sh summary` for debt snapshot
+5. Returns import results + debt summary; main agent confirms
+
+### Finance Agent Workflows
+
+| Workflow | Scripts Used | Data Files |
+|----------|-------------|------------|
+| Import bank CSV | `scripts/import-bank-csv.sh` | `finances/imports/YYYY-MM-transactions.csv` |
+| Log expense | (natural language → finance agent) | `finances/imports/YYYY-MM-transactions.csv` |
+| Debt tracking | `scripts/debt-tracker.sh` | `finances/debts/debts.json` |
+| Monthly report | `scripts/finance-report.sh` | `finances/reports/YYYY-MM-report.md` |
+| Credit cards | (finance agent reads/writes) | `finances/credit-cards/cards.json` |
+| Plaid setup | `scripts/plaid-setup.sh` | `finances/plaid-config.json.template` |
+
 ## Summary
 
-- **4 agents** are defined in `~/.claude/agents/` and available as `subagent_type` values
+- **5 agents** are defined in `~/.claude/agents/` and available as `subagent_type` values
 - **Automatic routing** happens via session-start-hook (analyzes every prompt)
 - **Cron jobs** are tagged with their corresponding agent in comments
 - **Key crons** (health check, memory prune, error digest) delegate to agents when needed

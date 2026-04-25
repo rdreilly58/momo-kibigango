@@ -1,0 +1,51 @@
+{
+  "_comment": "Plaid API configuration template — NOT ACTIVE. Copy to plaid-config.json and fill in values.",
+  "_target_date": "2026-05 to 2026-06",
+
+  "plaid": {
+    "client_id": "YOUR_PLAID_CLIENT_ID",
+    "secret": "YOUR_PLAID_SECRET",
+    "environment": "sandbox",
+    "products": ["transactions", "auth", "balance"],
+    "country_codes": ["US"],
+    "language": "en"
+  },
+
+  "institutions": {
+    "bank_of_america": {
+      "institution_id": "ins_127989",
+      "name": "Bank of America",
+      "access_token": null,
+      "item_id": null,
+      "accounts": []
+    },
+    "capital_one": {
+      "institution_id": "ins_128026",
+      "name": "Capital One",
+      "access_token": null,
+      "item_id": null,
+      "accounts": []
+    },
+    "fidelity": {
+      "institution_id": "ins_12",
+      "name": "Fidelity Investments",
+      "access_token": null,
+      "item_id": null,
+      "accounts": []
+    }
+  },
+
+  "sync_settings": {
+    "auto_sync": false,
+    "sync_interval_hours": 6,
+    "days_to_fetch": 30,
+    "categorize_on_import": true
+  },
+
+  "mcp_integration": {
+    "_comment": "Future: BankSync MCP server or direct Plaid MCP tool",
+    "server_name": "plaid-finance",
+    "server_path": null,
+    "enabled": false
+  }
+}
