@@ -17,6 +17,12 @@ source ~/.openclaw/workspace/config/briefing.env 2>/dev/null || {
 # Load shared notification library
 source ~/.openclaw/workspace/scripts/lib/notify.sh
 
+# Load email utilities (uses rdreilly2010@gmail.com — working OAuth)
+source ~/.openclaw/workspace/lib/email-utils.sh 2>/dev/null || {
+  echo "[briefing] Error: email-utils.sh not found"
+  exit 1
+}
+
 # Health check URLs (from TOOLS.md)
 HEALTHCHECK_EVENING="https://hc-ping.com/d570cbc7-1164-492b-98f1-0443ce23482e"
 HEALTHCHECK_MORNING="https://hc-ping.com/43edd8e8-e569-4bad-b044-90ab1546c271"
@@ -53,13 +59,7 @@ echo "[briefing] 📧 Sending email to $BRIEFING_EMAIL..."
 
 EMAIL_SUBJECT="$(echo $BRIEFING_TYPE | tr '[:lower:]' '[:upper:]') Briefing — $(date '+%A, %B %d')"
 
-gog gmail send \
-  -a "$BRIEFING_EMAIL" \
-  --to "$BRIEFING_EMAIL" \
-  --subject "$EMAIL_SUBJECT" \
-  --body-html "$(cat "$HTML_FILE")" 2>&1 | grep -E "message_id|Error" | head -1
-
-if [ $? -eq 0 ]; then
+if send_email "$EMAIL_SUBJECT" "$(cat "$HTML_FILE")" "$BRIEFING_EMAIL" --html; then
   echo "[briefing] ✓ Email sent successfully"
 else
   echo "[briefing] ⚠️  Email delivery may have issues"
