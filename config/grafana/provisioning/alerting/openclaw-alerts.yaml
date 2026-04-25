@@ -246,3 +246,43 @@ groups:
         annotations:
           summary: "Brave Search API is not responding"
           description: "openclaw_brave_api_up={{ $values.A.Value }} — web search will fail silently"
+
+      - uid: openclaw-agent-cost-spike
+        title: "Agent Cost Spike"
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 120
+              to: 0
+            datasourceUid: openclaw-prometheus
+            model:
+              expr: "sum(openclaw_agent_cost_usd_total)"
+              instant: true
+              refId: A
+          - refId: C
+            relativeTimeRange:
+              from: 120
+              to: 0
+            datasourceUid: "__expr__"
+            model:
+              type: threshold
+              refId: C
+              conditions:
+                - evaluator:
+                    params: [5.00]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [A]
+                  reducer:
+                    type: last
+        noDataState: NoData
+        execErrState: Error
+        for: 5m
+        annotations:
+          summary: "Agent cost has exceeded $5.00 since exporter restart"
+          description: "Total agent cost is ${{ $values.A }}. Review subagent usage for unexpected spend."
+        labels:
+          severity: warning

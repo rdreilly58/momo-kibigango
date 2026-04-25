@@ -90,6 +90,17 @@ NATIVE_CRON_MAP: dict[str, tuple[str, int]] = {
     "auto-update-system": ("Auto-Update System (Daily 2:00 AM EDT)", 26 * 3600),
 }
 
+# ── Agent metrics paths ───────────────────────────────────────────────────────
+SESSION_START_HOOK_LOG = LOGS_DIR / "session-start-hook.log"
+SUBAGENT_COST_DIR = LOGS_DIR / "subagent-costs"
+SESSION_DEPTH_FILE = LOGS_DIR / "session-depth-metrics.jsonl"
+
+# Agent suggestion/invocation counters (persist across scrapes, reset on restart)
+_AGENT_SUGGESTION_COUNTS: dict[str, int] = {}
+_AGENT_INVOCATION_COUNTS: dict[str, int] = {}
+_AGENT_COST_USD: dict[str, float] = {}
+_AGENT_LAST_SCAN_POS: int = 0  # file position for incremental log scan
+
 SESSION_KEYS = [
     "agent:main:main",
     "agent:main:main:heartbeat",
@@ -591,6 +602,153 @@ def _brave_api_metrics() -> list[str]:
     return lines
 
 
+def _agent_metrics() -> list[str]:
+    """Collect agent suggestion and invocation metrics from logs."""
+    global _AGENT_LAST_SCAN_POS
+    lines: list[str] = []
+
+    # ── 1. Scan session-start-hook.log for agent suggestions ────────────────
+    try:
+        if SESSION_START_HOOK_LOG.exists():
+            with open(SESSION_START_HOOK_LOG) as f:
+                f.seek(_AGENT_LAST_SCAN_POS)
+                new_lines = f.readlines()
+                _AGENT_LAST_SCAN_POS = f.tell()
+            for line in new_lines:
+                if "Agent suggestion:" in line:
+                    # Format: [timestamp] [start-hook] Agent suggestion: ops (based on...)
+                    m = re.search(r"Agent suggestion:\s*(\w+)", line)
+                    if m:
+                        agent = m.group(1)
+                        _AGENT_SUGGESTION_COUNTS[agent] = (
+                            _AGENT_SUGGESTION_COUNTS.get(agent, 0) + 1
+                        )
+    except Exception:
+        pass
+
+    lines += [
+        "# HELP openclaw_agent_suggestions_total Agent suggestions by session-start-hook",
+        "# TYPE openclaw_agent_suggestions_total counter",
+    ]
+    for agent in ["ops", "code", "research", "memory"]:
+        count = _AGENT_SUGGESTION_COUNTS.get(agent, 0)
+        lines.append(f'openclaw_agent_suggestions_total{{agent="{agent}"}} {count}')
+
+    # ── 2. Scan subagent cost logs for invocations and cost ─────────────────
+    try:
+        if SUBAGENT_COST_DIR.exists():
+            _AGENT_INVOCATION_COUNTS.clear()
+            _AGENT_COST_USD.clear()
+            for log_file in sorted(SUBAGENT_COST_DIR.glob("*.log")):
+                try:
+                    content = log_file.read_text()
+                    for block in content.split("─" * 36):
+                        model_m = re.search(r"Model:\s*(\S+)", block)
+                        cost_m = re.search(r"Est\. Cost:\s*\$([0-9.]+)", block)
+                        if model_m:
+                            model = model_m.group(1).lower()
+                            # Map model to agent type
+                            if "haiku" in model:
+                                agent = "research"  # haiku used by research/memory
+                            elif "sonnet" in model:
+                                agent = "code"  # sonnet used by code/ops
+                            else:
+                                agent = "unknown"
+                            _AGENT_INVOCATION_COUNTS[agent] = (
+                                _AGENT_INVOCATION_COUNTS.get(agent, 0) + 1
+                            )
+                            if cost_m:
+                                cost = float(cost_m.group(1))
+                                _AGENT_COST_USD[agent] = (
+                                    _AGENT_COST_USD.get(agent, 0.0) + cost
+                                )
+                except Exception:
+                    pass
+    except Exception:
+        pass
+
+    lines += [
+        "# HELP openclaw_agent_invocations_total Agent task invocations from cost logs",
+        "# TYPE openclaw_agent_invocations_total counter",
+    ]
+    for agent in ["ops", "code", "research", "memory", "unknown"]:
+        count = _AGENT_INVOCATION_COUNTS.get(agent, 0)
+        if count > 0 or agent != "unknown":
+            lines.append(f'openclaw_agent_invocations_total{{agent="{agent}"}} {count}')
+
+    lines += [
+        "# HELP openclaw_agent_cost_usd_total Estimated agent cost in USD",
+        "# TYPE openclaw_agent_cost_usd_total counter",
+    ]
+    for agent in ["ops", "code", "research", "memory"]:
+        cost = _AGENT_COST_USD.get(agent, 0.0)
+        lines.append(f'openclaw_agent_cost_usd_total{{agent="{agent}"}} {cost:.4f}')
+
+    return lines
+
+
+def _session_cost_metrics() -> list[str]:
+    """Read session-depth-metrics.jsonl for session cost tracking."""
+    lines: list[str] = []
+    lines += [
+        "# HELP openclaw_session_cost_usd Estimated cost of last session in USD",
+        "# TYPE openclaw_session_cost_usd gauge",
+        "# HELP openclaw_session_tokens_input Estimated input tokens of last session",
+        "# TYPE openclaw_session_tokens_input gauge",
+        "# HELP openclaw_session_tokens_output Estimated output tokens of last session",
+        "# TYPE openclaw_session_tokens_output gauge",
+        "# HELP openclaw_session_transcript_chars Transcript character count of last session",
+        "# TYPE openclaw_session_transcript_chars gauge",
+    ]
+
+    try:
+        if SESSION_DEPTH_FILE.exists():
+            # Read last entry
+            with open(SESSION_DEPTH_FILE) as f:
+                last_line = ""
+                for line in f:
+                    line = line.strip()
+                    if line:
+                        last_line = line
+            if last_line:
+                entry = json.loads(last_line)
+                lines.append(
+                    f"openclaw_session_cost_usd {entry.get('cost_usd_est', 0)}"
+                )
+                lines.append(
+                    f"openclaw_session_tokens_input {entry.get('input_tokens_est', 0)}"
+                )
+                lines.append(
+                    f"openclaw_session_tokens_output {entry.get('output_tokens_est', 0)}"
+                )
+                lines.append(
+                    f"openclaw_session_transcript_chars {entry.get('transcript_chars', 0)}"
+                )
+            else:
+                lines += [
+                    "openclaw_session_cost_usd 0",
+                    "openclaw_session_tokens_input 0",
+                    "openclaw_session_tokens_output 0",
+                    "openclaw_session_transcript_chars 0",
+                ]
+        else:
+            lines += [
+                "openclaw_session_cost_usd 0",
+                "openclaw_session_tokens_input 0",
+                "openclaw_session_tokens_output 0",
+                "openclaw_session_transcript_chars 0",
+            ]
+    except Exception:
+        lines += [
+            "openclaw_session_cost_usd -1",
+            "openclaw_session_tokens_input -1",
+            "openclaw_session_tokens_output -1",
+            "openclaw_session_transcript_chars -1",
+        ]
+
+    return lines
+
+
 def collect_all_metrics() -> str:
     """Collect all metrics and return as Prometheus text."""
     sections = [
@@ -598,10 +756,12 @@ def collect_all_metrics() -> str:
         _native_cron_metrics(),
         _memory_metrics(),
         _session_metrics(),
+        _session_cost_metrics(),
         _log_metrics(),
         _system_metrics(),
         _process_metrics(),
         _counter_metrics(),
+        _agent_metrics(),
         _brave_api_metrics(),
     ]
     all_lines: list[str] = []
