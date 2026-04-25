@@ -7,8 +7,11 @@ contactPoints:
       - uid: openclaw-telegram
         type: telegram
         settings:
-          botToken: "8716932495:AAHG9u1SNZEhM9q-LIqGBLYr-zeJz3XVdRE"
-          chatid: "8755120444"
+          # Grafana provisioning supports $VAR env-var interpolation. Both
+          # values must be exported into Grafana's environment — see SECRETS.md
+          # for the launchctl setenv + brew services restart procedure.
+          botToken: "$TELEGRAM_BOT_TOKEN"
+          chatid: "$TELEGRAM_CHAT_ID"
           message: |
             🚨 {{ .CommonLabels.alertname }}
             Status: {{ .Status | toUpper }}
