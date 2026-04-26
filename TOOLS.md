@@ -1,4 +1,29 @@
 
+## Calendar (Primary — Apple Calendar)
+
+**Tool:** `apple-calendar-cli` (installed at `/opt/homebrew/bin/apple-calendar-cli`)
+**Skill:** `~/.openclaw/workspace/skills/apple-calendar-cli/SKILL.md`
+**Always use `--json`** for reliable parsing.
+
+```bash
+# Today's events
+apple-calendar-cli list-events --from 2026-04-26 --to 2026-04-27 --json
+
+# List calendars
+apple-calendar-cli list-calendars --json
+
+# Create event
+apple-calendar-cli create-event --title "Meeting" --start "2026-04-27T10:00:00" --end "2026-04-27T11:00:00" --json
+
+# Update / delete
+apple-calendar-cli update-event EVENT-ID --title "New title" --json
+apple-calendar-cli delete-event EVENT-ID --json
+```
+
+**Note:** Use Apple Calendar CLI for ALL calendar operations. The `memory__calendar_today` / `memory__calendar_range` Google Calendar tools are secondary fallback only — prefer native Apple Calendar which has richer data (attendees, alarms, recurrence, notes).
+
+---
+
 ## Git Commit Author (ENFORCED)
 
 **Always use:** `robert.reilly@peraton.com` / `Robert Reilly`  

@@ -1,5 +1,14 @@
 
 
+## 📅 Calendar
+
+- **Primary:** `apple-calendar-cli` — native Apple Calendar via EventKit. Richer data than Google (attendees, alarms, recurrence, notes). Always use `--json`.
+- **Secondary/fallback:** `memory__calendar_today` / `memory__calendar_range` (Google Calendar)
+- **Set as default:** April 26, 2026
+- **Skill:** `~/.openclaw/workspace/skills/apple-calendar-cli/SKILL.md`
+
+---
+
 ## 🛠️ Infrastructure & Tools
 
 ### Total Recall Search (Added April 9, 2026)
