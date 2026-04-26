@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-04-07T10:31:57.669Z",
+  "updatedAt": "2026-04-26T18:12:10.850Z",
   "entries": {
     "memory:memory/2026-04-03.md:37:58": {
       "key": "memory:memory/2026-04-03.md:37:58",
@@ -11,6 +11,7 @@
       "snippet": "- **Next step:** Try int4/int8 quantization for qualifier + target, OR use MLX backend (more memory efficient on Apple Silicon) ### MLX Breakthrough (05:20-06:16 EDT) - Switched to MLX backend — all 3 models load at **5.56 GB** peak (vs OOM with PyTorch) - Models: Qwen2.5-0.5B/1.5B/7B-Instruct-4bit via mlx-community - 2-model spec dec works via mlx-lm built-in: 67.6 tok/s (3B), 25 tok/s (7B) - 3-model PyramidSD loop runs but **KV cache desync bug** — rejected draft tokens advance the draft cache but not qualifier/target caches - Result: 2.4% draft acceptance, garbage output - Fix needed: proper cache trim/rollback on rejection - Pushed to GitHub: `e33467f` on v2-token-level branch - README",
       "recallCount": 1,
       "dailyCount": 0,
+      "groundedCount": 0,
       "totalScore": 0.7299288075981443,
       "maxScore": 0.7299288075981443,
       "firstRecalledAt": "2026-04-07T10:31:57.669Z",
@@ -30,6 +31,535 @@
         "mlx-lm",
         "built-in",
         "67.6"
+      ]
+    },
+    "memory:memory/archive/2026-04-08.md:140:155": {
+      "key": "memory:memory/archive/2026-04-08.md:140:155",
+      "path": "memory/archive/2026-04-08.md",
+      "startLine": 140,
+      "endLine": 155,
+      "source": "memory",
+      "snippet": "- Prioritized script lookup: `~/bin/` first, then `~/.openclaw/workspace/scripts/`. - Explicitly set `Process.environment` (PATH, HOME, SHELL, LANG) to mimic a user's shell. **Test Results**: - Script now runs successfully from `~/bin/` (verified via direct execution). - App rebuilt and launched successfully. **Why This Works**: - Bypasses system permission restrictions by using a user-owned, user-executable script in a user-managed directory. - Explicit environment ensures the script has all necessary `PATH` and `HOME` variables. **Files Updated**: - `~/Projects/FastFindApp/FastFindApp/FileSearcher.swift` - `~/bin/fast-find-improved.sh` (new location)",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.39853108823299405,
+      "maxScore": 0.39853108823299405,
+      "firstRecalledAt": "2026-04-26T18:02:09.373Z",
+      "lastRecalledAt": "2026-04-26T18:02:09.373Z",
+      "queryHashes": [
+        "7856b1adc80b"
+      ],
+      "recallDays": [
+        "2026-04-26"
+      ],
+      "conceptTags": [
+        "openclaw/workspace/scripts",
+        "process.environment",
+        "user-owned",
+        "user-executable",
+        "user-managed",
+        "bin/fast-find-improved.sh",
+        "prioritized",
+        "script"
+      ]
+    },
+    "memory:memory/archive/2026-03-14.md:651:694": {
+      "key": "memory:memory/archive/2026-03-14.md:651:694",
+      "path": "memory/archive/2026-03-14.md",
+      "startLine": 651,
+      "endLine": 694,
+      "source": "memory",
+      "snippet": "## ClawHub Integration & Skills (17:14 PM - 17:22 PM) ✅ COMPLETE ### ClawHub Setup ✅ Installed and configured clawhub CLI globally ✅ Searched and installed 5 priority skills from marketplace ### Installed Skills (Operational Improvement) 1. **invoice-generator** (3.494 rating) — Auto-generate client invoices 2. **slack** (3.316 rating) — Send alerts/briefings to Slack 3. **notion** (1.375 rating) — CRM + project tracking database 4. **linkedin-automation** (1.161 rating) — Schedule portfolio posts 5. **time-tracker** (2.3.0) — Log billable hours per project **Setup Guide Created:** `~/.openclaw/workspace/CLAWHUB_SETUP.md` - Detailed SKILL.md references for each tool - Notion CRM database",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.38704150617122646,
+      "maxScore": 0.38704150617122646,
+      "firstRecalledAt": "2026-04-26T18:02:09.373Z",
+      "lastRecalledAt": "2026-04-26T18:02:09.373Z",
+      "queryHashes": [
+        "7856b1adc80b"
+      ],
+      "recallDays": [
+        "2026-04-26"
+      ],
+      "conceptTags": [
+        "invoice-generator",
+        "3.494",
+        "auto-generate",
+        "3.316",
+        "alerts/briefings",
+        "1.375",
+        "linkedin-automation",
+        "1.161"
+      ]
+    },
+    "memory:memory/archive/2026-03-20.md:205:245": {
+      "key": "memory:memory/archive/2026-03-20.md:205:245",
+      "path": "memory/archive/2026-03-20.md",
+      "startLine": 205,
+      "endLine": 245,
+      "source": "memory",
+      "snippet": "- Workaround: Can force push with `--force` flag or disable rulesets on account **Resolution for future:** - Check account-level rulesets in GitHub settings - Either disable or adjust to allow standard pushes - Retry momotaro-ios push ### Lessons Learned - **Token scopes matter:** Initial token failed on GitHub Actions workflow files; `workflow` scope was needed - **Repo creation first:** Must create repos on target account before pushing (mirror push fails on non-existent repos) - **Rulesets are account-level:** Not just branch protection; newer GitHub feature can block pushes organization-wide - **Local config crucial:** Must update all local clones to point to new account before next pu",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.3859739542007446,
+      "maxScore": 0.3859739542007446,
+      "firstRecalledAt": "2026-04-26T18:02:09.373Z",
+      "lastRecalledAt": "2026-04-26T18:02:09.373Z",
+      "queryHashes": [
+        "7856b1adc80b"
+      ],
+      "recallDays": [
+        "2026-04-26"
+      ],
+      "conceptTags": [
+        "account-level",
+        "momotaro-ios",
+        "non-existent",
+        "organization-wide",
+        "workaround",
+        "can",
+        "force",
+        "push"
+      ]
+    },
+    "memory:memory/archive/2026-03-11.md:584:628": {
+      "key": "memory:memory/archive/2026-03-11.md:584:628",
+      "path": "memory/archive/2026-03-11.md",
+      "startLine": 584,
+      "endLine": 628,
+      "source": "memory",
+      "snippet": "- ✅ All 5 credentials collected from Bob - ✅ Setup guide created and committed - ⏳ Bob looking for \"Deployment settings\" in AWS Amplify console (need to guide to \"App settings\") - Next: Help Bob add variables to Amplify, redeploy, test Stripe + OAuth **Time to completion:** ~15-20 minutes after Bob adds variables and redeploys --- ## ReillyDesignStudio Stripe + OAuth Deployment (3:33 PM - 4:04 PM) ✅ COMPLETE ### What Was Done **Via AWS CLI (direct):** 1. ✅ Retrieved 5 production Stripe + OAuth credentials from Bob 2. ✅ Added all 5 environment variables to AWS Amplify app (d24p2wkrfuex3c) 3. ✅ Verified variables were set in AWS **Variables Deployed:** - `STRIPE_SECRET_KEY` = production",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.44414459466934203,
+      "maxScore": 0.44414459466934203,
+      "firstRecalledAt": "2026-04-26T18:02:09.384Z",
+      "lastRecalledAt": "2026-04-26T18:02:09.384Z",
+      "queryHashes": [
+        "bcec44ea238b"
+      ],
+      "recallDays": [
+        "2026-04-26"
+      ],
+      "conceptTags": [
+        "15-20",
+        "stripe-secret-key",
+        "all",
+        "credentials",
+        "collected",
+        "bob",
+        "setup",
+        "guide"
+      ]
+    },
+    "memory:memory/archive/2026-03-14.md:414:451": {
+      "key": "memory:memory/archive/2026-03-14.md:414:451",
+      "path": "memory/archive/2026-03-14.md",
+      "startLine": 414,
+      "endLine": 451,
+      "source": "memory",
+      "snippet": "- Key learnings & lessons for future projects **Commit:** `2ae63e7` — \"docs: Update README with Vercel deployment details and Amplify migration notes\" - Pushed to main branch - README now serves as both documentation and detailed record of deployment decision ### Scheduled Reminders Processed (9:00 AM) **1. Momotaro iOS Development (9:00 AM) ✅** - Reminder triggered for WebSocket setup (Starscream) - Project status: `~/momotaro-ios` ready - Focus items: (1) WebSocket deps, (2) OpenClaw gateway connection, (3) Simulator testing - Relayed to Bob, awaiting next steps **2. Stripe Integration Task (9:00 AM) ⚠️ OBSOLETE** - Old reminder from March 10 triggered - Status: Already completed — a",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.4236554950475693,
+      "maxScore": 0.4236554950475693,
+      "firstRecalledAt": "2026-04-26T18:02:09.384Z",
+      "lastRecalledAt": "2026-04-26T18:02:09.384Z",
+      "queryHashes": [
+        "bcec44ea238b"
+      ],
+      "recallDays": [
+        "2026-04-26"
+      ],
+      "conceptTags": [
+        "gateway",
+        "momotaro-ios",
+        "key",
+        "learnings",
+        "lessons",
+        "future",
+        "projects",
+        "commit"
+      ]
+    },
+    "memory:memory/2026-04-26.md:710:725": {
+      "key": "memory:memory/2026-04-26.md:710:725",
+      "path": "memory/2026-04-26.md",
+      "startLine": 710,
+      "endLine": 725,
+      "source": "memory",
+      "snippet": "5. iMessage channel enable 6. reillyrd58 Gmail OAuth re-auth (browser step needed) 7. Rocket.Chat full config (deferred) **P3 — Improvements** 8. Total Recall Observer → upgrade from Haiku to Sonnet 9. Talk Voice / MLX Speech (local, experimental) 10. memory-wiki plugin 11. Webhooks plugin 12. OpenRouter credits top-up ### Commits Today (momo-kibigango main) - `fbb105f` fix: restore generate-status.sh (pre-session) - `90ccc21` feat: Apple Calendar CLI set as default calendar tool - `b03f94b` chore: fix git author config, prune stale worktrees, add safe-archive.sh",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.41939836740493774,
+      "maxScore": 0.41939836740493774,
+      "firstRecalledAt": "2026-04-26T18:02:09.384Z",
+      "lastRecalledAt": "2026-04-26T18:02:09.384Z",
+      "queryHashes": [
+        "bcec44ea238b"
+      ],
+      "recallDays": [
+        "2026-04-26"
+      ],
+      "conceptTags": [
+        "router",
+        "re-auth",
+        "rocket.chat",
+        "memory-wiki",
+        "top-up",
+        "momo-kibigango",
+        "generate-status.sh",
+        "pre-session"
+      ]
+    },
+    "memory:memory/archive/2026-03-11.md:699:754": {
+      "key": "memory:memory/archive/2026-03-11.md:699:754",
+      "path": "memory/archive/2026-03-11.md",
+      "startLine": 699,
+      "endLine": 754,
+      "source": "memory",
+      "snippet": "2. ✅ **database.js** (1.1 KB) - PostgreSQL connection pool - Schema initialization (6 tables) - Proper indexes for performance - Table schemas: users, devices, messages, backups, versions, support_messages 3. ✅ **middleware.js** (459 B) - JWT verification middleware - Error handling 4. ✅ **Deployment Files** - Procfile (19 B) — Heroku configuration - .env.example (178 B) — All required variables - package.json — All dependencies - README.md — Complete API documentation ### Code Statistics - **Total Lines:** 119 production code - **Language:** Node.js/Express - **Ready:** Immediate Heroku deployment ### GitHub Commit - **Commit:** 26ce77d `🚀 Week 1 Backend I",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.411856597661972,
+      "maxScore": 0.411856597661972,
+      "firstRecalledAt": "2026-04-26T18:02:09.384Z",
+      "lastRecalledAt": "2026-04-26T18:02:09.384Z",
+      "queryHashes": [
+        "bcec44ea238b"
+      ],
+      "recallDays": [
+        "2026-04-26"
+      ],
+      "conceptTags": [
+        "backup",
+        "backups",
+        "database.js",
+        "1.1",
+        "support-messages",
+        "middleware.js",
+        "env.example",
+        "package.json"
+      ]
+    },
+    "memory:memory/archive/2026-04-06.md:26:48": {
+      "key": "memory:memory/archive/2026-04-06.md:26:48",
+      "path": "memory/archive/2026-04-06.md",
+      "startLine": 26,
+      "endLine": 48,
+      "source": "memory",
+      "snippet": "- Health monitor keeps resetting the counter (reason: stopped) - The plugin IS registered: `[plugins] acpx runtime backend registered` - Gateway model: `anthropic/claude-opus-4-6` (at most restart points) **Bob's hint:** The Telegram channel fix required a change in how we configure channels. Study that fix for possible insights. **Memory note:** April 2 MEMORY.md entry says \"RC is working! Bob can message from work computer via Rocket.Chat\" — but the logs show it was already failing that same day (restart loop started April 2 at 13:50). **Next steps (NOT YET COMPLETED):** 1. Find the Telegram channel fix details 2. Review RC plugin config (`~/.openclaw/extensions/openclaw-channel-rocketc",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.4565350234508514,
+      "maxScore": 0.4565350234508514,
+      "firstRecalledAt": "2026-04-26T18:02:12.223Z",
+      "lastRecalledAt": "2026-04-26T18:02:12.223Z",
+      "queryHashes": [
+        "d8f1526103ac"
+      ],
+      "recallDays": [
+        "2026-04-26"
+      ],
+      "conceptTags": [
+        "gateway",
+        "anthropic/claude-opus-4-6",
+        "memory.md",
+        "rocket.chat",
+        "health",
+        "monitor",
+        "keeps",
+        "resetting"
+      ]
+    },
+    "memory:memory/archive/2026-04-05.md:119:139": {
+      "key": "memory:memory/archive/2026-04-05.md:119:139",
+      "path": "memory/archive/2026-04-05.md",
+      "startLine": 119,
+      "endLine": 139,
+      "source": "memory",
+      "snippet": "\"allow\": [\"openclaw-channel-rocketchat\", \"acpx\", \"telegram\"], \"entries\": { \"telegram\": { \"enabled\": true } } } } ``` **Key Lesson:** After OpenClaw updates, if a channel silently stops working, check if it was moved from built-in to plugin. The symptom is zero log lines for that channel on startup — not even an error. **Detection Time:** ~20 minutes of debugging. The gateway was updated at 18:54 via `update.run`, and telegram worked under the old binary but failed on every restart after. --- ## Rocket.Chat fix April 2nd - Successfully debugged and resolved the Rocket.Chat channel issues. - Identified and fixed several root causes including conflicting legacy scripts",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.44088523685932157,
+      "maxScore": 0.44088523685932157,
+      "firstRecalledAt": "2026-04-26T18:02:12.223Z",
+      "lastRecalledAt": "2026-04-26T18:02:12.223Z",
+      "queryHashes": [
+        "d8f1526103ac"
+      ],
+      "recallDays": [
+        "2026-04-26"
+      ],
+      "conceptTags": [
+        "gateway",
+        "openclaw-channel-rocketchat",
+        "built-in",
+        "update.run",
+        "rocket.chat",
+        "allow",
+        "openclaw",
+        "channel"
+      ]
+    },
+    "memory:memory/archive/2026-04-07.md:24:49": {
+      "key": "memory:memory/archive/2026-04-07.md:24:49",
+      "path": "memory/archive/2026-04-07.md",
+      "startLine": 24,
+      "endLine": 49,
+      "source": "memory",
+      "snippet": "``` - **Root cause chain:** 1. The `claude-cli/` provider prefix is no longer recognized in 2026.4.2 (\"Missing auth: claude-cli\" in gateway logs). 2. Gateway falls back to `google/gemini-2.5-pro`. 3. Gemini 2.5 Pro requires thinking mode, but the request had `budget: 0` (thinking off), causing the 400. - **Fix:** Updated the model config to use a properly-prefixed model (`anthropic/claude-sonnet-4-6` direct, not via `claude-cli/`). - **Lesson:** After any gateway update, audit configured model identifiers for unrecognized provider prefixes. ### Regression 3: Rocket.Chat plugin SDK breakage (Apr 6 → Apr 7) - **Symptom:** RC channel in retry loop for 13+ hours overnight.",
+      "recallCount": 3,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 1.876423916320663,
+      "maxScore": 0.7308417682014177,
+      "firstRecalledAt": "2026-04-26T18:02:12.223Z",
+      "lastRecalledAt": "2026-04-26T18:12:10.850Z",
+      "queryHashes": [
+        "d8f1526103ac",
+        "81c43783c391",
+        "b31bf66fbc9a"
+      ],
+      "recallDays": [
+        "2026-04-26"
+      ],
+      "conceptTags": [
+        "gateway",
+        "claude-cli",
+        "2026.4.2",
+        "google/gemini-2.5-pro",
+        "2.5",
+        "properly-prefixed",
+        "anthropic/claude-sonnet-4-6",
+        "rocket.chat"
+      ]
+    },
+    "memory:memory/archive/2026-04-07.md:1:30": {
+      "key": "memory:memory/archive/2026-04-07.md:1:30",
+      "path": "memory/archive/2026-04-07.md",
+      "startLine": 1,
+      "endLine": 30,
+      "source": "memory",
+      "snippet": "# Tuesday, April 7, 2026 ## OpenClaw 2026.4.2 Update — Multiple Regressions Discovered The auto-update on April 5 (~18:54 EDT) to gateway version **2026.4.2** introduced several silent regressions. Logging here as a consolidated reference because they keep biting us. ### Regression 1: Telegram channel no longer auto-loads (Apr 5, ~20:00 EDT) - **Symptom:** Telegram channel completely missing from gateway startup sequence after restart. No `[telegram]` log lines at all. Bot config in `openclaw.json` was correct and unchanged but channel never initialized. - **Root cause:** 2026.4.2 changed Telegram from a built-in channel to a plugin that requires explicit registration in `plugins.al",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.42569499015808104,
+      "maxScore": 0.42569499015808104,
+      "firstRecalledAt": "2026-04-26T18:02:12.223Z",
+      "lastRecalledAt": "2026-04-26T18:02:12.223Z",
+      "queryHashes": [
+        "d8f1526103ac"
+      ],
+      "recallDays": [
+        "2026-04-26"
+      ],
+      "conceptTags": [
+        "gateway",
+        "2026.4.2",
+        "auto-update",
+        "auto-loads",
+        "openclaw.json",
+        "built-in",
+        "plugins.al",
+        "tuesday"
+      ]
+    },
+    "memory:memory/archive/2026-04-06.md:1:31": {
+      "key": "memory:memory/archive/2026-04-06.md:1:31",
+      "path": "memory/archive/2026-04-06.md",
+      "startLine": 1,
+      "endLine": 31,
+      "source": "memory",
+      "snippet": "# Memory — April 6, 2026 ## CRITICAL BEHAVIOR CHANGE (05:36 EDT) — ENFORCED GOING FORWARD Bob explicitly instructed: **Provide proactive status updates on ALL multi-step and long-running tasks WITHOUT being prompted.** - This applies to every request and interaction going forward - No need for Bob to ask \"status?\" — Momotaro volunteers updates - Announce steps, progress, results, and blockers proactively - Applies to: investigations, subagent tasks, file reads, config changes, everything --- ## Rocket.Chat Investigation (Mon Apr 6, 2026 — IN PROGRESS) **Symptom:** Bob sees \"LLM error\" in Rocket.Chat from work computer. **Root cause found in gateway.log:** - The Rocket.Chat channel (`[r",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.4154448390007019,
+      "maxScore": 0.4154448390007019,
+      "firstRecalledAt": "2026-04-26T18:02:12.223Z",
+      "lastRecalledAt": "2026-04-26T18:02:12.223Z",
+      "queryHashes": [
+        "d8f1526103ac"
+      ],
+      "recallDays": [
+        "2026-04-26"
+      ],
+      "conceptTags": [
+        "gateway",
+        "multi-step",
+        "long-running",
+        "rocket.chat",
+        "gateway.log",
+        "april",
+        "critical",
+        "behavior"
+      ]
+    },
+    "memory:memory/archive/2026-03-14.md:719:773": {
+      "key": "memory:memory/archive/2026-03-14.md:719:773",
+      "path": "memory/archive/2026-03-14.md",
+      "startLine": 719,
+      "endLine": 773,
+      "source": "memory",
+      "snippet": "- Immediate action items (this week) - Ready-to-copy AWS CLI commands - Security checklist - Growth roadmap (phases 1-4) 3. **AWS_SUMMARY.txt** - Overview & quick reference - Recommended next services - 8-13 hours/month ROI potential ### Immediate Action Items 1. Enable CloudFront for reillydesignstudio-assets (10x faster images) 2. Set up cost budget alerts ($50/month limit) 3. Verify S3 bucket configuration 4. Audit IAM user permissions ### AWS Roadmap **Tier 1 (Next Week):** Lambda, SNS/SQS, CloudWatch **Tier 2 (Month 2):** DynamoDB, ElastiCache, EventBridge **Tier 3 (Month 3+):** Step Functions, Route 53, WAF --- ## Daily Summary (March 14, 2026) ### Accomplish",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.4344067007303238,
+      "maxScore": 0.4344067007303238,
+      "firstRecalledAt": "2026-04-26T18:05:11.192Z",
+      "lastRecalledAt": "2026-04-26T18:05:11.192Z",
+      "queryHashes": [
+        "19f210053552"
+      ],
+      "recallDays": [
+        "2026-04-26"
+      ],
+      "conceptTags": [
+        "ready-to-copy",
+        "1-4",
+        "aws-summary.txt",
+        "8-13",
+        "hours/month",
+        "reillydesignstudio-assets",
+        "50/month",
+        "sns/sqs"
+      ]
+    },
+    "memory:memory/archive/2026-03-13.md:155:197": {
+      "key": "memory:memory/archive/2026-03-13.md:155:197",
+      "path": "memory/archive/2026-03-13.md",
+      "startLine": 155,
+      "endLine": 197,
+      "source": "memory",
+      "snippet": "- StatusBadge.swift — Color-coded status indicators (4 types) - **Views Implemented:** - DashboardView.swift — Main dashboard with: * Time-based greeting (morning/afternoon/evening) * 4 stat cards grid (Users, Views, Engagement, Revenue) * Recent items list with search filtering * Search integration * Pull-to-refresh * Loading, empty, error states - LoadingView.swift — Loading spinner with optional message - EmptyStateView.swift — Contextual empty state display - ErrorStateView.swift — Error display with retry button - **State Management:** - DashboardViewModel.swift — Full MVVM with: * @Published properties (stats, items, search text, loading, error",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.4238397032022476,
+      "maxScore": 0.4238397032022476,
+      "firstRecalledAt": "2026-04-26T18:05:11.192Z",
+      "lastRecalledAt": "2026-04-26T18:05:11.192Z",
+      "queryHashes": [
+        "19f210053552"
+      ],
+      "recallDays": [
+        "2026-04-26"
+      ],
+      "conceptTags": [
+        "statusbadge.swift",
+        "color-coded",
+        "dashboardview.swift",
+        "time-based",
+        "morning/afternoon/evening",
+        "pull-to-refresh",
+        "loadingview.swift",
+        "emptystateview.swift"
+      ]
+    },
+    "memory:memory/archive/2026-03-14.md:326:369": {
+      "key": "memory:memory/archive/2026-03-14.md:326:369",
+      "path": "memory/archive/2026-03-14.md",
+      "startLine": 326,
+      "endLine": 369,
+      "source": "memory",
+      "snippet": "- Hero section (\"Design that moves people™\") - Featured work (3 portfolio items) - Services cards (Design, AI, Embedded, Cybersecurity, Support) - Client testimonials - Blog section - CTA buttons - Full navigation & footer **All Routes Working:** - `/` — Marketing homepage ✅ - `/portfolio` — Portfolio/work ✅ - `/shop` — E-commerce shop (physical, digital, services) ✅ - `/blog` — Blog index ✅ - `/contact` — Contact form ✅ - `/dashboard` — User dashboard ✅ - `/admin` — Admin panel ✅ - All API endpoints (Stripe, OAuth, contact, etc.) ✅ **Infrastructure:** - Database: PostgreSQL (Neon) ✅ - Auth: Google OAuth + NextAuth.js ✅ - Payments: Stripe Live (publishable key active) ✅ - Hos",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.4060722321271896,
+      "maxScore": 0.4060722321271896,
+      "firstRecalledAt": "2026-04-26T18:05:11.192Z",
+      "lastRecalledAt": "2026-04-26T18:05:11.192Z",
+      "queryHashes": [
+        "19f210053552"
+      ],
+      "recallDays": [
+        "2026-04-26"
+      ],
+      "conceptTags": [
+        "portfolio/work",
+        "e-commerce",
+        "nextauth.js",
+        "hero",
+        "section",
+        "design",
+        "moves",
+        "people"
+      ]
+    },
+    "memory:memory/archive/2026-04-08.md:1:27": {
+      "key": "memory:memory/archive/2026-04-08.md:1:27",
+      "path": "memory/archive/2026-04-08.md",
+      "startLine": 1,
+      "endLine": 27,
+      "source": "memory",
+      "snippet": "## April 8, 2026 - Memory Flush ### ReDrafter Engine - Benchmarking Status (Ongoing) - Started `benchmark_redrafter_rewritten.py` script. - Script is running in the background, loading `Qwen/Qwen2.5-7B-Instruct` and performing benchmarks. - Output redirected to `redrafter_benchmark_output.txt`. - Expecting a long runtime due to model size and multiple generations. ### Rocket.Chat Channel Debugging (Ongoing) - Rocket.Chat channel is continuously failing to connect/start, leading to an endless restart loop. - Attempted to stop the OpenClaw Gateway to debug, but the `openclaw gateway stop` command hung. - Had to force-kill the hanging `openclaw gateway stop` process (PID 8717). - Currently at",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.7429882176393853,
+      "maxScore": 0.7429882176393853,
+      "firstRecalledAt": "2026-04-26T18:07:52.001Z",
+      "lastRecalledAt": "2026-04-26T18:07:52.001Z",
+      "queryHashes": [
+        "81c43783c391"
+      ],
+      "recallDays": [
+        "2026-04-26"
+      ],
+      "conceptTags": [
+        "gateway",
+        "benchmark-redrafter-rewritten.py",
+        "qwen/qwen2.5-7b-instruct",
+        "redrafter-benchmark-output.txt",
+        "rocket.chat",
+        "connect/start",
+        "force-kill",
+        "april"
+      ]
+    },
+    "memory:memory/2026-04-26.md:604:642": {
+      "key": "memory:memory/2026-04-26.md:604:642",
+      "path": "memory/2026-04-26.md",
+      "startLine": 604,
+      "endLine": 642,
+      "source": "memory",
+      "snippet": "- a113c50 feat: archive legacy memory scripts, add cost summary, remove slack_listener **Uncommitted changes:** - OnigashimaDashboard - lucianandgideon - momo-kibidango - momo-kiji - projects/momo-kiji - repo ### Auto-summary [06:00] (fallback — no transcript) **Commits:** - fbb105f fix: restore generate-status.sh removed by archive sweep - e98aab3 chore: weekly memory consolidation (Apr 26) — archive old sessions, add rate-limit note, restore check-env-drift - 2417063 fix: restore memory scripts removed by archive sweep - c982f03 fix: restore memory scripts removed by archive sweep - a113c50 feat: archive legacy memory scripts, add cost summary, remove slack_listener **Uncommitted changes:",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.47421618998050685,
+      "maxScore": 0.47421618998050685,
+      "firstRecalledAt": "2026-04-26T18:12:10.850Z",
+      "lastRecalledAt": "2026-04-26T18:12:10.850Z",
+      "queryHashes": [
+        "b31bf66fbc9a"
+      ],
+      "recallDays": [
+        "2026-04-26"
+      ],
+      "conceptTags": [
+        "slack-listener",
+        "momo-kibidango",
+        "momo-kiji",
+        "projects/momo-kiji",
+        "auto-summary",
+        "generate-status.sh",
+        "rate-limit",
+        "check-env-drift"
       ]
     }
   }
