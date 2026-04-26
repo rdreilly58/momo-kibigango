@@ -42,14 +42,20 @@ Set as local config in `~/.openclaw/workspace/.git/config`.
 
 ## Email Operations
 
-**Primary account:** `reillyrd58@gmail.com` — use `gog` CLI for all Gmail ops.  
-- **Send:** `gog gmail send -a "reillyrd58@gmail.com" --to "..." --subject "..." --body-file <(cat file.txt)`  
-- **Read:** `gog gmail search -a reillyrd58@gmail.com "is:inbox"` (supports `from:X AND subject:Y AND after:DATE`)  
-- **Never use:** Himalaya for Gmail, `mail` command, `rdreilly2010@gmail.com` (expired)  
+⚠️ **CURRENT STATUS (as of April 26, 2026):**
+- `reillyrd58@gmail.com` OAuth token **EXPIRED** — cannot send, read, or search
+- `rdreilly2010@gmail.com` is **ACTIVE** — use this for all email until reillyrd58 is re-authenticated
+- To fix reillyrd58: `gog auth add reillyrd58@gmail.com --services gmail` (browser step)
+- This is tracked in Things 3 inbox
 
-**ReillyDesignStudio** (`robert@reillydesignstudio.com`): Routed via reillyrd58@gmail.com (forwarding + send-as)  
-- **Receive:** forwards to reillyrd58 inbox — read with `gog gmail search -a reillyrd58@gmail.com "is:inbox"`  
-- **Send as robert@:** `gog gmail send -a reillyrd58@gmail.com --from robert@reillydesignstudio.com --to "..." --subject "..." --body "..."`
+**Active account:** `rdreilly2010@gmail.com` — use `gog` CLI for all Gmail ops.  
+- **Send:** `gog gmail send -a "rdreilly2010@gmail.com" --to "..." --subject "..." --body "..."`  
+- **Read:** `gog gmail search -a rdreilly2010@gmail.com "is:inbox"`  
+- **Send to Bob:** always use `rdreilly2010@gmail.com` as recipient until reillyrd58 re-authed
+
+**ReillyDesignStudio** (`robert@reillydesignstudio.com`): Routed via rdreilly2010 (forwarding + send-as)  
+- **Receive:** forwards to rdreilly2010 inbox  
+- **Send as robert@:** `gog gmail send -a rdreilly2010@gmail.com --from robert@reillydesignstudio.com --to "..." --subject "..." --body "..."`
 
 ---
 

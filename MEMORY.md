@@ -9,6 +9,17 @@
 
 ---
 
+## 📧 Email — Current Auth Status (April 26, 2026)
+
+- **`rdreilly2010@gmail.com`** → ✅ Active, full OAuth — use for ALL email operations
+- **`reillyrd58@gmail.com`** → ❌ OAuth expired (March 21) — cannot send/read/search
+- **`robert@reillydesignstudio.com`** → routes via rdreilly2010
+- **Fix reillyrd58:** `gog auth add reillyrd58@gmail.com --services gmail` (browser step needed)
+- **Send to Bob:** always use `rdreilly2010@gmail.com` as recipient until reillyrd58 re-authed
+- Emails sent to reillyrd58 tend to land in spam when sent cross-account
+
+---
+
 ## 🛠️ Infrastructure & Tools
 
 ### Total Recall Search (Added April 9, 2026)
