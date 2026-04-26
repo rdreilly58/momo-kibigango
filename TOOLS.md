@@ -26,8 +26,17 @@ apple-calendar-cli delete-event EVENT-ID --json
 
 ## Git Commit Author (ENFORCED)
 
-**Always use:** `robert.reilly@peraton.com` / `Robert Reilly`  
-Vercel only builds reillydesignstudio with this author. Set globally: `git config --global user.email "robert.reilly@peraton.com"`
+**Global (default for all repos):** `robert.reilly@peraton.com` / `Robert Reilly`
+Vercel only builds reillydesignstudio with this author.
+
+**Workspace override (momo-kibigango only):** `reillyrd58@gmail.com` / `Robert Reilly`
+Set as local config in `~/.openclaw/workspace/.git/config`.
+
+| Repo | Email | Set via |
+|------|-------|---------|
+| reillydesignstudio | robert.reilly@peraton.com | global |
+| momo-kibigango (workspace) | reillyrd58@gmail.com | local override |
+| All others | robert.reilly@peraton.com | global |
 
 ---
 
