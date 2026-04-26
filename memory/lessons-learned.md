@@ -79,3 +79,12 @@ Format: one entry per problem, structured for fast recall and prevention.
 - **Fix**: Extract the join expression to a variable before the f-string
 - **Prevention**: Never nest quotes of the same type inside an f-string. Use a pre-built variable or triple-quote the outer string
 - **Test**: `TestAgentCoordinatorPurge` (would catch a syntax error at import time)
+
+## 2026-04-25
+
+### Gmail OAuth expired, briefing broke silently
+- **Symptom**: `send-briefing-v2.sh` failed to send; no error logs (using reillyrd58, Gmail-only OAuth)
+- **Root cause**: Script used hardcoded `reillyrd58@gmail.com` with expired/limited OAuth scope; reillyrd58 only has Gmail scope, not full account access needed for briefing
+- **Fix**: Changed script to use `rdreilly2010@gmail.com` via `email-utils.sh` wrapper, which has full OAuth; wrapper handles email account selection
+- **Prevention**: Never hardcode email addresses in briefing/notification scripts. Use a helper that wraps account selection (e.g., `email-utils.sh`, preferring the primary account). Document which OAuth scopes each account has, and test briefing with the fallback account before deploying
+- **Context**: Three Gmail accounts exist: rdreilly2010 (full OAuth ✅), reillyrd58 (Gmail-only ⚠️), reillydesignstudio (not added ❌)
