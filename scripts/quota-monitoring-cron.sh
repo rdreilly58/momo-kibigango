@@ -88,3 +88,6 @@ else
 fi
 
 log "✅ Quota Monitoring Check Complete\n"
+
+# ── Dead-man heartbeat ───────────────────────────────────────────────────────
+bash "${WORKSPACE}/scripts/cron-heartbeat.sh" quota-monitoring $?

@@ -128,3 +128,6 @@ echo "=================================================="
 # Purge old done/failed/cancelled tasks (keep last 20)
 python3 "$WORKSPACE/scripts/agent_coordinator.py" purge --keep 20 \
   >/dev/null 2>&1 || true
+
+# ── Dead-man heartbeat ───────────────────────────────────────────────────────
+bash "${HOME}/.openclaw/workspace/scripts/cron-heartbeat.sh" daily-session-reset $?

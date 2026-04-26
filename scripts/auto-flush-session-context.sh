@@ -16,6 +16,10 @@
 
 set -uo pipefail
 
+# ── Dead-man heartbeat trap — fires on ANY exit path ─────────────────────────
+_FLUSH_EXIT=0
+trap 'bash "${HOME}/.openclaw/workspace/scripts/cron-heartbeat.sh" auto-flush-session-context "${_FLUSH_EXIT}"' EXIT
+
 WORKSPACE="$HOME/.openclaw/workspace"
 OUT="$WORKSPACE/SESSION_CONTEXT.md"
 TIMESTAMP=$(date '+%Y-%m-%d %H:%M %Z')
