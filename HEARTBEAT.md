@@ -1,26 +1,5 @@
 # HEARTBEAT.md - Periodic Tasks
 
-## Leidos Strategy Check (ACTIVE)
-
-**Weekly: Every Sunday 8:00 AM EDT**
-
-This is managed by cron job: `Leidos Leadership Strategy Weekly Review`
-
-The cron will automatically prompt you on Sunday mornings. Response flow:
-1. Review the checklist that fires (DORA metrics, people, delivery, etc.)
-2. I'll guide you through the template (we have `WEEKLY_REVIEW_TEMPLATE.md` ready)
-3. Discuss adjustments needed
-4. Save results to `leidos/knowledge/weekly-reviews/YYYY-MM-DD-review.md`
-
-**What you need for each review:**
-- DORA metrics (deployment frequency, lead time, failure rate, recovery time)
-- Sprint completion data (% on-time)
-- Team health observations (1:1s, morale, growth)
-- Blocker list (what's slowing things down?)
-- Any strategic adjustments from the week
-
----
-
 ## Things 3 Task Check
 
 Show pending tasks during periodic checks (Things 3 is the primary task tracker since April 16, 2026):

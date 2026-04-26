@@ -8,6 +8,18 @@ Format: one entry per problem, structured for fast recall and prevention.
 
 ---
 
+## 2026-04-26
+
+### Archive sweep removed an active script (generate-status.sh)
+- **Commit**: `fbb105f` — fix: restore generate-status.sh removed by archive sweep
+- **Symptom**: `observer-agent.sh` failed to refresh STATUS.md after an archive cleanup pass moved scripts to `_archive/`
+- **Root cause**: Archive sweep was too broad — grabbed `generate-status.sh` which is still called by the observer agent at runtime
+- **Fix**: Restored script to active location; copy kept in `_archive/` for reference
+- **Prevention**: Before archiving any script, grep for active references in cron jobs, shell scripts, and agent configs. Never archive without checking callers first
+- **Check**: `grep -r "generate-status" ~/.openclaw/workspace/scripts/ ~/.openclaw/cron/`
+
+---
+
 ## 2026-04-24
 
 ### Grafana: log2 scale + `min:0` breaks panel rendering
