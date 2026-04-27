@@ -270,6 +270,16 @@ class TierManager:
         model = _get_model()
         return self._warm.sync_from_sqlite(self._db_path, model)
 
+    def incremental_sync_warm_index(self) -> Dict:
+        """
+        Sync only memories changed since the last watermark. Falls back to a
+        full clean rebuild on cold start. Returns the diagnostic dict from
+        LanceWarmStore.incremental_sync_from_sqlite (synced count, mode,
+        watermark_before/after, duration_s).
+        """
+        model = _get_model()
+        return self._warm.incremental_sync_from_sqlite(self._db_path, model)
+
     # ── STATS ─────────────────────────────────────────────────────────────────
 
     def stats(self) -> Dict:
@@ -314,7 +324,8 @@ if __name__ == "__main__":
     store_p.add_argument("--priority", type=int, default=5)
 
     sub.add_parser("stats", help="Show tier statistics")
-    sub.add_parser("rebuild", help="Rebuild LanceDB warm index from SQLite")
+    sub.add_parser("rebuild", help="Rebuild LanceDB warm index from SQLite (full)")
+    sub.add_parser("sync", help="Incremental LanceDB sync since last watermark")
 
     demote_p = sub.add_parser("demote", help="Demote stale cold candidates")
     demote_p.add_argument("--days", type=int, default=90)
@@ -339,6 +350,10 @@ if __name__ == "__main__":
     elif args.cmd == "rebuild":
         n = mgr.rebuild_warm_index()
         print(f"Rebuilt warm index: {n} records synced")
+
+    elif args.cmd == "sync":
+        result = mgr.incremental_sync_warm_index()
+        print(json.dumps(result, indent=2))
 
     elif args.cmd == "demote":
         n = mgr.demote_cold_candidates(days_inactive=args.days)
