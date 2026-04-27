@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏛️ Memory Palace Explorer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .tab-btn {
+            padding: 10px 20px;
+            border: none;
+            background: #f0f0f0;
+            cursor: pointer;
+            border-radius: 5px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .tab-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .palace {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .wing {
+            background: linear-gradient(135deg, var(--color) 0%, rgba(102, 126, 234, 0.1) 100%);
+            border-left: 5px solid var(--color);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .wing-header {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .room {
+            background: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid #eee;
+        }
+
+        .room-name {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #667eea;
+        }
+
+        .memory-item {
+            font-size: 0.9em;
+            padding: 5px 0;
+            color: #666;
+            border-left: 3px solid #ddd;
+            padding-left: 10px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .graph-viz {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: monospace;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .graph-viz li {
+            margin-left: 20px;
+        }
+
+        .centrality-list {
+            list-style: none;
+        }
+
+        .centrality-item {
+            padding: 10px;
+            margin-bottom: 8px;
+            background: #f0f0f0;
+            border-radius: 4px;
+            border-left: 4px solid #667eea;
+        }
+
+        .no-data {
+            text-align: center;
+            color: #999;
+            padding: 40px;
+        }
+
+        footer {
+            text-align: center;
+            color: white;
+            margin-top: 40px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏛️ Memory Palace Explorer</h1>
+            <p>Navigate your semantic memory space</p>
+        </header>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('palace')">🏰 Palace</button>
+            <button class="tab-btn" onclick="switchTab('graph')">🔗 Graph</button>
+            <button class="tab-btn" onclick="switchTab('stats')">📊 Stats</button>
+        </div>
+
+        <!-- Palace Tab -->
+        <div id="palace" class="tab-content active">
+            <div id="palace-content" class="no-data">Loading palace...</div>
+        </div>
+
+        <!-- Graph Tab -->
+        <div id="graph" class="tab-content">
+            <div id="graph-content" class="no-data">Loading graph...</div>
+        </div>
+
+        <!-- Stats Tab -->
+        <div id="stats" class="tab-content">
+            <div id="stats-content" class="no-data">Loading stats...</div>
+        </div>
+
+        <footer>
+            <p>Generated automatically • Last updated: <span id="timestamp">Loading...</span></p>
+        </footer>
+    </div>
+
+    <script>
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        async function loadData() {
+            try {
+                // Load palace
+                const palaceRes = await fetch('memory-palace.json');
+                const palace = await palaceRes.json();
+                renderPalace(palace);
+
+                // Load graph
+                const graphRes = await fetch('memory-graph.json');
+                const graph = await graphRes.json();
+                renderGraph(graph);
+
+                // Update timestamp
+                document.getElementById('timestamp').textContent = new Date().toLocaleString();
+            } catch (err) {
+                console.error('Failed to load data:', err);
+                document.getElementById('palace-content').innerHTML =
+                    '<div class="no-data">Error loading palace data. Make sure to run: memory-palace-builder.py --build</div>';
+                document.getElementById('graph-content').innerHTML =
+                    '<div class="no-data">Error loading graph data. Make sure to run: memory-graph-builder.py --build</div>';
+            }
+        }
+
+        function renderPalace(palace) {
+            let html = '<div class="stats">';
+            html += `<div class="stat-box"><div class="stat-value">${palace.stats.total_memories}</div><div class="stat-label">Memories</div></div>`;
+            html += `<div class="stat-box"><div class="stat-value">${palace.stats.total_wings}</div><div class="stat-label">Wings</div></div>`;
+            html += `<div class="stat-box"><div class="stat-value">${palace.stats.total_rooms}</div><div class="stat-label">Rooms</div></div>`;
+            html += '</div>';
+
+            html += '<div class="palace">';
+
+            for (const [wingName, wing] of Object.entries(palace.wings || {})) {
+                html += `<div class="wing" style="--color: ${wing.color || '#667eea'}">`;
+                html += `<div class="wing-header">${wing.icon} ${wingName.toUpperCase()}</div>`;
+                html += `<p style="margin-bottom: 15px; font-size: 0.9em;">${wing.description}</p>`;
+
+                for (const [roomId, room] of Object.entries(wing.rooms || {})) {
+                    html += `<div class="room">`;
+                    html += `<div class="room-name">${room.name} (${room.memory_count})</div>`;
+
+                    for (const mem of room.memories.slice(0, 3)) {
+                        const title = mem.title || 'Untitled';
+                        html += `<div class="memory-item" title="${title}">${title}</div>`;
+                    }
+
+                    if (room.memory_count > 3) {
+                        html += `<div class="memory-item">+${room.memory_count - 3} more...</div>`;
+                    }
+
+                    html += '</div>';
+                }
+
+                html += '</div>';
+            }
+
+            html += '</div>';
+            document.getElementById('palace-content').innerHTML = html;
+        }
+
+        function renderGraph(graph) {
+            let html = '<div class="stats">';
+            html += `<div class="stat-box"><div class="stat-value">${graph.stats.total_nodes}</div><div class="stat-label">Nodes</div></div>`;
+            html += `<div class="stat-box"><div class="stat-value">${graph.stats.total_edges.toLocaleString()}</div><div class="stat-label">Edges</div></div>`;
+            html += `<div class="stat-box"><div class="stat-value">${graph.stats.avg_connections.toFixed(1)}</div><div class="stat-label">Avg Connections</div></div>`;
+            html += '</div>';
+
+            html += '<h3>🏆 Most Connected Memories</h3>';
+            html += '<ul class="centrality-list">';
+
+            const centrality = graph.stats.centrality || {};
+            const nodeMap = {};
+            graph.nodes.forEach(n => nodeMap[n.id] = n.label);
+
+            for (const [nodeId, degree] of Object.entries(centrality).slice(0, 10)) {
+                const label = nodeMap[nodeId] || 'Unknown';
+                html += `<li class="centrality-item"><strong>${degree}</strong> connections: ${label.substring(0, 50)}</li>`;
+            }
+
+            html += '</ul>';
+
+            html += '<h3 style="margin-top: 30px;">📊 Relationship Types</h3>';
+            html += '<ul class="centrality-list">';
+
+            const edgeTypes = graph.stats.edge_types || {};
+            for (const [type, count] of Object.entries(edgeTypes).sort((a, b) => b[1] - a[1])) {
+                html += `<li class="centrality-item">${type}: <strong>${count}</strong> edges</li>`;
+            }
+
+            html += '</ul>';
+
+            document.getElementById('graph-content').innerHTML = html;
+        }
+
+        // Load data on page load
+        document.addEventListener('DOMContentLoaded', loadData);
+    </script>
+</body>
+</html>
