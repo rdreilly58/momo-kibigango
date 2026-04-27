@@ -22,6 +22,16 @@ trap 'rm -f "$LOCK_FILE"' EXIT
 WORKSPACE="${WORKSPACE:-$HOME/.openclaw/workspace}"
 OBS_FILE="$WORKSPACE/memory/observations.md"
 STAMP="$WORKSPACE/memory/.observer-last-run"
+HARNESS_LOG="$HOME/.openclaw/logs/observer-harness.log"
+mkdir -p "$(dirname "$HARNESS_LOG")"
+
+# Check harness availability before proceeding
+HARNESS_CHECK=0
+bash "$WORKSPACE/scripts/harness-fallback.sh" "observer-agent" >/dev/null 2>&1 || HARNESS_CHECK=1
+
+if [ $HARNESS_CHECK -eq 1 ]; then
+  echo "[observer:error] No harness available (tried: anthropic, ollama, local)" | tee -a "$HARNESS_LOG"
+fi
 
 # Submit + immediately start coordinator task (observer has no external session ID)
 COORDINATOR_TASK_ID=""

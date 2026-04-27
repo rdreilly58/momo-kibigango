@@ -28,6 +28,16 @@ import sqlite3
 import sys
 import uuid
 from contextlib import contextmanager
+
+# Audit logging
+try:
+    from memory_audit_logger import log_operation
+except ImportError:
+
+    def log_operation(*args, **kwargs):
+        pass  # Audit logging optional
+
+
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -82,6 +92,7 @@ class MemoryDB:
         # Auto-expire working-tier records after 7 days if no explicit TTL set
         if tier == "working" and expires_at is None:
             from datetime import timedelta
+
             expires_at = (datetime.now(timezone.utc) + timedelta(days=7)).isoformat()
         mem_id = str(uuid.uuid4())
         with _conn(self.db_path) as con:
@@ -96,8 +107,16 @@ class MemoryDB:
                        confidence=?, source=?, expires_at=?, metadata=?, updated_at=?
                        WHERE id=?""",
                     (
-                        content, tier, json.dumps(tags), priority, confidence,
-                        source, expires_at, json.dumps(metadata), now, existing["id"],
+                        content,
+                        tier,
+                        json.dumps(tags),
+                        priority,
+                        confidence,
+                        source,
+                        expires_at,
+                        json.dumps(metadata),
+                        now,
+                        existing["id"],
                     ),
                 )
                 return existing["id"]
@@ -107,18 +126,47 @@ class MemoryDB:
                     confidence, source, created_at, updated_at, expires_at, metadata)
                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)""",
                 (
-                    mem_id, tier, namespace, title, content,
-                    json.dumps(tags), priority, confidence, source,
-                    now, now, expires_at, json.dumps(metadata),
+                    mem_id,
+                    tier,
+                    namespace,
+                    title,
+                    content,
+                    json.dumps(tags),
+                    priority,
+                    confidence,
+                    source,
+                    now,
+                    now,
+                    expires_at,
+                    json.dumps(metadata),
                 ),
             )
+        # Log operation for audit trail
+        log_operation(
+            op="add",
+            source=source,
+            memory_id=mem_id,
+            namespace=namespace,
+            title=title,
+            content=content,
+            tags=tags,
+            priority=priority,
+        )
         return mem_id
 
     def update(self, mem_id: str, **fields) -> bool:
         """Update arbitrary fields on an existing memory."""
         allowed = {
-            "title", "content", "tier", "namespace", "tags", "priority",
-            "confidence", "source", "expires_at", "metadata",
+            "title",
+            "content",
+            "tier",
+            "namespace",
+            "tags",
+            "priority",
+            "confidence",
+            "source",
+            "expires_at",
+            "metadata",
         }
         updates = {k: v for k, v in fields.items() if k in allowed}
         if not updates:
@@ -132,14 +180,36 @@ class MemoryDB:
         values = list(updates.values()) + [mem_id]
         with _conn(self.db_path) as con:
             cur = con.execute(f"UPDATE memories SET {set_clause} WHERE id=?", values)
+            if cur.rowcount > 0:
+                # Log update for audit trail
+                log_operation(
+                    op="update",
+                    source="api",
+                    memory_id=mem_id,
+                    namespace=fields.get("namespace", "unknown"),
+                    title=fields.get("title", "unknown"),
+                    content=fields.get("content", ""),
+                    tags=fields.get("tags", []),
+                )
             return cur.rowcount > 0
 
     def delete(self, mem_id: str) -> bool:
         with _conn(self.db_path) as con:
             cur = con.execute("DELETE FROM memories WHERE id=?", (mem_id,))
+            if cur.rowcount > 0:
+                # Log delete for audit trail
+                log_operation(
+                    op="delete",
+                    source="api",
+                    memory_id=mem_id,
+                    namespace="unknown",
+                    title="",
+                )
             return cur.rowcount > 0
 
-    def link(self, source_id: str, target_id: str, relation: str = "related_to") -> bool:
+    def link(
+        self, source_id: str, target_id: str, relation: str = "related_to"
+    ) -> bool:
         """Link two memories."""
         now = _now()
         try:
@@ -165,11 +235,30 @@ class MemoryDB:
                     source, access_count, created_at, updated_at, last_accessed_at,
                     expires_at, metadata, archived_at, archive_reason)
                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
-                (*[row[k] for k in (
-                    "id","tier","namespace","title","content","tags","priority",
-                    "confidence","source","access_count","created_at","updated_at",
-                    "last_accessed_at","expires_at","metadata",
-                )], now, reason),
+                (
+                    *[
+                        row[k]
+                        for k in (
+                            "id",
+                            "tier",
+                            "namespace",
+                            "title",
+                            "content",
+                            "tags",
+                            "priority",
+                            "confidence",
+                            "source",
+                            "access_count",
+                            "created_at",
+                            "updated_at",
+                            "last_accessed_at",
+                            "expires_at",
+                            "metadata",
+                        )
+                    ],
+                    now,
+                    reason,
+                ),
             )
             con.execute("DELETE FROM memories WHERE id=?", (mem_id,))
         return True
@@ -272,13 +361,17 @@ class MemoryDB:
                     "SELECT target_id, relation FROM memory_links WHERE source_id=?",
                     (mem_id,),
                 ).fetchall():
-                    results.append({"other_id": row[0], "relation": row[1], "direction": "out"})
+                    results.append(
+                        {"other_id": row[0], "relation": row[1], "direction": "out"}
+                    )
             if direction in ("in", "both"):
                 for row in con.execute(
                     "SELECT source_id, relation FROM memory_links WHERE target_id=?",
                     (mem_id,),
                 ).fetchall():
-                    results.append({"other_id": row[0], "relation": row[1], "direction": "in"})
+                    results.append(
+                        {"other_id": row[0], "relation": row[1], "direction": "in"}
+                    )
         return results
 
     def traverse(
@@ -318,12 +411,14 @@ class MemoryDB:
                         m = dict(row)
                         m["tags"] = json.loads(m.get("tags") or "[]")
                         m["metadata"] = json.loads(m.get("metadata") or "{}")
-                        results.append({
-                            "memory": m,
-                            "depth": current_depth + 1,
-                            "relation": link["relation"],
-                            "direction": link["direction"],
-                        })
+                        results.append(
+                            {
+                                "memory": m,
+                                "depth": current_depth + 1,
+                                "relation": link["relation"],
+                                "direction": link["direction"],
+                            }
+                        )
                         queue.append((nid, current_depth + 1))
 
         return results
@@ -357,7 +452,9 @@ class MemoryDB:
     def stats(self) -> Dict:
         with _conn(self.db_path) as con:
             memories = con.execute("SELECT COUNT(*) FROM memories").fetchone()[0]
-            archived = con.execute("SELECT COUNT(*) FROM archived_memories").fetchone()[0]
+            archived = con.execute("SELECT COUNT(*) FROM archived_memories").fetchone()[
+                0
+            ]
             links = con.execute("SELECT COUNT(*) FROM memory_links").fetchone()[0]
             orphaned = con.execute(
                 """SELECT COUNT(*) FROM memory_links WHERE
@@ -387,6 +484,7 @@ class MemoryDB:
 
 
 # ── CLI ───────────────────────────────────────────────────────────────────────
+
 
 def _cli():
     p = argparse.ArgumentParser(description="ai-memory.db CLI")
@@ -423,7 +521,14 @@ def _cli():
 
     if args.cmd == "add":
         tags = [t.strip() for t in args.tags.split(",") if t.strip()]
-        mem_id = db.add(args.title, args.content, tier=args.tier, namespace=args.ns, tags=tags, priority=args.priority)
+        mem_id = db.add(
+            args.title,
+            args.content,
+            tier=args.tier,
+            namespace=args.ns,
+            tags=tags,
+            priority=args.priority,
+        )
         print(f"ok id={mem_id}")
 
     elif args.cmd == "search":

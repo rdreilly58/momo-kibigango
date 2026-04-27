@@ -61,6 +61,27 @@ cron_section() {
   echo ""
 }
 
+# ── Section: Observer Health ─────────────────────────────────────────────────
+
+observer_health_section() {
+  echo "## Observer Health"
+  echo ""
+  local harness_log="$HOME/.openclaw/logs/observer-harness.log"
+
+  if [ ! -f "$harness_log" ]; then
+    echo "✅ No harness errors logged"
+  else
+    local last_line
+    last_line=$(tail -1 "$harness_log" 2>/dev/null || echo "")
+    if echo "$last_line" | grep -q "error"; then
+      echo "❌ $(echo "$last_line" | sed 's/.*error/error/')"
+    else
+      echo "✅ Harness ok — $(echo "$last_line" | grep -oE 'harness=[^ ]+|fallback=[^ ]+' | tail -1 || echo 'local')"
+    fi
+  fi
+  echo ""
+}
+
 # ── Section: Gateway ─────────────────────────────────────────────────────────
 
 gateway_section() {
@@ -282,6 +303,7 @@ for line in sys.stdin:
   gateway_section
   disk_section
   git_section
+  observer_health_section
   cron_section
   crons_section
   observations_section
