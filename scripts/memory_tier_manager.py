@@ -19,8 +19,10 @@ Usage:
 
 from __future__ import annotations
 
+import math
 import os
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Optional
 
@@ -30,7 +32,7 @@ if str(_SCRIPTS) not in sys.path:
     sys.path.insert(0, str(_SCRIPTS))
 
 from memory_hot_cache import HotCache, get_hot_cache
-from memory_lance_store import LanceWarmStore
+from memory_lance_store import LanceWarmStore, _stable_int_id
 from memory_cold_store import ColdStore
 from memory_db import MemoryDB
 
@@ -48,6 +50,44 @@ def _get_model():
         from sentence_transformers import SentenceTransformer
         _model = SentenceTransformer("all-MiniLM-L6-v2", local_files_only=True)
     return _model
+
+
+# Cold archive scoring: time-decayed so recent archives can resurface.
+# Half-life of 6 months means a 6-month-old archived memory scores half of a
+# fresh archive; an 18-month-old one scores ~1/8th. Floor keeps results
+# below any plausible warm match (warm scores are typically 0.05-0.95).
+_COLD_BASE_SCORE = 0.04        # max cold score for a brand-new archive
+_COLD_FLOOR = 0.005             # absolute minimum (so cold never ranks above warm)
+_COLD_HALF_LIFE_DAYS = 180.0    # 6 months
+
+
+def _cold_time_decay_score(hit: Dict) -> float:
+    """
+    Score a cold (archived) memory using exponential time-decay.
+
+    Reads `archived_at` (preferred), then `last_accessed_at`, then `created_at`.
+    Falls back to the floor when no usable timestamp is found, preserving the
+    legacy behaviour where cold hits rank below warm.
+    """
+    ts_value = (
+        hit.get("archived_at")
+        or hit.get("last_accessed_at")
+        or hit.get("created_at")
+    )
+    if not ts_value:
+        return _COLD_FLOOR
+    try:
+        # Accept ISO-8601 with or without timezone; SQLite often stores
+        # naive UTC strings like '2026-04-27T05:30:00'.
+        ts = datetime.fromisoformat(str(ts_value).replace("Z", "+00:00"))
+        if ts.tzinfo is None:
+            ts = ts.replace(tzinfo=timezone.utc)
+    except (ValueError, TypeError):
+        return _COLD_FLOOR
+    now = datetime.now(timezone.utc)
+    age_days = max(0.0, (now - ts).total_seconds() / 86400.0)
+    decay = math.pow(0.5, age_days / _COLD_HALF_LIFE_DAYS)
+    return max(_COLD_FLOOR, _COLD_BASE_SCORE * decay)
 
 
 class TierManager:
@@ -113,13 +153,16 @@ class TierManager:
         for result in warm_results[:3]:
             self._hot.put(result)
 
-        # Phase 3 — Cold fallback
+        # Phase 3 — Cold fallback with time-decay
+        # Replaces hardcoded score=0.01: rescues recently-archived items so a
+        # 1-week-old archived memory can outrank a 6-month-old one. Half-life
+        # is 6 months; floor of 0.005 keeps very-old hits below any warm match.
         cold_results = []
         if include_cold:
             cold_hits = self._cold.search_fts(query, limit=5)
             for hit in cold_hits:
                 hit["_tier"] = "cold"
-                hit["_score"] = 0.01  # cold results rank below warm
+                hit["_score"] = _cold_time_decay_score(hit)
                 cold_results.append(hit)
 
         combined = warm_results + cold_results
@@ -154,7 +197,8 @@ class TierManager:
         text = f"{title} {content}"
         emb = model.encode(text, convert_to_numpy=True)
         mem_dict = {
-            "id": abs(hash(mem_id)) % (2 ** 31),
+            "id": _stable_int_id(mem_id),
+            "_uuid": mem_id,  # registers int_id -> uuid mapping in upsert()
             "namespace": namespace,
             "title": title,
             "content": content,
@@ -186,7 +230,7 @@ class TierManager:
     def delete(self, memory_id: str) -> bool:
         """Remove from all tiers."""
         self._hot.invalidate(memory_id)
-        int_id = abs(hash(memory_id)) % (2 ** 31)
+        int_id = _stable_int_id(memory_id)
         self._warm.delete(int_id)
         return self._db.delete(memory_id)
 
