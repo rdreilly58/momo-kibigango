@@ -1,0 +1,59 @@
+[submodule "OnigashimaDashboard"]
+	path = OnigashimaDashboard
+	url = https://github.com/rdreilly58/Onigashima-macOS.git
+	branch = dashboard
+
+[submodule "leidos/dora-metrics"]
+	path = leidos/dora-metrics
+	url = https://github.com/rdreilly58/leidos-dora-metrics.git
+	branch = main
+
+[submodule "leidos/rfc-decisions"]
+	path = leidos/rfc-decisions
+	url = https://github.com/rdreilly58/leidos-rfc-decisions.git
+	branch = main
+
+[submodule "lucianandgideon"]
+	path = lucianandgideon
+	url = https://github.com/reillyrd58-ai/lucianandgideon.git
+	branch = main
+
+[submodule "momo-kibidango"]
+	path = momo-kibidango
+	url = https://github.com/reillyrd58-ai/momo-kibidango.git
+	branch = main
+
+[submodule "momo-kibidango-website"]
+	path = momo-kibidango-website
+	url = https://github.com/reillyrd58-ai/momo-kibidango-website.git
+	branch = main
+
+[submodule "momo-kiji"]
+	path = momo-kiji
+	url = https://github.com/reillyrd58-ai/momo-kiji.git
+	branch = main
+
+[submodule "momo-kiji-website"]
+	path = momo-kiji-website
+	url = https://github.com/reillyrd58-ai/momo-kiji-website.git
+	branch = main
+
+[submodule "onigashima"]
+	path = onigashima
+	url = https://github.com/reillyrd58-ai/onigashima.git
+	branch = main
+
+[submodule "projects/momo-kiji"]
+	path = projects/momo-kiji
+	url = https://github.com/ReillyDesignStudio/momo-kiji.git
+	branch = main
+
+[submodule "reillydesignstudio"]
+	path = reillydesignstudio
+	url = https://github.com/rdreilly58/reillydesignstudio.git
+	branch = main
+
+[submodule "repo"]
+	path = repo
+	url = https://github.com/rdreilly58/reillydesignstudio.git
+	branch = main

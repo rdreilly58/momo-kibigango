@@ -1,0 +1,57 @@
+{
+  "lsh_config": {
+    "num_hashes": 16,
+    "recall_threshold": 0.90,
+    "description": "LSH configuration for OpenClaw Phase 1 MVP"
+  },
+  "performance_targets": {
+    "latency_p50_ms": 10,
+    "latency_p95_ms": 25,
+    "latency_p99_ms": 50,
+    "recall_at_5": 0.95,
+    "memory_overhead_mb": 20,
+    "fallback_rate": 0.05
+  },
+  "tuning_parameters": {
+    "hash_functions": {
+      "min": 8,
+      "default": 16,
+      "max": 32,
+      "note": "More hashes = higher recall, slower hash computation"
+    },
+    "bucket_size": {
+      "note": "Auto-determined by FAISS based on data distribution"
+    },
+    "recall_threshold": {
+      "min": 0.80,
+      "default": 0.90,
+      "max": 0.99,
+      "note": "Triggers fallback to brute-force if LSH recall < threshold"
+    }
+  },
+  "deployment": {
+    "dependencies": [
+      "numpy>=1.19.0",
+      "faiss-cpu>=1.7.0",
+      "sentence-transformers>=2.0.0"
+    ],
+    "memory_chunks": 600,
+    "embedding_dimension": 384,
+    "embedding_model": "all-MiniLM-L6-v2"
+  },
+  "monitoring": {
+    "metrics_tracked": [
+      "total_queries",
+      "lsh_queries",
+      "fallback_queries",
+      "average_latency_ms",
+      "lsh_hit_rate",
+      "fallback_rate"
+    ],
+    "alert_thresholds": {
+      "fallback_rate_high": 0.10,
+      "average_latency_high_ms": 50,
+      "recall_low": 0.90
+    }
+  }
+}
