@@ -62,6 +62,14 @@ fi
 python3 "$WORKSPACE/scripts/memory_db.py" expire 2>/dev/null || true
 python3 "$WORKSPACE/scripts/memory_db.py" clean-links 2>/dev/null || true
 
+# 6b. Resync warm LanceDB index from SQLite
+# Without this, memories added above by `memory_db.py add` are invisible to
+# the warm tier until the next manual rebuild, causing SQLite/LanceDB drift.
+# This is a full re-embed and may take a minute or two on large stores.
+echo "🔄 Rebuilding warm LanceDB index from SQLite..."
+python3 "$WORKSPACE/scripts/memory_tier_manager.py" rebuild 2>&1 | tail -5 || \
+  echo "   warm rebuild skipped (rebuild command unavailable)"
+
 # 7. Git commit
 cd "$WORKSPACE"
 git add -A && git commit -m "chore: Weekly memory consolidation and archival ($(date +%Y-%m-%d))" || true
