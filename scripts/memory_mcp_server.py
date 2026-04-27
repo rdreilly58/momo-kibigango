@@ -44,7 +44,6 @@ MODEL_NAME = "all-MiniLM-L6-v2"
 
 EMAIL_ACCOUNTS = [
     "rdreilly2010@gmail.com",
-    "reillyrd58@gmail.com",
     "robert@reillydesignstudio.com",
 ]
 DEFAULT_TOP_K = 5
@@ -237,7 +236,6 @@ _TZ = ZoneInfo("America/New_York")
 # Email accounts known to the system
 _EMAIL_ACCOUNTS = [
     "rdreilly2010@gmail.com",
-    "reillyrd58@gmail.com",
     "robert@reillydesignstudio.com",
 ]
 _DEFAULT_CALENDAR_ACCOUNT = "rdreilly2010@gmail.com"
@@ -555,7 +553,7 @@ def email_list_unread(account: str = "all") -> str:
     Args:
         account: Email address, short label (e.g. 'rdreilly2010'), or 'all'
                  (default). Known accounts: rdreilly2010@gmail.com,
-                 reillyrd58@gmail.com, robert@reillydesignstudio.com.
+                 robert@reillydesignstudio.com.
 
     Returns:
         JSON object keyed by account with lists of {from, subject, date, flags}.

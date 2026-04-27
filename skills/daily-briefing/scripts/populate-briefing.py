@@ -80,22 +80,22 @@ def get_gmail_data():
     """Fetch Gmail statistics"""
     try:
         # Get unread count
-        cmd_unread = "gog gmail search 'is:unread' --json 2>/dev/null | jq '.threads | length'"
+        cmd_unread = "gog gmail search -a rdreilly2010@gmail.com 'is:unread' --json 2>/dev/null | jq '.threads | length'"
         result = subprocess.run(cmd_unread, shell=True, capture_output=True, text=True, timeout=10)
         unread = result.stdout.strip() if result.returncode == 0 else "--"
         
         # Get flagged/starred count
-        cmd_starred = "gog gmail search 'is:starred' --json 2>/dev/null | jq '.threads | length'"
+        cmd_starred = "gog gmail search -a rdreilly2010@gmail.com 'is:starred' --json 2>/dev/null | jq '.threads | length'"
         result = subprocess.run(cmd_starred, shell=True, capture_output=True, text=True, timeout=10)
         starred = result.stdout.strip() if result.returncode == 0 else "--"
         
         # Get today's email count
-        cmd_today = "gog gmail search 'after:" + datetime.now().strftime('%Y-%m-%d') + "' --json 2>/dev/null | jq '.threads | length'"
+        cmd_today = "gog gmail search -a rdreilly2010@gmail.com 'after:" + datetime.now().strftime('%Y-%m-%d') + "' --json 2>/dev/null | jq '.threads | length'"
         result = subprocess.run(cmd_today, shell=True, capture_output=True, text=True, timeout=10)
         today = result.stdout.strip() if result.returncode == 0 else "--"
         
         # Get urgent/important count
-        cmd_urgent = "gog gmail search 'is:important OR is:starred after:" + datetime.now().strftime('%Y-%m-%d') + "' --json 2>/dev/null | jq '.threads | length'"
+        cmd_urgent = "gog gmail search -a rdreilly2010@gmail.com 'is:important OR is:starred after:" + datetime.now().strftime('%Y-%m-%d') + "' --json 2>/dev/null | jq '.threads | length'"
         result = subprocess.run(cmd_urgent, shell=True, capture_output=True, text=True, timeout=10)
         urgent = result.stdout.strip() if result.returncode == 0 else "--"
         

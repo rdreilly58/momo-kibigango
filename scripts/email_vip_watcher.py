@@ -36,7 +36,7 @@ DEFAULT_CONFIG = {
     "vip_emails": [],
     "vip_sender_domains": [],
     "subject_keywords": ["urgent", "action required", "deadline", "emergency", "invoice", "payment"],
-    "accounts": ["rdreilly2010@gmail.com", "reillyrd58@gmail.com", "robert@reillydesignstudio.com"],
+    "accounts": ["rdreilly2010@gmail.com", "robert@reillydesignstudio.com"],
     "max_age_minutes": 10,
     "cooldown_minutes": 60,
     "check_interval_minutes": 5,

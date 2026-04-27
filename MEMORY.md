@@ -9,14 +9,15 @@
 
 ---
 
-## 📧 Email — Current Auth Status (April 26, 2026)
+## 📧 Email — Current Auth Status (April 27, 2026)
 
-- **`rdreilly2010@gmail.com`** → ✅ Active, full OAuth — use for ALL email operations
-- **`reillyrd58@gmail.com`** → ❌ OAuth expired (March 21) — cannot send/read/search
-- **`robert@reillydesignstudio.com`** → routes via rdreilly2010
-- **Fix reillyrd58:** `gog auth add reillyrd58@gmail.com --services gmail` (browser step needed)
-- **Send to Bob:** always use `rdreilly2010@gmail.com` as recipient until reillyrd58 re-authed
-- Emails sent to reillyrd58 tend to land in spam when sent cross-account
+- **`rdreilly2010@gmail.com`** → ✅ Active, full OAuth (gmail, calendar, drive, docs, tasks, sheets, contacts, people, etc.) — primary account for all read/search/calendar ops
+- **`robert@reillydesignstudio.com`** → ✅ Active OAuth (gmail scope only, added 2026-04-27) — native account; can send-as directly. Replaces reillyrd58 as the migration target.
+- ~~`reillyrd58@gmail.com`~~ → 🗑️ Token removed 2026-04-27. Was broken since 2026-03-21; Bob couldn’t switch the browser away from robert@ during reauth, so the design studio account took its place. Do NOT attempt to send to or auth with reillyrd58 — it’s abandoned.
+- **Send to Bob:** use `rdreilly2010@gmail.com` (most reliable inbox).
+- **Send AS robert@reillydesignstudio.com:** can now use either:
+  - Native: `gog gmail send -a robert@reillydesignstudio.com --to ... --subject ... --body ...`
+  - Via rdreilly2010 send-as alias: `gog gmail send -a rdreilly2010@gmail.com --from robert@reillydesignstudio.com --to ...` (still works, established forwarding/send-as setup)
 
 ---
 

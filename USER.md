@@ -16,9 +16,9 @@
 - **Website:** www.Leidos.com
 
 ## Personal Emails
-- **Personal:** reillyrd58@gmail.com (NEW - migrating to this)
-- **Legacy:** rdreilly2010@gmail.com
-- **Design Studio:** robert@reillydesignstudio.com
+- **Active personal:** rdreilly2010@gmail.com (full OAuth — gmail, calendar, drive, docs, tasks, etc.)
+- **Design Studio:** robert@reillydesignstudio.com (gmail OAuth, added 2026-04-27 — replaces reillyrd58 as migration target)
+- ~~reillyrd58@gmail.com~~ — token removed 2026-04-27 (was broken since 2026-03-21, abandoned)
 
 ## Notes
 - Named me Momotaro on first meeting
@@ -26,4 +26,4 @@
 - **Current Date:** Friday, April 10th, 2026 - 11:30 PM (America/New_York)
 - **Work Week:** Monday–Friday
 - **CRITICAL FOR MOMOTARO:** Always parse day-of-week from timestamps (Tue, Wed, etc). Do NOT guess or infer. The metadata provides both day name AND date.
-- Transitioning personal Gmail to reillyrd58 (few days, medium priority)
+- Migration target shifted from reillyrd58 → robert@reillydesignstudio.com (2026-04-27); reillyrd58 OAuth was broken and Bob couldn't get the browser to switch off robert@.

@@ -29,33 +29,32 @@ apple-calendar-cli delete-event EVENT-ID --json
 **Global (default for all repos):** `robert.reilly@peraton.com` / `Robert Reilly`
 Vercel only builds reillydesignstudio with this author.
 
-**Workspace override (momo-kibigango only):** `reillyrd58@gmail.com` / `Robert Reilly`
-Set as local config in `~/.openclaw/workspace/.git/config`.
+**Workspace override (momo-kibigango only):** `rdreilly2010@gmail.com` / `Robert Reilly`
+Set as local config in `~/.openclaw/workspace/.git/config`. Updated 2026-04-27 (was reillyrd58, migrated to active address).
 
 | Repo | Email | Set via |
 |------|-------|---------|
 | reillydesignstudio | robert.reilly@peraton.com | global |
-| momo-kibigango (workspace) | reillyrd58@gmail.com | local override |
+| momo-kibigango (workspace) | rdreilly2010@gmail.com | local override |
 | All others | robert.reilly@peraton.com | global |
 
 ---
 
 ## Email Operations
 
-⚠️ **CURRENT STATUS (as of April 26, 2026):**
-- `reillyrd58@gmail.com` OAuth token **EXPIRED** — cannot send, read, or search
-- `rdreilly2010@gmail.com` is **ACTIVE** — use this for all email until reillyrd58 is re-authenticated
-- To fix reillyrd58: `gog auth add reillyrd58@gmail.com --services gmail` (browser step)
-- This is tracked in Things 3 inbox
+✅ **CURRENT STATUS (as of April 27, 2026):**
+- `rdreilly2010@gmail.com` — **ACTIVE** (full OAuth: gmail, calendar, drive, docs, tasks, sheets, contacts, etc.)
+- `robert@reillydesignstudio.com` — **ACTIVE** (gmail OAuth, added 2026-04-27 — replaces reillyrd58)
+- ~~`reillyrd58@gmail.com`~~ — token **REMOVED** 2026-04-27. Abandoned (was broken since 2026-03-21).
 
-**Active account:** `rdreilly2010@gmail.com` — use `gog` CLI for all Gmail ops.  
-- **Send:** `gog gmail send -a "rdreilly2010@gmail.com" --to "..." --subject "..." --body "..."`  
-- **Read:** `gog gmail search -a rdreilly2010@gmail.com "is:inbox"`  
-- **Send to Bob:** always use `rdreilly2010@gmail.com` as recipient until reillyrd58 re-authed
+**Send to Bob:** `gog gmail send -a "rdreilly2010@gmail.com" --to "..."` (most reliable inbox)
 
-**ReillyDesignStudio** (`robert@reillydesignstudio.com`): Routed via rdreilly2010 (forwarding + send-as)  
-- **Receive:** forwards to rdreilly2010 inbox  
-- **Send as robert@:** `gog gmail send -a rdreilly2010@gmail.com --from robert@reillydesignstudio.com --to "..." --subject "..." --body "..."`
+**Read inbox:** `gog gmail search -a rdreilly2010@gmail.com "is:inbox"`
+
+**ReillyDesignStudio** (`robert@reillydesignstudio.com`):  
+- **Native send:** `gog gmail send -a robert@reillydesignstudio.com --to "..." --subject "..." --body "..."`
+- **Native read:** `gog gmail search -a robert@reillydesignstudio.com "is:inbox"`
+- **Send-as via rdreilly2010** (legacy forwarding path, still works): `gog gmail send -a rdreilly2010@gmail.com --from robert@reillydesignstudio.com --to "..."`
 
 ---
 

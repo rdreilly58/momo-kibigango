@@ -246,10 +246,10 @@ else
 fi
 
 WS_EMAIL=$(git -C "$HOME/.openclaw/workspace" config --local user.email 2>/dev/null)
-if [[ "$WS_EMAIL" == "reillyrd58@gmail.com" ]]; then
+if [[ "$WS_EMAIL" == "rdreilly2010@gmail.com" ]]; then
   pass "Workspace local git email: $WS_EMAIL"
 else
-  fail "Workspace local git email: $WS_EMAIL (expected reillyrd58@gmail.com)"
+  fail "Workspace local git email: $WS_EMAIL (expected rdreilly2010@gmail.com)"
 fi
 
 # ──────────────────────────────────────────────
