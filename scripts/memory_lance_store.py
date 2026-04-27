@@ -136,6 +136,17 @@ def _rrf_score(ranks: list[int], k: int = 60) -> float:
     return sum(1.0 / (k + r) for r in ranks)
 
 
+def _max_updated_at(db_path: Path) -> Optional[str]:
+    """Return MAX(updated_at) across the memories table, or None if empty."""
+    try:
+        con = sqlite3.connect(str(db_path))
+        row = con.execute("SELECT MAX(updated_at) FROM memories").fetchone()
+        con.close()
+        return row[0] if row and row[0] else None
+    except Exception:
+        return None
+
+
 class LanceWarmStore:
     """
     Persistent vector store backed by LanceDB.
@@ -288,6 +299,145 @@ class LanceWarmStore:
             self._table.delete(f"id = {int(memory_id)}")
         except Exception:
             pass
+
+    # ── INCREMENTAL SYNC ──────────────────────────────────────────────────
+    # Watermark stored in the existing `namespace_meta` table under a reserved
+    # namespace key. No schema migration needed.
+    _SYNC_WATERMARK_NS = "__lance_sync__"
+
+    @staticmethod
+    def _read_watermark(db_path: Path) -> Optional[str]:
+        """Return the last-sync ISO-8601 watermark, or None if never synced."""
+        try:
+            con = sqlite3.connect(str(db_path))
+            row = con.execute(
+                "SELECT updated_at FROM namespace_meta WHERE namespace = ?",
+                (LanceWarmStore._SYNC_WATERMARK_NS,),
+            ).fetchone()
+            con.close()
+            return row[0] if row else None
+        except Exception:
+            return None
+
+    @staticmethod
+    def _write_watermark(db_path: Path, watermark: str) -> None:
+        """Persist the last-sync watermark using INSERT OR REPLACE."""
+        try:
+            con = sqlite3.connect(str(db_path))
+            con.execute(
+                "INSERT INTO namespace_meta (namespace, updated_at) VALUES (?, ?) "
+                "ON CONFLICT(namespace) DO UPDATE SET updated_at = excluded.updated_at",
+                (LanceWarmStore._SYNC_WATERMARK_NS, watermark),
+            )
+            con.commit()
+            con.close()
+        except Exception as e:
+            print(
+                f"[memory_lance_store] WARNING: could not persist sync watermark: {e}",
+                file=sys.stderr,
+            )
+
+    def incremental_sync_from_sqlite(
+        self,
+        db_path: Path,
+        model,
+        *,
+        force_full_if_missing: bool = True,
+    ) -> Dict[str, Any]:
+        """
+        Sync only memories whose `updated_at` is greater than the stored
+        watermark. Falls back to a full clean rebuild if no watermark exists
+        and `force_full_if_missing=True`.
+
+        Returns: {
+            'synced': N,           # rows re-embedded and upserted
+            'mode': 'incremental' | 'full',
+            'watermark_before': str | None,
+            'watermark_after': str | None,
+            'duration_s': float,
+        }
+        """
+        import time as _time
+        start = _time.monotonic()
+
+        watermark = self._read_watermark(db_path)
+        if watermark is None and force_full_if_missing:
+            # Cold start — do a full rebuild and stamp the watermark
+            n = self.sync_from_sqlite(db_path, model, clean=True)
+            new_watermark = _max_updated_at(db_path)
+            if new_watermark:
+                self._write_watermark(db_path, new_watermark)
+            return {
+                "synced": n,
+                "mode": "full",
+                "watermark_before": None,
+                "watermark_after": new_watermark,
+                "duration_s": round(_time.monotonic() - start, 3),
+            }
+
+        # Incremental path: pull only changed rows
+        con = sqlite3.connect(str(db_path))
+        con.row_factory = sqlite3.Row
+        if watermark:
+            rows = con.execute(
+                "SELECT * FROM memories WHERE updated_at > ? ORDER BY updated_at",
+                (watermark,),
+            ).fetchall()
+        else:
+            rows = con.execute(
+                "SELECT * FROM memories ORDER BY updated_at"
+            ).fetchall()
+        con.close()
+
+        if not rows:
+            return {
+                "synced": 0,
+                "mode": "incremental",
+                "watermark_before": watermark,
+                "watermark_after": watermark,
+                "duration_s": round(_time.monotonic() - start, 3),
+            }
+
+        # Compute embeddings in a single batch
+        texts = [f"{r['title']} {r['content']}" for r in rows]
+        embeddings = model.encode(texts, convert_to_numpy=True, show_progress_bar=False)
+
+        max_updated = watermark or ""
+        for r, emb in zip(rows, embeddings):
+            d = dict(r)
+            str_id = str(d.get("id", ""))
+            try:
+                int_id = int(str_id)
+            except (ValueError, TypeError):
+                int_id = _stable_int_id(str_id)
+            mem_dict = {
+                "id": int_id,
+                "_uuid": str_id,
+                "namespace": d.get("namespace", "workspace"),
+                "title": d.get("title", ""),
+                "content": d.get("content", ""),
+                "tags": d.get("tags", "[]") if isinstance(d.get("tags"), str) else "[]",
+                "priority": float(d.get("priority", 3)),
+                "tier": d.get("tier", "warm"),
+                "access_count": int(d.get("access_count", 0)),
+                "last_accessed_at": str(d.get("last_accessed_at", "") or ""),
+            }
+            self.upsert(mem_dict, emb)
+            row_updated = str(d.get("updated_at", "") or "")
+            if row_updated > max_updated:
+                max_updated = row_updated
+
+        # Advance the watermark only after successful upserts
+        if max_updated:
+            self._write_watermark(db_path, max_updated)
+
+        return {
+            "synced": len(rows),
+            "mode": "incremental",
+            "watermark_before": watermark,
+            "watermark_after": max_updated or watermark,
+            "duration_s": round(_time.monotonic() - start, 3),
+        }
 
     def truncate(self) -> int:
         """

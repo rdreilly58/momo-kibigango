@@ -63,10 +63,10 @@ python3 "$WORKSPACE/scripts/memory_db.py" expire 2>/dev/null || true
 python3 "$WORKSPACE/scripts/memory_db.py" clean-links 2>/dev/null || true
 
 # 6b. Resync warm LanceDB index from SQLite
-# Without this, memories added above by `memory_db.py add` are invisible to
-# the warm tier until the next manual rebuild, causing SQLite/LanceDB drift.
-# This is a full re-embed and may take a minute or two on large stores.
-echo "🔄 Rebuilding warm LanceDB index from SQLite..."
+# Weekly anchor: do a full clean rebuild so embeddings stay fresh and any
+# legacy rows under stale ID schemes are removed. Fast incremental syncs
+# run via a separate cron (see openclaw cron list).
+echo "🔄 Full rebuild of warm LanceDB index from SQLite (weekly anchor)..."
 python3 "$WORKSPACE/scripts/memory_tier_manager.py" rebuild 2>&1 | tail -5 || \
   echo "   warm rebuild skipped (rebuild command unavailable)"
 
