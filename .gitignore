@@ -151,6 +151,9 @@ STATUS.md
 memory/observations.md
 memory/.last-summary-run
 memory/.observer-last-run
+memory/.observer-last-hash
+memory/.dreams/
+memory/.dream-backups/
 memory/2026-*.md
 memory/DAILY_METRICS_*.md
 logs/session-start.json
