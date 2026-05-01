@@ -6,6 +6,11 @@ token-based cost, and prints a summary + ALERT: lines for any threshold breach.
 Usage: curl ... | python3 anthropic-spend-check.py
        python3 anthropic-spend-check.py < usage.json
 
+For model breakdown, use group_by[]=model query param:
+  curl "https://api.anthropic.com/v1/organizations/usage_report/messages?starting_at=YYYY-MM-DD&ending_at=YYYY-MM-DD&group_by[]=model"
+
+Admin API key (from keychain: AnthropicAdminKey) required — standard API key won't work.
+
 Env vars (optional):
   ANTHROPIC_DAILY_ALERT_USD   — alert if today's cost >= this (default: 20)
   ANTHROPIC_WEEKLY_ALERT_USD  — alert if 7d cost >= this   (default: 100)
@@ -74,7 +79,9 @@ for bucket in data:
                 (cw5m+cw1h)/1e6*p["cw"] + cr/1e6*p["cr"])
         day_cost += cost
         mdl = r.get("model") or "unknown"
-        model_totals[mdl] = model_totals.get(mdl, 0.0) + cost
+        # Trim date suffix for cleaner display (e.g. claude-sonnet-4-6-20250101 → claude-sonnet-4-6)
+        mdl_display = "-".join(p for p in mdl.split("-") if not (len(p) == 8 and p.isdigit()))
+        model_totals[mdl_display] = model_totals.get(mdl_display, 0.0) + cost
 
     total_7d += day_cost
     if day == today:
@@ -88,8 +95,11 @@ print(f"Anthropic spend (7d) — today: ${today_cost:.4f} | 7d: ${total_7d:.4f} 
 
 # Top models by spend
 if model_totals:
-    top = sorted(model_totals.items(), key=lambda x: -x[1])[:3]
-    print("  Top models: " + " | ".join(f"{m.split('-20')[0]}=${c:.2f}" for m, c in top if c > 0.001))
+    top = sorted(model_totals.items(), key=lambda x: -x[1])[:5]
+    print("  Top models:")
+    for m, c in top:
+        if c > 0.001:
+            print(f"    {m:<40} ${c:.4f}")
 
 if high_days:
     print("  High-spend days: " + ", ".join(f"{d}=${c:.2f}" for d, c in high_days))
