@@ -1,0 +1,8 @@
+# DREAMS.md — Nightly Memory Consolidation Log
+
+## DREAMS Run — 2026-05-01 14:59 [DRY RUN]
+
+- Files processed: 31
+- Files: 2026-04-22.md, 2026-04-23.md, 2026-04-24.md, 2026-04-25-1135.md, 2026-04-25-2121.md, 2026-04-25.md, 2026-04-26-0947.md, 2026-04-26-1833.md, 2026-04-26-1836.md, 2026-04-26-2036.md, 2026-04-26-2042.md, 2026-04-26-2108.md, 2026-04-26.md, 2026-04-27-1656.md, 2026-04-27-2141.md, 2026-04-27.md, 2026-04-28.md, 2026-04-29-1620.md, 2026-04-29-1654.md, 2026-04-29.md, 2026-04-30.md, 2026-05-01.md, DAILY_METRICS_2026-04-24.md, DAILY_METRICS_2026-04-25.md, DAILY_METRICS_2026-04-26.md, DAILY_METRICS_2026-04-27.md, DAILY_METRICS_2026-04-28.md, DAILY_METRICS_2026-04-29.md, DAILY_METRICS_2026-04-30.md, lessons-learned.md, observations.md
+- New content added to MEMORY.md: no (nothing new or dry run)
+

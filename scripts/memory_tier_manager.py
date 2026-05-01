@@ -22,6 +22,7 @@ from __future__ import annotations
 import math
 import os
 import sys
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -118,6 +119,10 @@ class TierManager:
         self._auto_sync = auto_sync
         self._searches = 0
         self._hot_hits = 0
+        # Query-level result cache: key → (timestamp, results)
+        # Avoids hitting warm store on repeated identical searches within a session.
+        self._query_cache: Dict[str, tuple] = {}
+        self._query_cache_ttl = 300  # 5 minutes
 
     # ── SEARCH ────────────────────────────────────────────────────────────────
 
@@ -136,6 +141,17 @@ class TierManager:
         """
         self._searches += 1
         model = _get_model()
+
+        # Phase 0 — Query-level hot cache check
+        # Key includes all params that affect results
+        cache_key = f"{query}|{k}|{namespace}|{include_cold}"
+        if cache_key in self._query_cache:
+            cached_ts, cached_results = self._query_cache[cache_key]
+            if time.monotonic() - cached_ts < self._query_cache_ttl:
+                self._hot_hits += 1
+                return cached_results
+            else:
+                del self._query_cache[cache_key]
 
         # Auto-sync on first use if warm store is empty
         if self._auto_sync and self._warm.count() == 0:
@@ -167,7 +183,12 @@ class TierManager:
 
         combined = warm_results + cold_results
         combined.sort(key=lambda r: r.get("_score", 0), reverse=True)
-        return combined[:k]
+        final = combined[:k]
+
+        # Cache search results for hot-path reuse
+        self._query_cache[cache_key] = (time.monotonic(), final)
+
+        return final
 
     # ── STORE ─────────────────────────────────────────────────────────────────
 
@@ -215,7 +236,10 @@ class TierManager:
 
     def get(self, memory_id: str) -> Optional[Dict]:
         """Fetch a single memory by id. Checks hot cache first."""
-        cached = self._hot.get(memory_id)
+        # BUG FIX: HotCache uses integer keys (from _stable_int_id), not string UUIDs.
+        # Convert UUID → int before hot cache lookup so types match.
+        int_id = _stable_int_id(memory_id)
+        cached = self._hot.get(int_id)
         if cached:
             self._hot_hits += 1
             return cached

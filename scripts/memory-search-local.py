@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+# ⚠️  DEPRECATED — 2026-05-01
+# This script is superseded by total_recall_search.py which provides:
+#   - Unified semantic + keyword search
+#   - Auto-routing, caching, JSON output, explain mode
+#   - CLI: total-recall-search <query> [--type auto|semantic|keyword]
+# DO NOT add new features here. Update total_recall_search.py instead.
 """
 Local Memory Search using Sentence Transformers
 No API quota limits, works offline, instant results

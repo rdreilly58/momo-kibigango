@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# ⚠️  DEPRECATED — 2026-05-01
+# This script is superseded by total_recall_search.py which provides:
+#   - Unified semantic + keyword search
+#   - Auto-routing, caching, JSON output, explain mode
+#   - CLI: total-recall-search <query> [--type auto|semantic|keyword]
+# DO NOT add new features here. Update total_recall_search.py instead.
+#
 # Auto-relaunch in the workspace venv if sentence_transformers isn't available.
 import os, sys
 try:
@@ -12,6 +19,8 @@ except ImportError:
 """
 Local Memory Search using Sentence Transformers
 Fast, free, no API keys needed
+
+[DEPRECATED] Use total_recall_search.py instead.
 """
 
 import os

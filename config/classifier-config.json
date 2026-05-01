@@ -61,8 +61,8 @@
       "rules": [
         {
           "pattern": "code|javascript|python|swift|java",
-          "classification": "complex",
-          "reason": "Code-related always complex"
+          "classification": "medium",
+          "reason": "Code-related = Sonnet minimum, not Opus"
         },
         {
           "pattern": "simple|quick|fast|easy",
@@ -71,8 +71,8 @@
         },
         {
           "pattern": "analyze|understand|explain|why",
-          "classification": "complex",
-          "reason": "Analysis requires reasoning"
+          "classification": "medium",
+          "reason": "Analysis = Sonnet; Opus only for explicit complex keywords"
         }
       ]
     }
