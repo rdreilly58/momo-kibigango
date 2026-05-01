@@ -159,6 +159,19 @@ def main():
             print("ℹ️  LanceDB warm index still shows these as 'warm' tier (tier field in Lance")
             print("   is separate from SQLite tier). Run `memory_tier_manager.py rebuild` if")
             print("   you want Lance to reflect the updated tier metadata.")
+            # Update entity graph for newly promoted memories
+            print()
+            print("🔗 Updating entity graph for promoted memories...")
+            import subprocess
+            graph_script = SCRIPTS_DIR / "memory-graph-activate.py"
+            result = subprocess.run(
+                [sys.executable, str(graph_script), "--apply"],
+                capture_output=True, text=True
+            )
+            if result.returncode == 0:
+                print(result.stdout.strip())
+            else:
+                print(f"⚠️  Graph update warning: {result.stderr[:200]}")
     else:
         print(f"[Dry run] Would promote {len(candidates)} memories.")
         print("Run with --commit to apply.")
