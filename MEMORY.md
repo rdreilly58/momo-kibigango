@@ -1,134 +1,69 @@
 
-
 ## 📅 Calendar
 
-- **Primary:** `apple-calendar-cli` — native Apple Calendar via EventKit. Richer data than Google (attendees, alarms, recurrence, notes). Always use `--json`.
+- **Primary:** `apple-calendar-cli` — native Apple Calendar via EventKit. Always use `--json`.
 - **Secondary/fallback:** `memory__calendar_today` / `memory__calendar_range` (Google Calendar)
-- **Set as default:** April 26, 2026
 - **Skill:** `~/.openclaw/workspace/skills/apple-calendar-cli/SKILL.md`
 
 ---
 
-## 📧 Email — Current Auth Status (April 27, 2026)
+## 📧 Email — Auth Status
 
-- **`rdreilly2010@gmail.com`** → ✅ Active, full OAuth (gmail, calendar, drive, docs, tasks, sheets, contacts, people, etc.) — primary account for all read/search/calendar ops
-- **`robert@reillydesignstudio.com`** → ✅ Active OAuth (gmail scope only, added 2026-04-27) — native account; can send-as directly. Replaces reillyrd58 as the migration target.
-- ~~`reillyrd58@gmail.com`~~ → 🗑️ Token removed 2026-04-27. Was broken since 2026-03-21; Bob couldn’t switch the browser away from robert@ during reauth, so the design studio account took its place. Do NOT attempt to send to or auth with reillyrd58 — it’s abandoned.
-- **Send to Bob:** use `rdreilly2010@gmail.com` (most reliable inbox).
-- **Send AS robert@reillydesignstudio.com:** can now use either:
-  - Native: `gog gmail send -a robert@reillydesignstudio.com --to ... --subject ... --body ...`
-  - Via rdreilly2010 send-as alias: `gog gmail send -a rdreilly2010@gmail.com --from robert@reillydesignstudio.com --to ...` (still works, established forwarding/send-as setup)
+- **`rdreilly2010@gmail.com`** → ✅ Active, full OAuth — primary account
+- **`robert@reillydesignstudio.com`** → ✅ Active OAuth (gmail scope, added 2026-04-27)
+- ~~`reillyrd58@gmail.com`~~ → 🗑️ Abandoned. Token removed 2026-04-27. Do NOT use.
+- **Send to Bob:** `rdreilly2010@gmail.com`
 
 ---
 
-## 🛠️ Infrastructure & Tools
+## 🛠️ Memory System (Updated May 1, 2026)
 
-### Total Recall Search (Added April 9, 2026)
-- **Tool:** `~/bin/total-recall-search` → `~/.openclaw/workspace/scripts/total_recall_search.py`
-- Unified semantic + keyword search over memory files and disk
-- 7 improvements implemented; 63/63 tests passing; documented in momo-kioku GitHub
-- Auto-routes: file/path queries → keyword; prose/concept → semantic
-- **Skill:** `openclaw-skills:total-recall-search`
+Memory system fully overhauled. Key scripts:
+- `scripts/total_recall_search.py` — canonical search (use `--rerank` for recency-weighted results)
+- `scripts/memory_tier_manager.py` — hot/warm/cold tier management
+- `scripts/memory-auto-promote.py` — promote memories by priority/tags
+- `scripts/spawn-with-memory.py` — inject memory context into subagent spawns (Phase 1)
+- `scripts/memory-writeback.py` — subagent write-back via QMD (Phase 2)
+- `scripts/dreams-consolidation.py` — nightly consolidation (23:30 cron)
+- `scripts/memory-decay.py` — TTL decay (weekly)
+- `scripts/memory-rerank.py` — recency × relevance composite scoring
+- `memory/CROSS-AGENT-MEMORY.md` — cross-agent memory protocol
 
-### FastFindApp (Fixed April 8, 2026)
-- FileSearcher.swift fully rewritten in native Swift
-- Uses `kMDItemFSName` Spotlight AND logic for multi-word filename search (not OR)
-- Script at `~/bin/fast-find-improved.sh` (user-owned — macOS sandbox blocks system paths)
-- App installed at `~/Applications/FastFindApp.app`, running in menu bar
-
-### Memory Search Override
-- **Built-in `memory_search` tool is BROKEN** — hardcoded to OpenAI, quota exceeded
-- Use `mem-search "query"` alias instead (local Sentence Transformers)
-- Or use `total-recall-search` for full unified search
-
-### Total Recall Observer (Cross-session memory)
-- Reads `memory/observations.md` at session startup for cross-session context
-- Observer cron auto-consolidates observations into MEMORY.md when over threshold
-- Config: `vectorWeight: 0.7`, `textWeight: 0.3`, MMR `lambda: 0.7`
+Native OpenClaw dreaming enabled (3 AM daily). Entity graph: 217 entities, 2,732 links.
 
 ---
 
-## 🔧 Known Issues / Troubleshooting
+## 🔧 Known Issues / Active
 
-### Google Tasks `jq` Display Issue (April 9, 2026)
-- During heartbeat checks, `jq` sometimes shows `• \(.title)` instead of task names
-- Task count is correct; only the formatted list is broken
-- Root cause: escaping issue within `exec` call for `jq`
-
-### OpenClaw 2026.4.2 Regressions (April 7, 2026)
-- `claude-cli/` provider prefix no longer recognized → use `anthropic/claude-sonnet-4-6` directly
-- Telegram requires explicit `plugins.allow` + `plugins.entries` registration (was built-in)
-- Anthropic Sonnet times out at exactly :01 past the hour (61s); Gemini fallback succeeds
-
----
-
-## 🖥️ System State
-
-### AWS GPU Instance
-- **`54.81.20.218` is DOWN** — 100% packet loss since ~April 5, 2026
-- Requires restart/replacement in AWS console
-- Workarounds available: local M4 Mac Mini GPU, Google Colab H100
-
-### Telegram
-- Credentials configured April 11, 2026
-- Bot token: `(stored in ~/.openclaw/config.json)`
-- Chat ID: `8755120444`
-- Daily briefings and heartbeat notifications now enabled
-
-### OpenRouter API Credits
-- Credits exhausted as of ~April 11, 2026
-- Total Recall Observer falling back to Anthropic Haiku native API
-- Replenish at: https://openrouter.ai/settings/credits
-
----
-
-## 📋 Active Projects
-
-### ReDrafter Benchmarking
-- `benchmark_redrafter_rewritten.py` running with `Qwen/Qwen2.5-7B-Instruct`
-- Output: `redrafter_benchmark_output.txt`
-- Colab training notebooks committed to repo (A100, all fixes applied)
-
-### momo-kioku GitHub Repo
-- `total_recall_search` README.md pushed April 9, 2026
-- Documents all 7 improvements and CLI usage
+### Cron Isolation (Partial — May 1, 2026)
+10 monitoring crons still running in main session. `openclaw cron edit` requires `--message` re-supplied for agentTurn crons. Need per-cron re-add to complete migration.
 
 ---
 
 ## ✅ Decisions Made
 
-### Cascade Proxy (Decommissioned April 11, 2026)
-- Trial ended April 5, 2026; zero requests routed
-- Bob ordered full removal of measurement and reporting infrastructure
-- Cascade Daily Report cron deleted April 12, 2026
+### Model Routing (Updated May 1, 2026)
+- Default: `claude-sonnet-4-6`
+- Cron/heartbeat: `claude-haiku-4-5`
+- Subagents: `claude-sonnet-4-6` (Opus guardrail — subagents locked to Sonnet)
+- Complex/on-demand: `claude-opus-4-7`
+- Fallback: `google/gemini-2.5-flash`
+- See `TASK_ROUTING.md` for classifier logic
 
-### Model Routing (Updated April 16, 2026)
-- Three-tier routing: Haiku (simple/short) → Sonnet (default/medium) → Opus (complex)
-- `openrouter/auto` removed — explicit model IDs used instead
-- Sonnet 4-6 is now the default tier for most tasks
-- See `TASK_ROUTING.md` and `config/classifier-config.json` for details
+### Memory Backend (May 1, 2026)
+- Backend: QMD with `searchMode: query`, Ollama nomic-embed-text
+- QMD update interval: 60s (for subagent write-back latency)
+- Dreaming: enabled natively (3 AM daily sweep)
 
 ---
 
 ## 📋 Lessons Learned
 
-- **File**: `memory/lessons-learned.md`
-- Running record of non-trivial problems, root causes, fixes, and prevention steps
-- **Convention**: `fix:` commits should reference the relevant entry with `(see lessons-learned.md#anchor)` in the commit body
-- Observer agent flags new `fix:` commits → reminds to add a lessons entry
-- Quarterly review cron (Jan/Apr/Jul/Oct 1st, 09:03) surfaces entries older than 90 days for promotion to MEMORY.md or archival
+- **File:** `memory/lessons-learned.md` — running record of problems, root causes, fixes
+- `fix:` commits should reference entry: `(see lessons-learned.md#anchor)`
 
 ---
 
 ## 📝 Pending Tasks
 
-Tracked in Things 3 (migrated 2026-04-16). Use `things today` or `things inbox` — not this file.
-
----
-
-## 🔌 Remote Access (Updated May 1, 2026)
-
-- **Tailscale: UNINSTALLED** — removed 2026-05-01 (both Homebrew package + app stubs)
-- Remote access now via **direct SSH / Termius** on local network only
-- No VPN in use
-- Termius configured on iPhone/iPad with direct connection
+Tracked in Things 3. Use `things today` or `things inbox` — not this file.
