@@ -46,6 +46,70 @@ check_brave_quota() {
     fi
 }
 
+check_anthropic_credits() {
+    # Anthropic doesn't expose a balance endpoint for standard API keys.
+    # Best signal: probe with a 1-token request and inspect the error type.
+    #   - success          → credits OK
+    #   - overloaded_error → server busy, credits fine
+    #   - billing_error / "credit" in message → exhausted
+    #   - authentication_error → bad key
+    local key="${ANTHROPIC_API_KEY:-}"
+    if [ -z "$key" ]; then
+        key=$(security find-generic-password -s "AnthropicAPI" -w 2>/dev/null || true)
+    fi
+    if [ -z "$key" ]; then
+        log "⚠️  Anthropic: API key not found in env or keychain — skipping"
+        return
+    fi
+
+    local response
+    response=$(curl -s --max-time 15 "https://api.anthropic.com/v1/messages" \
+        -H "x-api-key: $key" \
+        -H "anthropic-version: 2023-06-01" \
+        -H "content-type: application/json" \
+        -d '{"model":"claude-haiku-4-5","max_tokens":1,"messages":[{"role":"user","content":"hi"}]}' \
+        2>/dev/null)
+
+    if [ -z "$response" ]; then
+        log "❌ Anthropic: no response (network error or timeout)"
+        ALERTS+=("Anthropic API unreachable")
+        return
+    fi
+
+    local err_type
+    err_type=$(echo "$response" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('error',{}).get('type','none'))" 2>/dev/null || echo "parse_error")
+    local err_msg
+    err_msg=$(echo "$response" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('error',{}).get('message',''))" 2>/dev/null || echo "")
+
+    case "$err_type" in
+        none)
+            local tokens
+            tokens=$(echo "$response" | python3 -c "import json,sys; d=json.load(sys.stdin); u=d.get('usage',{}); print(f'in={u.get(\"input_tokens\",\"?\")}, out={u.get(\"output_tokens\",\"?\")}')" 2>/dev/null || echo "?")
+            log "✅ Anthropic API: credits OK (probe: $tokens tokens)"
+            ;;
+        overloaded_error)
+            log "⚠️  Anthropic API: server overloaded (credits OK, retry later)"
+            ;;
+        billing_error)
+            log "❌ Anthropic API: billing/credits issue — $err_msg"
+            ALERTS+=("Anthropic credits exhausted or billing error")
+            ;;
+        authentication_error)
+            log "❌ Anthropic API: authentication failed — key may be invalid or rotated"
+            ALERTS+=("Anthropic API key invalid")
+            ;;
+        *)
+            # Catch credit-related language in any error message
+            if echo "$err_msg" | grep -qi "credit\|balance\|quota\|payment"; then
+                log "❌ Anthropic API: possible credit issue — $err_type: $err_msg"
+                ALERTS+=("Anthropic possible credit issue: $err_msg")
+            else
+                log "⚠️  Anthropic API: unexpected error — $err_type: $err_msg"
+            fi
+            ;;
+    esac
+}
+
 check_cloudflare_quota() {
     # Cloudflare doesn't expose detailed quota via API
     if curl -s -f https://api.cloudflare.com/client/v4/zones \
@@ -66,6 +130,7 @@ check_hf_quota() {
 log "🔍 Quota Monitoring Check Started"
 check_openai_quota
 check_brave_quota
+check_anthropic_credits
 check_cloudflare_quota
 check_hf_quota
 
