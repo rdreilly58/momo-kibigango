@@ -2,9 +2,9 @@ version: "3.9"
 
 # Self-hosted ntfy notification server
 #
-# Listens on 127.0.0.1:8085 (loopback only) plus the Tailscale interface,
-# which makes it reachable from the iPhone (bobiphone) over Tailscale without
-# exposing it to the public internet.
+# Listens on 127.0.0.1:8085 (loopback only).
+# Reachable from iPhone/iPad via local network or direct SSH tunnel.
+# Note: Tailscale was removed 2026-05-01 — no longer used for remote access.
 #
 # Prerequisites
 # -------------

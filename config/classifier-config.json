@@ -30,29 +30,14 @@
       "medium_model": "anthropic/claude-sonnet-4-6",
 
       "complex_keywords": [
-        "build",
         "refactor",
-        "analyze",
-        "debug",
-        "write",
-        "create",
-        "design",
-        "implement",
-        "fix",
-        "troubleshoot",
-        "optimize",
-        "improve",
-        "review",
-        "evaluate",
-        "strategy",
-        "decision",
-        "plan",
         "architecture",
-        "examine",
-        "recommend",
-        "recommendations"
+        "audit",
+        "migrate",
+        "benchmark",
+        "deploy"
       ],
-      "complex_model": "anthropic/claude-opus-4-6",
+      "complex_model": "anthropic/claude-opus-4-7",
 
       "context_simple": {
         "max_chars": 5000,

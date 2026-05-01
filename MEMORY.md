@@ -123,3 +123,12 @@
 ## 📝 Pending Tasks
 
 Tracked in Things 3 (migrated 2026-04-16). Use `things today` or `things inbox` — not this file.
+
+---
+
+## 🔌 Remote Access (Updated May 1, 2026)
+
+- **Tailscale: UNINSTALLED** — removed 2026-05-01 (both Homebrew package + app stubs)
+- Remote access now via **direct SSH / Termius** on local network only
+- No VPN in use
+- Termius configured on iPhone/iPad with direct connection

@@ -28,7 +28,7 @@
 - ✅ `thinking="off"` — skip reasoning overhead
 - Saves 2-3 seconds per request
 
-**Model:** `anthropic/claude-haiku-4-5-20251001`
+**Model:** `anthropic/claude-haiku-4-5`
 
 **Hard rule:** If message word count > 50, minimum tier is Sonnet. No exceptions.
 
@@ -58,7 +58,7 @@
 
 **Model:** `anthropic/claude-sonnet-4-6`
 
-**This is the default tier.** Anything that doesn't match simple or complex keywords routes here.
+**This is the default tier.** Anything that doesn't match simple or complex keywords routes here. Gateway default is also Sonnet — Telegram, cron jobs, and all channels without overrides land here.
 
 ---
 
@@ -66,13 +66,14 @@
 **Characteristics:** Multi-step, deep reasoning, coding, architecture, strategy, >5 min work
 
 **Examples:**
-- Coding tasks (design, refactor, build, debug)
-- Strategic decisions, analysis
-- Writing/editing (emails, documentation, content) requiring deep reasoning
-- Multi-step workflows (deployments, audits)
-- Problem-solving that needs extended reasoning
-- Research and synthesis
-- Context-aware responses (understanding ongoing projects)
+- Major refactors or architectural changes
+- Security/compliance audits
+- Data migrations
+- Benchmark design and analysis
+- Complex multi-system deployments
+- Anything explicitly requiring `/opus`
+
+**NOT Opus:** writing emails, explaining things, reviewing code, debugging, strategy discussion, planning — those are Sonnet.
 
 **Context Loading:**
 - ✅ SOUL.md (who you are)
@@ -87,7 +88,7 @@
 - ✅ `thinking="full"` (extended reasoning for hard problems)
 - ✅ `thinking="off"` (rare — skip if user asks for speed)
 
-**Model:** `anthropic/claude-opus-4-6`
+**Model:** `anthropic/claude-opus-4-7`
 
 ---
 
@@ -125,13 +126,19 @@
 
 ## Implementation
 
-**Classifier logic** (implemented in `scripts/task-classifier.py` — single source of truth):
+**Classifier logic** (implemented in `scripts/task-classifier.py` + `config/classifier-config.json`):
 1. **Code patterns** (```` ``` ````, `def `, `class `) → MEDIUM (Sonnet) minimum
-2. **Opus keywords** (refactor, architecture, audit, migrate, research+synthesize) → COMPLEX
-3. **Sonnet keywords** (write, email, explain, fix, code, review) → MEDIUM
+2. **Opus keywords** (refactor, architecture, audit, migrate, benchmark, deploy) → COMPLEX
+3. **Sonnet keywords** (write, email, explain, fix, code, review, design, analyze, plan, strategy, debug, optimize, improve, create, examine, recommend) → MEDIUM
 4. **Multi-line / chained query** → MEDIUM minimum
 5. **Simple keywords + short (≤10 tokens)** → SIMPLE (Haiku)
 6. **Default** → MEDIUM (Sonnet — never default to Haiku or Opus)
+
+**Gateway defaults (updated May 2026):**
+- `model.default`: `anthropic/claude-sonnet-4-6` (was `claude-opus-4-0`)
+- `model.complex`: `anthropic/claude-opus-4-7`
+- `model.fallback`: `google/gemini-2.5-flash` → `anthropic/claude-haiku-4-5`
+- Telegram channel: explicit `anthropic/claude-sonnet-4-6` override
 
 **Context loader (load order matters — primacy/recency bias):**
 ```

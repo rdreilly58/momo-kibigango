@@ -72,45 +72,11 @@ else
 fi
 
 # ──────────────────────────────────────────────
-header "4. Tailscale Integration"
+header "4. Remote Access (Tailscale removed May 2026)"
 # ──────────────────────────────────────────────
-TS_MODE=$(cat "$CONFIG" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('gateway',{}).get('tailscale',{}).get('mode','MISSING'))")
-if [[ "$TS_MODE" == "serve" ]]; then
-  pass "gateway.tailscale.mode=serve"
-else
-  fail "gateway.tailscale.mode=$TS_MODE (expected serve)"
-fi
-
-TS_PROXIES=$(cat "$CONFIG" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('gateway',{}).get('trustedProxies','MISSING'))")
-if [[ "$TS_PROXIES" != "MISSING" && "$TS_PROXIES" != "[]" ]]; then
-  pass "gateway.trustedProxies configured: $TS_PROXIES"
-else
-  fail "gateway.trustedProxies not set"
-fi
-
-# Check tailscale is running
-TS_STATUS=$(tailscale status 2>/dev/null | grep "bobs-m4-mac-mini" | head -1)
-if [[ -n "$TS_STATUS" ]]; then
-  pass "Tailscale node is active"
-else
-  fail "Tailscale node not found"
-fi
-
-# Check Tailscale serve is live
-TS_SERVE=$(tailscale serve status 2>/dev/null | grep "tail321872.ts.net" | head -1)
-if [[ -n "$TS_SERVE" ]]; then
-  pass "Tailscale Funnel/Serve active: $(echo $TS_SERVE | xargs)"
-else
-  fail "Tailscale Funnel/Serve not configured"
-fi
-
-# Check gateway log confirms tailscale active
-TS_LOG=$(openclaw logs 2>/dev/null | grep "tailscale.*serve enabled" | tail -1)
-if [[ -n "$TS_LOG" ]]; then
-  pass "Gateway confirmed Tailscale serve enabled"
-else
-  warn "Tailscale serve confirmation not in recent logs"
-fi
+# Tailscale uninstalled 2026-05-01. Remote access now via direct SSH only.
+# Termius is configured on iPhone/iPad with direct IP or local network.
+warn "Tailscale removed — remote access via direct SSH/Termius only"
 
 # ──────────────────────────────────────────────
 header "5. iMessage Plugin (disabled — intentionally removed)"

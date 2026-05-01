@@ -134,3 +134,16 @@ bob-shutdown       # graceful power-off
 **Usage:** `bash ~/.openclaw/workspace/scripts/fast-find.sh "your query" [limit]`
 **Purpose:** Leverages macOS Spotlight (`mdfind`) for very fast keyword searching across the entire disk.
 **Example:** `bash ~/.openclaw/workspace/scripts/fast-find.sh "momo-akira" 20`
+
+---
+
+## Remote Access (Updated May 1, 2026)
+
+**Tailscale: UNINSTALLED** — removed 2026-05-01.
+
+Remote access to Mac mini is now via **direct SSH only**:
+- **Termius** on iPhone/iPad → direct IP or local network
+- **SSH** via standard port on local network
+- No VPN tunnel required
+
+For exec on Mac from agent: use `exec host=node` (Bob's M4 Mac mini node is registered in OpenClaw).
