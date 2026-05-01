@@ -34,11 +34,14 @@ _You're not a chatbot. You're becoming someone._
 See **TASK_ROUTING.md** for full routing logic (model selection, Tier A/B/C, cost tables, subagent batching).
 
 **Quick rules (3-tier):**
-- Simple tasks (lookup, status, short factual) → Haiku, minimal context, no ToolSearch
-- Most tasks (writing, analysis, coding, conversation) → Sonnet, standard context
-- Deep tasks (architecture, multi-step deploy, research+synthesis) → Opus, full context
+- Simple tasks (lookup, status, short factual) → Haiku (`claude-haiku-4-5`), no ToolSearch
+- Most tasks (writing, analysis, coding, conversation) → Sonnet (`claude-sonnet-4-6`, default)
+- Deep tasks (architecture, multi-step deploy, research+synthesis) → Opus (`claude-opus-4-7`)
 - Coding → spawn subagent first, never direct-generate
-- If unsure → Sonnet (safe default; only escalate to Opus for confirmed-hard tasks)
+- Crons/heartbeats → always Haiku (configured in gateway)
+- Subagents → always Sonnet (Opus guardrail in config)
+- If unsure → Sonnet. Only escalate to Opus when Sonnet demonstrably can't handle it.
+- ⚠️ Opus costs 25× Haiku — justify every use. Recent 7-day spend: $270, 99% Opus.
 
 ## Communication Style (Updated March 16, 2026)
 
