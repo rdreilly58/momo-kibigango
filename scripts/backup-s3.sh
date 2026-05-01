@@ -94,7 +94,7 @@ else
   OBJECTS=$(aws s3 ls "s3://${S3_BUCKET}/${S3_PREFIX}/" --recursive \
     | sort \
     | awk '{print $4}' \
-    | head -n -${KEEP_S3_OBJECTS})
+    | python3 -c "import sys; lines=sys.stdin.read().splitlines(); [print(l) for l in lines[int('30'):]]")
   if [[ -n "$OBJECTS" ]]; then
     while IFS= read -r obj; do
       aws s3 rm "s3://${S3_BUCKET}/$obj" && log "  Deleted old: $obj" || true
