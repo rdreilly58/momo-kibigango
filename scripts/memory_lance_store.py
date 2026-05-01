@@ -270,16 +270,25 @@ class LanceWarmStore:
 
         # RRF with weights
         k_rrf = 60
+        n_fts = len(fts_results)
+        n_vec = len(vector_results)
         scored = []
         for mid in all_ids:
-            vec_rank = vec_ranks.get(mid, len(vector_results) + 100)
-            fts_rank = fts_ranks.get(mid, len(fts_results) + 100)
+            vec_rank = vec_ranks.get(mid, n_vec + 100)
+            fts_rank = fts_ranks.get(mid, n_fts + 100)
             vec_score = 0.6 / (k_rrf + vec_rank)
             fts_score = 0.3 / (k_rrf + fts_rank)
             rec = id_to_record.get(mid, {})
             priority_norm = float(rec.get("priority", 3)) / 10.0
             priority_score = 0.1 * priority_norm
-            total = vec_score + fts_score + priority_score
+            # Boost strong FTS matches: top FTS hits should always surface
+            # regardless of priority-dominated vector scores. This ensures
+            # exact/near-exact textual matches aren't buried by high-priority
+            # off-topic memories.
+            fts_boost = 0.0
+            if fts_rank <= 2:
+                fts_boost = 0.05  # lift top FTS hits above median priority scores
+            total = vec_score + fts_score + priority_score + fts_boost
             scored.append((mid, total))
 
         scored.sort(key=lambda x: x[1], reverse=True)
