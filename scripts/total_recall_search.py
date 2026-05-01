@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+from __future__ import annotations
 # Auto-relaunch in the workspace venv if sentence_transformers isn't available.
 import os, sys
 try:
@@ -29,13 +30,12 @@ Usage:
                                           [--index-dir /path]
                                           [--prune-old]
                                           [--no-cache]
+                                          [--rerank]
 
 Exit codes:
   0  Success (even if zero results)
   1  Unrecoverable error (both backends failed)
 """
-
-from __future__ import annotations
 
 import argparse
 import hashlib
@@ -857,6 +857,8 @@ def total_recall_search(
     # improvement 6
     index_dirs: Optional[List[str]] = None,
     prune_old: bool = False,
+    # improvement 11: recency × relevance reranking
+    rerank: bool = False,
 ) -> List[Dict]:
     """
     Public entry point. Returns a list of result dicts.
@@ -868,6 +870,7 @@ def total_recall_search(
       use_cache   — enable 5-min result cache (default True)
       index_dirs  — extra dirs for semantic indexing
       prune_old   — skip memory files older than 90 days
+      rerank      — apply recency × relevance composite reranking (default False)
     """
     t0 = time.time()
 
@@ -942,6 +945,18 @@ def total_recall_search(
         ck = _cache_key(query, search_type, limit, path)
         _write_cache(ck, results)
 
+    # Improvement 11: optional recency × relevance reranking
+    if rerank and results:
+        try:
+            import importlib.util as _ilu
+            _rr_path = Path(__file__).parent / "memory-rerank.py"
+            _rr_spec = _ilu.spec_from_file_location("memory_rerank", _rr_path)
+            _rr_mod = _ilu.module_from_spec(_rr_spec)  # type: ignore
+            _rr_spec.loader.exec_module(_rr_mod)  # type: ignore
+            results = _rr_mod.rerank(results)
+        except Exception as _rr_exc:
+            _vlog(f"[rerank] reranking skipped: {_rr_exc}")
+
     return results
 
 
@@ -1012,6 +1027,10 @@ Examples:
         "--prune-old", action="store_true",
         help=f"Skip memory files older than {PRUNE_DAYS} days during semantic indexing",
     )
+    p.add_argument(
+        "--rerank", action="store_true",
+        help="Apply recency × relevance composite reranking (score = 0.6×sim + 0.25×recency + 0.15×access)",
+    )
     return p
 
 
@@ -1073,6 +1092,7 @@ def main() -> int:
         use_cache=not args.no_cache,
         index_dirs=args.index_dirs,
         prune_old=args.prune_old,
+        rerank=getattr(args, 'rerank', False),
     )
 
     if args.json:
