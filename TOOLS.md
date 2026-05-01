@@ -105,6 +105,28 @@ Gateway restart required to activate (or restart automatically next gateway cycl
 
 ---
 
+## Pre-Reboot Graceful App-Quit (Added April 30, 2026)
+
+**Problem:** macOS 26.3 (Tahoe) Mail.app's WebKit child processes refuse to terminate cleanly during shutdown, causing 60–90 s hangs (`pageCount > 0` with `shutdownPreventingScopeCounter = 0`). Bob's M4 hung 88 s on Apr 30 reboot.
+
+**Solution:** Pre-quit known offenders before invoking `shutdown`/`reboot`.
+
+```bash
+bob-reboot         # graceful restart (quits Mail/Music/Photos/Safari first)
+bob-shutdown       # graceful power-off
+```
+
+**Files:**
+- `~/.openclaw/workspace/scripts/pre-reboot-quit-apps.sh` — the quit logic (8 s grace per app, then SIGTERM)
+- `~/.openclaw/workspace/scripts/bob-reboot.sh` — wrapper that calls quit script + `sudo shutdown -r now`
+- `~/Library/LaunchAgents/com.momotaro.pre-reboot-quit-apps.plist` — watches `~/.openclaw/state/reboot-trigger` (manual hook for future automation)
+- Aliases in `~/.zshrc`: `bob-reboot`, `bob-shutdown`
+- Logs: `~/.openclaw/logs/pre-reboot-quit-apps.log`
+
+**Add new offenders:** edit `BLOCKING_APPS` array in `pre-reboot-quit-apps.sh`. Detection rule: search `/usr/bin/log show ... eventMessage CONTAINS "canTerminateAuxiliaryProcess"` after a slow shutdown.
+
+---
+
 ## Fast Disk Search (via mdfind) - Added April 8, 2026
 
 **Tool:** `fast-find.sh`

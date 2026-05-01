@@ -26,13 +26,19 @@ check_openai_quota() {
 }
 
 check_brave_quota() {
-    # Brave doesn't expose quota via API, but we monitor by checking connectivity
-    if [ -z "${BRAVE_API_KEY:-}" ]; then
-        log "⚠️  Brave Search: BRAVE_API_KEY not configured — skipping"
+    # Brave key lives in macOS keychain under service 'BraveSearchAPI'
+    # Fall back to env var BRAVE_API_KEY if set
+    local brave_key="${BRAVE_API_KEY:-}"
+    if [ -z "$brave_key" ]; then
+        brave_key=$(security find-generic-password -s "BraveSearchAPI" -w 2>/dev/null || true)
+    fi
+    if [ -z "$brave_key" ]; then
+        log "⚠️  Brave Search: key not found in keychain or env — skipping"
         return
     fi
     if curl -s -f "https://api.search.brave.com/res/v1/web/search?q=test&count=1" \
-        -H "X-Subscription-Token: $BRAVE_API_KEY" > /dev/null 2>&1; then
+        -H "Accept: application/json" \
+        -H "X-Subscription-Token: $brave_key" > /dev/null 2>&1; then
         log "✅ Brave Search: Operating normally"
     else
         log "❌ Brave Search: Connection failed"

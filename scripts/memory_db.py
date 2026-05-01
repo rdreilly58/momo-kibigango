@@ -24,10 +24,51 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sqlite3
 import sys
 import uuid
 from contextlib import contextmanager
+
+
+# FTS5 reserved characters that break the query parser when bare.
+# Strategy: tokenize the query, strip punctuation inside terms, and quote
+# multi-word/punctuated terms as phrases. This preserves intent while making
+# the query syntactically valid for FTS5 MATCH.
+_FTS5_OPERATORS = {"AND", "OR", "NOT", "NEAR"}
+# Strip everything that's not alphanumeric, underscore, or whitespace from
+# token interiors. Apostrophes and dots become spaces so "Rocket.Chat" splits
+# cleanly into ["Rocket", "Chat"].
+_FTS5_TOKEN_SPLIT = re.compile(r"[^\w\s]+")
+
+
+def sanitize_fts5_query(query: str) -> str:
+    """
+    Make a user-supplied query safe for SQLite FTS5 MATCH.
+
+    - Strips/replaces FTS5 special characters (. : - / ( ) " ' etc.) that
+      otherwise produce 'fts5: syntax error' for queries like 'Rocket.Chat'.
+    - Preserves AND/OR/NOT/NEAR operators if user typed them in caps.
+    - Falls back to a single phrase quote if sanitisation strips everything.
+    """
+    if not query or not query.strip():
+        return '""'
+
+    # Replace special punctuation with spaces, then collapse whitespace.
+    cleaned = _FTS5_TOKEN_SPLIT.sub(" ", query).strip()
+    if not cleaned:
+        # Nothing usable left — wrap original as a phrase (will return 0 hits but won't crash).
+        return '"' + query.replace('"', "") + '"'
+
+    tokens = cleaned.split()
+    safe_tokens = []
+    for tok in tokens:
+        if tok in _FTS5_OPERATORS:
+            safe_tokens.append(tok)
+        else:
+            # Lowercase for stability; FTS5 default tokenizer is case-insensitive anyway.
+            safe_tokens.append(tok.lower())
+    return " ".join(safe_tokens)
 
 # Audit logging
 try:
@@ -288,7 +329,8 @@ class MemoryDB:
         tier: Optional[str] = None,
         limit: int = 10,
     ) -> List[Dict]:
-        """Full-text search via FTS5."""
+        """Full-text search via FTS5. User query is sanitized for FTS5 syntax."""
+        safe_query = sanitize_fts5_query(query)
         with _conn(self.db_path) as con:
             if namespace:
                 rows = con.execute(
@@ -297,7 +339,7 @@ class MemoryDB:
                        JOIN memories m ON m.rowid = memories_fts.rowid
                        WHERE memories_fts MATCH ? AND m.namespace=?
                        ORDER BY rank LIMIT ?""",
-                    (query, namespace, limit),
+                    (safe_query, namespace, limit),
                 ).fetchall()
             else:
                 rows = con.execute(
@@ -306,7 +348,7 @@ class MemoryDB:
                        JOIN memories m ON m.rowid = memories_fts.rowid
                        WHERE memories_fts MATCH ?
                        ORDER BY rank LIMIT ?""",
-                    (query, limit),
+                    (safe_query, limit),
                 ).fetchall()
             results = []
             for row in rows:

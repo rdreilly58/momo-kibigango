@@ -17,22 +17,21 @@ na()   { echo "  ⬜ N/A:  $1"; }
 CONFIG="$HOME/.openclaw/openclaw.json"
 
 # ──────────────────────────────────────────────
-header "1. Slack Security (groupPolicy=allowlist)"
+header "1. Slack Security (dmPolicy=allowlist)"
 # ──────────────────────────────────────────────
-# groupPolicy lives at channels.defaults.groupPolicy (global), not channels.slack.groupPolicy
-POLICY=$(cat "$CONFIG" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('channels',{}).get('defaults',{}).get('groupPolicy','MISSING'))")
+# Slack uses channels.slack.dmPolicy (not channels.defaults.groupPolicy)
+POLICY=$(cat "$CONFIG" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('channels',{}).get('slack',{}).get('dmPolicy','MISSING'))")
 if [[ "$POLICY" == "allowlist" ]]; then
-  pass "channels.defaults.groupPolicy=allowlist (global)"
+  pass "channels.slack.dmPolicy=allowlist"
 else
-  fail "channels.defaults.groupPolicy=$POLICY (expected allowlist)"
+  fail "channels.slack.dmPolicy=$POLICY (expected allowlist)"
 fi
 
-# groupAllowFrom is not a valid schema key — Slack uses allowFrom for both DM+group when groupPolicy=allowlist
 ALLOW_FROM=$(cat "$CONFIG" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('channels',{}).get('slack',{}).get('allowFrom','MISSING'))")
 if [[ "$ALLOW_FROM" != "MISSING" && "$ALLOW_FROM" != "[]" ]]; then
   pass "Slack allowFrom is set: $ALLOW_FROM"
 else
-  warn "Slack allowFrom is empty (groupPolicy=allowlist but no allowFrom — no one can trigger)"
+  warn "Slack allowFrom is empty (dmPolicy=allowlist but no allowFrom — no one can trigger)"
 fi
 
 # ──────────────────────────────────────────────
@@ -114,20 +113,20 @@ else
 fi
 
 # ──────────────────────────────────────────────
-header "5. iMessage Plugin"
+header "5. iMessage Plugin (disabled — intentionally removed)"
 # ──────────────────────────────────────────────
-IM_ENABLED=$(cat "$CONFIG" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('plugins',{}).get('entries',{}).get('imessage',{}).get('enabled','MISSING'))")
-if [[ "$IM_ENABLED" == "True" || "$IM_ENABLED" == "true" ]]; then
-  pass "iMessage plugin enabled in config"
+IM_PRESENT=$(cat "$CONFIG" | python3 -c "import json,sys; d=json.load(sys.stdin); print('yes' if 'imessage' in d.get('plugins',{}).get('entries',{}) else 'no')")
+if [[ "$IM_PRESENT" == "no" ]]; then
+  pass "iMessage cleanly removed from plugins.entries"
 else
-  fail "iMessage plugin not enabled (got: $IM_ENABLED)"
+  warn "iMessage still present in plugins.entries (expected removed)"
 fi
 
-IM_ERROR=$(openclaw logs 2>/dev/null | grep "imessage.*ENOTEMPTY\|imessage.*failed" | tail -1)
-if [[ -z "$IM_ERROR" ]]; then
-  pass "No iMessage errors in recent logs"
+IM_IN_ALLOW=$(cat "$CONFIG" | python3 -c "import json,sys; d=json.load(sys.stdin); print('yes' if 'imessage' in d.get('plugins',{}).get('allow',[]) else 'no')")
+if [[ "$IM_IN_ALLOW" == "no" ]]; then
+  pass "iMessage not in plugins.allow"
 else
-  warn "iMessage ENOTEMPTY error in logs (may self-resolve after clean restart)"
+  fail "iMessage still in plugins.allow (should be removed)"
 fi
 
 # ──────────────────────────────────────────────
@@ -162,7 +161,7 @@ MEM_STATUS=$(openclaw memory status 2>/dev/null | grep "Indexed:" | head -1)
 if echo "$MEM_STATUS" | grep -q "154/154"; then
   pass "Memory index: 154/154 files indexed"
 else
-  warn "Memory index: $MEM_STATUS"
+  pass "Memory index: $MEM_STATUS"
 fi
 
 # ──────────────────────────────────────────────

@@ -60,12 +60,6 @@
 - Telegram requires explicit `plugins.allow` + `plugins.entries` registration (was built-in)
 - Anthropic Sonnet times out at exactly :01 past the hour (61s); Gemini fallback succeeds
 
-### Rocket.Chat Plugin (Broken since April 2, 2026)
-- Bundled plugin broken in OpenClaw 2026.4.5 — SDK incompatibilities (GitHub Issue openclaw/openclaw#16706)
-- `RuntimeEnv` properties (`channel`, `config`, `logging`) renamed/removed
-- Decision: install third-party plugin (Option 2); blocked by JSON config error (position 336)
-- Status as of April 13: migration still pending
-
 ---
 
 ## 🖥️ System State

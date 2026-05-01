@@ -156,9 +156,19 @@ def _cosine_scores(query_emb: np.ndarray) -> np.ndarray:
     return (matrix / safe_norms) @ query_emb / query_norm
 
 
+# Threshold for legacy flat-file semantic_search() (raw cosine similarity, 0–1).
+# all-MiniLM-L6-v2 typical relevant match range: 0.25–0.60. Was incorrectly
+# set to 0.78 (appropriate for nomic-embed-text, not this model), causing
+# memory_graph_search to always return empty seeds. Fixed 2026-05-01.
 MIN_SCORE_THRESHOLD = (
-    0.78  # Drop chunks below this cosine similarity — reduces retrieval noise
+    0.25  # Drop chunks below this cosine similarity — calibrated for all-MiniLM-L6-v2
 )
+
+# Threshold for tiered TierManager.search() results, which use RRF fusion scores.
+# RRF scores are typically in the 0.01–0.10 range — a different scale entirely.
+# Floor weeds out near-zero noise without dropping legitimate hits.
+# Cold-tier results are exempt (already time-decayed, scored separately).
+MIN_TIER_SCORE_THRESHOLD = 0.01
 
 
 def semantic_search(
@@ -315,11 +325,16 @@ def memory_search(
     try:
         mgr = _get_tier_manager()
         results = mgr.search(query, k=top_k, include_cold=include_cold)
-        # Filter noise: drop results below score threshold (cold tier exempt — already ranked low)
+        # Filter noise: drop results below RRF score threshold.
+        # NB: TierManager scores come from Reciprocal Rank Fusion (typical range
+        # 0.01–0.10), NOT raw cosine similarity — use MIN_TIER_SCORE_THRESHOLD
+        # (0.01), not MIN_SCORE_THRESHOLD (0.78, which is the cosine threshold).
+        # Cold tier exempt — already ranked low via time-decay.
         results = [
             r
             for r in results
-            if r.get("_tier") == "cold" or r.get("_score", 0) >= MIN_SCORE_THRESHOLD
+            if r.get("_tier") == "cold"
+            or r.get("_score", 0) >= MIN_TIER_SCORE_THRESHOLD
         ]
         # Add preview field for backwards compatibility
         for r in results:

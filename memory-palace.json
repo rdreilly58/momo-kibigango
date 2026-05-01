@@ -1,6 +1,6 @@
 {
   "name": "Memory Palace",
-  "built_at": "2026-04-27T16:18:09.893092+00:00",
+  "built_at": "2026-04-27T16:23:16.331200+00:00",
   "stats": {
     "total_memories": 222,
     "total_wings": 1,
@@ -14,9 +14,9 @@
       "icon": "\ud83d\udc40",
       "memory_count": 222,
       "rooms": {
-        "0": {
-          "name": "Bob Reilly (59)",
-          "memory_count": 59,
+        "2": {
+          "name": "Bob Reilly (89)",
+          "memory_count": 89,
           "memories": [
             {
               "id": "59e53702-8828-4175-b8de-ed83d6df06a6",
@@ -31,368 +31,8 @@
               "tier": "long"
             },
             {
-              "id": "b8a981bb-6858-495a-8de3-7f550df85005",
-              "title": "MEMORY.md#2",
-              "priority": 6,
-              "tier": "long"
-            },
-            {
-              "id": "799d2a6f-790a-42df-a763-299ea66251b4",
-              "title": "memory/aa-meetings.md#1",
-              "priority": 6,
-              "tier": "long"
-            },
-            {
-              "id": "25c3cf0d-8e2f-45f1-8a3d-3ca005c71d0e",
-              "title": "memory/2026-04-13-2107.md#0",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "543dc9e1-0d34-46d7-a7a0-f2a247a406f2",
-              "title": "memory/2026-04-13-2107.md#1",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "b2a73495-e581-4c26-a7fa-31b2b9aaeadd",
-              "title": "memory/2026-04-13-2107.md#3",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "d49117dc-83a1-4dbb-9653-9a1ecfc83d22",
-              "title": "memory/2026-04-13-2219.md#0",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "795fd638-8b23-41e1-bf0e-f95cb5787acf",
-              "title": "memory/2026-04-13-2219.md#1",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "f7289ebd-88ff-456f-aa11-540fe564d685",
-              "title": "memory/2026-04-13-2219.md#2",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "01d09cea-8051-40ae-ad3c-13c1f011a937",
-              "title": "memory/2026-04-21.md#0",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "8254d18c-2ce3-42a3-9e17-fad7a58bcb68",
-              "title": "memory/2026-04-22-1909.md#0",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "e638e860-034b-43b6-919b-cf645e0537d9",
-              "title": "memory/2026-04-22-2116.md#1",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "d29ba17e-518e-4cb9-b4c7-5ecd5786c989",
-              "title": "memory/2026-04-22.md#1",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "d75ae94a-51ef-4ed9-8191-16bc6b87f87c",
-              "title": "memory/leidos-dora-training.md#0",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "1fab8f8f-7047-447d-9455-637e0cb5d0e9",
-              "title": "memory/leidos-dora-training.md#8",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "b5de27c5-710f-43a6-98a4-f03f04da1962",
-              "title": "memory/leidos-dora-training.md#10",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "3fba2d8c-cbac-4e1e-a1c5-03696f5bdcb4",
-              "title": "memory/leidos-dora-training.md#14",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "21914ffc-dcd9-451f-a070-4d55cdb9cd82",
-              "title": "memory/leidos-dora-training.md#15",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "648f8c8d-ce0c-4791-b40e-5e292f857827",
-              "title": "memory/leidos-dora-training.md#18",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "43a8690d-00b5-4d9d-9aab-ffa397c440e2",
-              "title": "memory/leidos-dora-training.md#20",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "1c92ea00-1ad0-428f-bc37-8dd859e9114e",
-              "title": "memory/leidos-dora-training.md#24",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "3a968d10-bb13-43c0-9355-d728cbb6a365",
-              "title": "memory/leidos-dora-training.md#25",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "88853738-52b0-49aa-a042-6f8d9f574000",
-              "title": "memory/leidos-dora-training.md#31",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "e753abd1-d4a6-436d-9592-c98d84eb30a5",
-              "title": "memory/leidos-first-week-plan.md#1",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "8fdd47b2-9b70-4619-a935-4648a87cdd91",
-              "title": "memory/leidos-first-week-plan.md#2",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "20c51a7d-f425-442b-abfe-f1653a8b5cba",
-              "title": "memory/leidos-first-week-plan.md#5",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "325009aa-714b-4fc1-8710-204ffe0075d7",
-              "title": "memory/leidos-first-week-plan.md#6",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "3ecd8735-8103-4619-a832-fce69137b476",
-              "title": "memory/leidos-first-week-plan.md#8",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "c44b9128-d294-4e8f-afda-6e0c55fd155a",
-              "title": "memory/leidos-first-week-plan.md#10",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "06fb21e6-2119-442d-a389-6cb529e564a5",
-              "title": "memory/leidos-first-week-plan.md#13",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "709a59d3-7efc-40c4-b427-2e909fc88a35",
-              "title": "memory/leidos-first-week-plan.md#19",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "8bb42b43-150e-4b5d-b25d-4b8b512f7467",
-              "title": "memory/leidos-first-week-plan.md#20",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "4ac0beb2-d1a7-4138-9c5b-b4d560d641b1",
-              "title": "memory/leidos-first-week-plan.md#23",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "2591200f-5654-4dcd-951f-4ea98b25d380",
-              "title": "memory/leidos-first-week-plan.md#26",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "e771f938-e3a7-463c-823b-138318f1a6c8",
-              "title": "memory/leidos-first-week-plan.md#27",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "4ba8aa00-3183-4fbc-982a-7e5c7c23926f",
-              "title": "memory/leidos-leadership-strategy.md#2",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "f8b73d87-d5df-4cd9-8209-51d4df46750e",
-              "title": "memory/leidos-leadership-strategy.md#4",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "532a5ede-44b4-4892-b460-8d37ade8c968",
-              "title": "memory/leidos-leadership-strategy.md#8",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "78e42761-6035-4d4f-bdaa-e4e5304e7285",
-              "title": "memory/leidos-leadership-strategy.md#14",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "69d114a2-c7ca-4acf-9cce-ff225f15ee94",
-              "title": "memory/leidos-leadership-strategy.md#18",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "55dafe91-03c2-4a48-9f30-26a099741a39",
-              "title": "memory/leidos-leadership-strategy.md#20",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "bb5e1627-51e2-4c86-a8aa-0a0ec10efe3b",
-              "title": "memory/leidos-rfc-training.md#0",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "b4ea2944-e5ef-4ee9-8a4f-a384daceb23d",
-              "title": "memory/leidos-rfc-training.md#4",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "12322569-d3c6-478a-9bf9-f9d7c39ccece",
-              "title": "memory/leidos-rfc-training.md#7",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "e2df00aa-6b31-4e96-a9ae-de60a587403b",
-              "title": "memory/leidos-rfc-training.md#9",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "5262140b-a5f5-46b4-a8ac-30fc95ba280e",
-              "title": "memory/leidos-rfc-training.md#10",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "cbec63e5-7f20-4275-bfce-f098aa8ff21d",
-              "title": "memory/leidos-rfc-training.md#12",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "ca1e74b9-4fb0-4337-b738-009295cda832",
-              "title": "memory/leidos-rfc-training.md#14",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "67521b8a-87dd-4f17-a654-1a70c4960878",
-              "title": "memory/leidos-rfc-training.md#23",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "e2694121-b5e7-4dd7-b26d-0ec394a9e881",
-              "title": "memory/leidos-rfc-training.md#28",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "34e2fe41-b2dc-471a-b28a-5c49bd00c5a3",
-              "title": "memory/leidos-self-introductions.md#0",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "cecdb808-65db-4e1d-9a99-d1971654c03c",
-              "title": "memory/leidos-self-introductions.md#3",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "91ab88a4-dfd3-4992-8ac1-5ba4e394778d",
-              "title": "memory/leidos-self-introductions.md#4",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "73bc1501-4650-4bcf-84c6-ff8af84d3c1e",
-              "title": "memory/leidos-self-introductions.md#7",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "844d7d9b-edbf-4258-a7e3-b061069323d3",
-              "title": "memory/leidos-self-introductions.md#9",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "85c070c9-3cc4-49b4-bef1-9f3476b9ad34",
-              "title": "memory/leidos-self-introductions.md#10",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "e6f08ac5-a46c-4929-9cbb-b74be632b72a",
-              "title": "memory/observations.md#1",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "670c8e42-3670-498b-9cbc-b7fe4ac03683",
-              "title": "memory/printers.md#0",
-              "priority": 6,
-              "tier": "short"
-            }
-          ]
-        },
-        "1": {
-          "name": "ENTITY:OpenClaw (65)",
-          "memory_count": 65,
-          "memories": [
-            {
-              "id": "9507b1cf-8d3a-49f0-8409-495f8bc7188b",
-              "title": "ENTITY:OpenClaw",
-              "priority": 7,
-              "tier": "long"
-            },
-            {
-              "id": "8bc547a4-ea0c-4d95-b9d5-e1dfb4726597",
-              "title": "MEMORY.md#0",
-              "priority": 6,
-              "tier": "long"
-            },
-            {
-              "id": "abb5d91f-641a-44ae-9a26-ea380633e170",
-              "title": "MEMORY.md#1",
+              "id": "28ee1ca1-bb99-4daa-bb47-1b4a7a61a1ae",
+              "title": "MEMORY.md#3",
               "priority": 6,
               "tier": "long"
             },
@@ -403,380 +43,8 @@
               "tier": "long"
             },
             {
-              "id": "f7ec1428-7cf4-4bd6-8170-2cea181213f7",
-              "title": "memory/aa-meetings.md#0",
-              "priority": 6,
-              "tier": "long"
-            },
-            {
-              "id": "4accf4f1-dd43-4e53-8a44-88ef0d61a7c8",
-              "title": "memory/email-accounts.md#0",
-              "priority": 6,
-              "tier": "long"
-            },
-            {
-              "id": "3143be10-f113-49e5-913f-871444740b48",
-              "title": "memory/leidos-dora-summary.md#0",
-              "priority": 6,
-              "tier": "long"
-            },
-            {
-              "id": "f14328be-be46-4abe-9669-d6953c3e8041",
-              "title": "memory/leidos-dora-summary.md#2",
-              "priority": 6,
-              "tier": "long"
-            },
-            {
-              "id": "f0394387-95c2-484b-935f-4a35b0a36f5a",
-              "title": "memory/2026-04-13-2107.md#2",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "71616cab-26cf-4027-90a8-9940a353c27d",
-              "title": "memory/2026-04-13-2107.md#5",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "7214cb43-6eff-4084-8ba8-189f7f5db88e",
-              "title": "memory/2026-04-13-2107.md#6",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "63915b7e-fac1-4e08-bd26-f27b4ad301c3",
-              "title": "memory/2026-04-14-0922.md#0",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "c186404d-8f6b-4c89-96cd-b4d30dfa63d2",
-              "title": "memory/2026-04-14-0922.md#2",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "ad7bf09c-ace7-4e37-89da-b2d36ef41252",
-              "title": "memory/2026-04-14-0922.md#4",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "e47c6b1f-4ee4-44a1-81df-133cdd5af42c",
-              "title": "memory/2026-04-20.md#0",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "c57ffa2a-8a58-4cf5-a10f-61820d1b6a40",
-              "title": "memory/2026-04-21-1105.md#0",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "526d3005-40d4-4458-8060-84f892cec287",
-              "title": "memory/2026-04-22-1034.md#0",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "aa218122-7768-4373-9973-85c028e03438",
-              "title": "memory/2026-04-22-1737.md#0",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "35b281f4-1acd-4ab4-aad0-34c1c907cc3b",
-              "title": "memory/2026-04-22-2013.md#1",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "20bb3c6b-8f1d-4845-bea3-64c16506c922",
-              "title": "memory/DAILY_METRICS_2026-04-22.md#0",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "72a10b6a-fd17-4a25-bebb-155cb92079b6",
-              "title": "memory/leidos-dora-training.md#1",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "88a2e47f-d354-4740-a089-464b75aa0dc5",
-              "title": "memory/leidos-dora-training.md#6",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "fd95f6b6-0478-46cf-b9bd-00ad4e631daa",
-              "title": "memory/leidos-dora-training.md#7",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "7e0dbb80-2ca5-4bd3-a42b-389ccbe242a1",
-              "title": "memory/leidos-dora-training.md#9",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "cce5c9e8-24d5-48f2-8fb9-d2633f41b71d",
-              "title": "memory/leidos-dora-training.md#26",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "3676c792-4c87-4574-bf72-303e0c406447",
-              "title": "memory/leidos-dora-training.md#29",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "2df0ca19-b690-409e-9463-71c8400760c3",
-              "title": "memory/leidos-dora-training.md#30",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "bd3efbf8-5f2d-4431-a832-2a4489ca53f9",
-              "title": "memory/leidos-dora-training.md#33",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "2081ba0c-12dd-4a2e-baff-b47bb2844e91",
-              "title": "memory/leidos-first-week-plan.md#0",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "5d7feaaa-686d-4780-9f06-e4a0036ae38d",
-              "title": "memory/leidos-first-week-plan.md#4",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "6e97158d-011b-4ed2-acef-efb1d313ca93",
-              "title": "memory/leidos-first-week-plan.md#9",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "c6f0709d-c14d-479e-a146-8d12f780cdc9",
-              "title": "memory/leidos-first-week-plan.md#12",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "cf04be3d-ada5-4e1b-b639-05ef95495aa6",
-              "title": "memory/leidos-first-week-plan.md#17",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "827401b7-0ac0-4d1f-8e4e-0c8360117642",
-              "title": "memory/leidos-first-week-plan.md#21",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "4904affd-483b-40c6-ae6e-1b92e8ddb986",
-              "title": "memory/leidos-first-week-plan.md#24",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "bf02710e-d875-415d-8417-634d77983ad3",
-              "title": "memory/leidos-first-week-plan.md#25",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "a2bc34ab-2367-4eab-a621-75e0898e2788",
-              "title": "memory/leidos-first-week-plan.md#28",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "17ba57fd-49c2-47c7-bc23-db4980bddfca",
-              "title": "memory/leidos-leadership-strategy.md#0",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "4b27f171-fc33-40c4-9944-2fe8e043f4a0",
-              "title": "memory/leidos-leadership-strategy.md#1",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "939dcfc3-84a1-4f48-adce-0fe32366fa4d",
-              "title": "memory/leidos-leadership-strategy.md#5",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "3f106dab-888a-48cc-ac04-18871d34f0fb",
-              "title": "memory/leidos-leadership-strategy.md#6",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "0fe09901-d7e4-4ade-b49d-2eba80245d51",
-              "title": "memory/leidos-leadership-strategy.md#7",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "836c5663-3231-4149-ac0f-eea06bebb66d",
-              "title": "memory/leidos-leadership-strategy.md#9",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "178f594f-474c-48bf-ab00-3b61b711f5a9",
-              "title": "memory/leidos-leadership-strategy.md#11",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "3a97830e-7b7c-46e1-b9d5-f5742ab03409",
-              "title": "memory/leidos-leadership-strategy.md#12",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "eb0630e0-6846-44ef-b7a8-93cad4fe180d",
-              "title": "memory/leidos-leadership-strategy.md#13",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "ba41d325-9d65-4753-9cc2-f7941681d424",
-              "title": "memory/leidos-leadership-strategy.md#15",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "1d28342c-dad9-4134-8597-76c423bf3d29",
-              "title": "memory/leidos-leadership-strategy.md#19",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "5bfab6a6-04fd-42e9-9cad-415924f0a9e8",
-              "title": "memory/leidos-rfc-training.md#2",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "6636f938-f18e-4d93-ba7e-ab6d6c9b06fe",
-              "title": "memory/leidos-rfc-training.md#3",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "96f7fb29-4fea-41af-937e-09a1c76d86e4",
-              "title": "memory/leidos-rfc-training.md#6",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "837dfff6-724a-4f51-b4f0-89e4c89c795d",
-              "title": "memory/leidos-rfc-training.md#8",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "53657203-32a9-4f58-96bf-cacbaa5c982f",
-              "title": "memory/leidos-rfc-training.md#11",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "417d36c4-397d-49d8-8f03-fa7099e617fe",
-              "title": "memory/leidos-rfc-training.md#13",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "4de07ee1-72c8-4692-a7f0-10cb6f28e92b",
-              "title": "memory/leidos-rfc-training.md#21",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "ca02bb2e-257a-457b-8f8e-529571914620",
-              "title": "memory/leidos-rfc-training.md#24",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "f34ba81a-4a5e-44bf-a432-7f057003a585",
-              "title": "memory/leidos-rfc-training.md#27",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "a3f94dbc-2e61-4a68-af30-0b1e5940b0d5",
-              "title": "memory/leidos-self-introductions.md#1",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "86e8e185-c101-4a4e-ba42-d3b6f6a8ccf0",
-              "title": "memory/leidos-self-introductions.md#5",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "4f83f347-2366-4b08-bb23-12cf1b4d114e",
-              "title": "memory/leidos-self-introductions.md#11",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "b743a937-79b9-44b8-950c-462a1ae01c5e",
-              "title": "memory/observations.md#0",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "8d9c7f04-83d6-4ead-bc95-e9f59c108d13",
-              "title": "memory/observations.md#2",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "a1afed79-2d95-427d-b2ed-539ec9c2ab1b",
-              "title": "memory/observations.md#5",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "77817ce0-fa73-4b95-8368-0a2767a7ef09",
-              "title": "memory/observations.md#7",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "3926e76c-1754-4465-a69a-c5a8d9b75324",
-              "title": "memory/observations.md#8",
-              "priority": 6,
-              "tier": "short"
-            }
-          ]
-        },
-        "2": {
-          "name": "MEMORY.md#3 (98)",
-          "memory_count": 98,
-          "memories": [
-            {
-              "id": "28ee1ca1-bb99-4daa-bb47-1b4a7a61a1ae",
-              "title": "MEMORY.md#3",
+              "id": "799d2a6f-790a-42df-a763-299ea66251b4",
+              "title": "memory/aa-meetings.md#1",
               "priority": 6,
               "tier": "long"
             },
@@ -859,14 +127,20 @@
               "tier": "short"
             },
             {
-              "id": "f1e9952a-761d-4505-9e00-aede502921a1",
-              "title": "memory/2026-04-13-2107.md#7",
+              "id": "b2a73495-e581-4c26-a7fa-31b2b9aaeadd",
+              "title": "memory/2026-04-13-2107.md#3",
               "priority": 6,
               "tier": "short"
             },
             {
-              "id": "c4c0f172-75ef-46dd-9f79-ee466ce523f9",
-              "title": "memory/2026-04-14-0922.md#1",
+              "id": "795fd638-8b23-41e1-bf0e-f95cb5787acf",
+              "title": "memory/2026-04-13-2219.md#1",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "c186404d-8f6b-4c89-96cd-b4d30dfa63d2",
+              "title": "memory/2026-04-14-0922.md#2",
               "priority": 6,
               "tier": "short"
             },
@@ -889,18 +163,6 @@
               "tier": "short"
             },
             {
-              "id": "4947323d-184d-44df-b3ee-324253c08125",
-              "title": "memory/2026-04-19.md#0",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "ef65b6e5-4825-428d-9b5b-a57c1f3553ad",
-              "title": "memory/2026-04-20-0336.md#0",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
               "id": "8cd1ebdb-01a2-43df-b851-d2e7d6ab9859",
               "title": "memory/2026-04-21-2144.md#0",
               "priority": 6,
@@ -913,8 +175,8 @@
               "tier": "short"
             },
             {
-              "id": "7ea96d24-cb10-40f2-9903-8c824e57feec",
-              "title": "memory/2026-04-22-2013.md#0",
+              "id": "35b281f4-1acd-4ab4-aad0-34c1c907cc3b",
+              "title": "memory/2026-04-22-2013.md#1",
               "priority": 6,
               "tier": "short"
             },
@@ -925,20 +187,8 @@
               "tier": "short"
             },
             {
-              "id": "75f14aa9-12ab-4b8b-a0aa-c3f9c56a43c0",
-              "title": "memory/2026-04-22.md#0",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
               "id": "d2b0a091-1a39-4503-bd53-f101f3652008",
               "title": "memory/2026-04-22.md#2",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "6356102f-a5ff-4714-81a5-579aae207f02",
-              "title": "memory/2026-04-22.md#3",
               "priority": 6,
               "tier": "short"
             },
@@ -949,56 +199,26 @@
               "tier": "short"
             },
             {
-              "id": "b1a17984-9cd8-4881-b87b-7c3e4b9c457d",
-              "title": "memory/2026-04-23.md#0",
+              "id": "20bb3c6b-8f1d-4845-bea3-64c16506c922",
+              "title": "memory/DAILY_METRICS_2026-04-22.md#0",
               "priority": 6,
               "tier": "short"
             },
             {
-              "id": "bc291486-72e8-4717-99c6-d472d3c2464d",
-              "title": "memory/DAILY_METRICS_2026-04-20.md#0",
+              "id": "d75ae94a-51ef-4ed9-8191-16bc6b87f87c",
+              "title": "memory/leidos-dora-training.md#0",
               "priority": 6,
               "tier": "short"
             },
             {
-              "id": "3602a36b-89e7-4fbe-a236-63c3c97643a4",
-              "title": "memory/leidos-dora-training.md#2",
+              "id": "1fab8f8f-7047-447d-9455-637e0cb5d0e9",
+              "title": "memory/leidos-dora-training.md#8",
               "priority": 6,
               "tier": "short"
             },
             {
-              "id": "2b34fa10-1dc6-4c50-bcb4-49ee24fcfdbe",
-              "title": "memory/leidos-dora-training.md#3",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "ee0a9e73-8324-486b-896f-0d4fd0b1bc4a",
-              "title": "memory/leidos-dora-training.md#4",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "26552a47-6cd5-4db8-bf3d-8946cd6a7ef9",
-              "title": "memory/leidos-dora-training.md#5",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "fe2df6b2-0bc4-44a2-99bb-1667c0177e9f",
-              "title": "memory/leidos-dora-training.md#11",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "8e4d28ad-14f5-436f-a592-9e2c4e937f64",
-              "title": "memory/leidos-dora-training.md#12",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "bacb1382-5636-43c6-88b1-8b9e29c6ec8e",
-              "title": "memory/leidos-dora-training.md#13",
+              "id": "b5de27c5-710f-43a6-98a4-f03f04da1962",
+              "title": "memory/leidos-dora-training.md#10",
               "priority": 6,
               "tier": "short"
             },
@@ -1009,20 +229,8 @@
               "tier": "short"
             },
             {
-              "id": "b954c8ae-97d5-44b5-ad4b-dd60e680e000",
-              "title": "memory/leidos-dora-training.md#17",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "5f737fb3-003c-4185-b7a7-092fd99099b8",
-              "title": "memory/leidos-dora-training.md#19",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "02a8bb61-8f9d-4a22-96a8-389300a7d3ab",
-              "title": "memory/leidos-dora-training.md#21",
+              "id": "648f8c8d-ce0c-4791-b40e-5e292f857827",
+              "title": "memory/leidos-dora-training.md#18",
               "priority": 6,
               "tier": "short"
             },
@@ -1039,14 +247,14 @@
               "tier": "short"
             },
             {
-              "id": "ab0addea-8c2c-4117-9801-83dc23cba78f",
-              "title": "memory/leidos-dora-training.md#27",
+              "id": "cce5c9e8-24d5-48f2-8fb9-d2633f41b71d",
+              "title": "memory/leidos-dora-training.md#26",
               "priority": 6,
               "tier": "short"
             },
             {
-              "id": "977da9c8-b6d0-4d4c-8ffd-b9e9d8a16b67",
-              "title": "memory/leidos-dora-training.md#28",
+              "id": "ab0addea-8c2c-4117-9801-83dc23cba78f",
+              "title": "memory/leidos-dora-training.md#27",
               "priority": 6,
               "tier": "short"
             },
@@ -1063,32 +271,14 @@
               "tier": "short"
             },
             {
-              "id": "88e0b365-0b24-45c1-8bf0-31e04496c7de",
-              "title": "memory/leidos-first-week-plan.md#7",
+              "id": "c44b9128-d294-4e8f-afda-6e0c55fd155a",
+              "title": "memory/leidos-first-week-plan.md#10",
               "priority": 6,
               "tier": "short"
             },
             {
-              "id": "13fa2b7a-05f1-4462-bfcf-877746324a7d",
-              "title": "memory/leidos-first-week-plan.md#11",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "3ee3d0e0-34ef-4fcf-be5a-f3d9597acec4",
-              "title": "memory/leidos-first-week-plan.md#14",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "d8dea1c2-3b40-4df2-807a-75c542f4f3dc",
-              "title": "memory/leidos-first-week-plan.md#15",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "f3736134-6bc6-4041-abd5-495e305bdd99",
-              "title": "memory/leidos-first-week-plan.md#16",
+              "id": "cf04be3d-ada5-4e1b-b639-05ef95495aa6",
+              "title": "memory/leidos-first-week-plan.md#17",
               "priority": 6,
               "tier": "short"
             },
@@ -1099,14 +289,20 @@
               "tier": "short"
             },
             {
-              "id": "be53f3a9-a253-4848-87a8-b7a907421352",
-              "title": "memory/leidos-first-week-plan.md#22",
+              "id": "709a59d3-7efc-40c4-b427-2e909fc88a35",
+              "title": "memory/leidos-first-week-plan.md#19",
               "priority": 6,
               "tier": "short"
             },
             {
-              "id": "4d2e6430-855d-46b3-8f7a-b58c5c7e406b",
-              "title": "memory/leidos-first-week-plan.md#29",
+              "id": "4904affd-483b-40c6-ae6e-1b92e8ddb986",
+              "title": "memory/leidos-first-week-plan.md#24",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "2591200f-5654-4dcd-951f-4ea98b25d380",
+              "title": "memory/leidos-first-week-plan.md#26",
               "priority": 6,
               "tier": "short"
             },
@@ -1117,14 +313,38 @@
               "tier": "short"
             },
             {
-              "id": "35c69cec-d8f2-426d-9fbe-e5dfe2cbd64f",
-              "title": "memory/leidos-leadership-strategy.md#10",
+              "id": "939dcfc3-84a1-4f48-adce-0fe32366fa4d",
+              "title": "memory/leidos-leadership-strategy.md#5",
               "priority": 6,
               "tier": "short"
             },
             {
-              "id": "f53041a2-73fb-4d57-a6a9-74a5c7988be9",
-              "title": "memory/leidos-leadership-strategy.md#16",
+              "id": "0fe09901-d7e4-4ade-b49d-2eba80245d51",
+              "title": "memory/leidos-leadership-strategy.md#7",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "836c5663-3231-4149-ac0f-eea06bebb66d",
+              "title": "memory/leidos-leadership-strategy.md#9",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "178f594f-474c-48bf-ab00-3b61b711f5a9",
+              "title": "memory/leidos-leadership-strategy.md#11",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "eb0630e0-6846-44ef-b7a8-93cad4fe180d",
+              "title": "memory/leidos-leadership-strategy.md#13",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "78e42761-6035-4d4f-bdaa-e4e5304e7285",
+              "title": "memory/leidos-leadership-strategy.md#14",
               "priority": 6,
               "tier": "short"
             },
@@ -1135,14 +355,26 @@
               "tier": "short"
             },
             {
-              "id": "7680403c-e7fa-4150-91eb-92041b59b744",
-              "title": "memory/leidos-rfc-training.md#1",
+              "id": "1d28342c-dad9-4134-8597-76c423bf3d29",
+              "title": "memory/leidos-leadership-strategy.md#19",
               "priority": 6,
               "tier": "short"
             },
             {
-              "id": "9516fbb4-50f8-4a6a-90bf-5f51641afc23",
-              "title": "memory/leidos-rfc-training.md#5",
+              "id": "96f7fb29-4fea-41af-937e-09a1c76d86e4",
+              "title": "memory/leidos-rfc-training.md#6",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "5262140b-a5f5-46b4-a8ac-30fc95ba280e",
+              "title": "memory/leidos-rfc-training.md#10",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "cbec63e5-7f20-4275-bfce-f098aa8ff21d",
+              "title": "memory/leidos-rfc-training.md#12",
               "priority": 6,
               "tier": "short"
             },
@@ -1153,20 +385,8 @@
               "tier": "short"
             },
             {
-              "id": "a2b659c3-0274-40d2-a4fe-255c0c08f434",
-              "title": "memory/leidos-rfc-training.md#16",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
               "id": "90bbcc7b-2cb6-47e0-89ab-71cfa60a1a22",
               "title": "memory/leidos-rfc-training.md#17",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "9aee6cbd-64b6-4657-9e3a-c97f64a1b1db",
-              "title": "memory/leidos-rfc-training.md#18",
               "priority": 6,
               "tier": "short"
             },
@@ -1183,68 +403,38 @@
               "tier": "short"
             },
             {
-              "id": "94c27cca-d02a-4ea1-a8c7-f62940fd2b55",
-              "title": "memory/leidos-rfc-training.md#22",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "e47ed117-909a-4ab0-9be9-75edff9d1244",
-              "title": "memory/leidos-rfc-training.md#25",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
               "id": "c9ff9363-fb13-4da9-83c1-7a564691df00",
               "title": "memory/leidos-rfc-training.md#26",
               "priority": 6,
               "tier": "short"
             },
             {
-              "id": "fefdfe69-9603-4cd6-89ce-cbad18f46c8a",
-              "title": "memory/leidos-self-introductions.md#2",
+              "id": "cecdb808-65db-4e1d-9a99-d1971654c03c",
+              "title": "memory/leidos-self-introductions.md#3",
               "priority": 6,
               "tier": "short"
             },
             {
-              "id": "d6cce4d2-201a-4759-ae29-3b365b083ef4",
-              "title": "memory/leidos-self-introductions.md#6",
+              "id": "b743a937-79b9-44b8-950c-462a1ae01c5e",
+              "title": "memory/observations.md#0",
               "priority": 6,
               "tier": "short"
             },
             {
-              "id": "d21ccc17-4620-40a7-8ecb-51ad155ca00c",
-              "title": "memory/leidos-self-introductions.md#8",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "ac90a9b5-5bbd-4921-96a6-a0e80107683b",
-              "title": "memory/leidos-self-introductions.md#12",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "7be1e4bc-ad4e-42be-a7a9-529122cbd130",
-              "title": "memory/leidos-self-introductions.md#13",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "cbb0889f-c04e-44e0-809d-2b9181ed7824",
-              "title": "memory/observations.md#3",
-              "priority": 6,
-              "tier": "short"
-            },
-            {
-              "id": "2d5f8ab7-69aa-4f5e-9aa7-c4a59d06c19c",
-              "title": "memory/observations.md#4",
+              "id": "8d9c7f04-83d6-4ead-bc95-e9f59c108d13",
+              "title": "memory/observations.md#2",
               "priority": 6,
               "tier": "short"
             },
             {
               "id": "6750df03-cf88-48ab-88d1-d46ef195a9a7",
               "title": "memory/observations.md#6",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "670c8e42-3670-498b-9cbc-b7fe4ac03683",
+              "title": "memory/printers.md#0",
               "priority": 6,
               "tier": "short"
             },
@@ -1360,6 +550,816 @@
               "id": "c491ab71-d0e9-4600-a490-31a40234ac8a",
               "title": "Observer: 5 commits 2026-04-27",
               "priority": 5,
+              "tier": "short"
+            }
+          ]
+        },
+        "1": {
+          "name": "ENTITY:OpenClaw (73)",
+          "memory_count": 73,
+          "memories": [
+            {
+              "id": "9507b1cf-8d3a-49f0-8409-495f8bc7188b",
+              "title": "ENTITY:OpenClaw",
+              "priority": 7,
+              "tier": "long"
+            },
+            {
+              "id": "8bc547a4-ea0c-4d95-b9d5-e1dfb4726597",
+              "title": "MEMORY.md#0",
+              "priority": 6,
+              "tier": "long"
+            },
+            {
+              "id": "abb5d91f-641a-44ae-9a26-ea380633e170",
+              "title": "MEMORY.md#1",
+              "priority": 6,
+              "tier": "long"
+            },
+            {
+              "id": "4accf4f1-dd43-4e53-8a44-88ef0d61a7c8",
+              "title": "memory/email-accounts.md#0",
+              "priority": 6,
+              "tier": "long"
+            },
+            {
+              "id": "f14328be-be46-4abe-9669-d6953c3e8041",
+              "title": "memory/leidos-dora-summary.md#2",
+              "priority": 6,
+              "tier": "long"
+            },
+            {
+              "id": "25c3cf0d-8e2f-45f1-8a3d-3ca005c71d0e",
+              "title": "memory/2026-04-13-2107.md#0",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "543dc9e1-0d34-46d7-a7a0-f2a247a406f2",
+              "title": "memory/2026-04-13-2107.md#1",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "f1e9952a-761d-4505-9e00-aede502921a1",
+              "title": "memory/2026-04-13-2107.md#7",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "d49117dc-83a1-4dbb-9653-9a1ecfc83d22",
+              "title": "memory/2026-04-13-2219.md#0",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "f7289ebd-88ff-456f-aa11-540fe564d685",
+              "title": "memory/2026-04-13-2219.md#2",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "63915b7e-fac1-4e08-bd26-f27b4ad301c3",
+              "title": "memory/2026-04-14-0922.md#0",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "4947323d-184d-44df-b3ee-324253c08125",
+              "title": "memory/2026-04-19.md#0",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "ef65b6e5-4825-428d-9b5b-a57c1f3553ad",
+              "title": "memory/2026-04-20-0336.md#0",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "01d09cea-8051-40ae-ad3c-13c1f011a937",
+              "title": "memory/2026-04-21.md#0",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "aa218122-7768-4373-9973-85c028e03438",
+              "title": "memory/2026-04-22-1737.md#0",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "8254d18c-2ce3-42a3-9e17-fad7a58bcb68",
+              "title": "memory/2026-04-22-1909.md#0",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "7ea96d24-cb10-40f2-9903-8c824e57feec",
+              "title": "memory/2026-04-22-2013.md#0",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "e638e860-034b-43b6-919b-cf645e0537d9",
+              "title": "memory/2026-04-22-2116.md#1",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "b1a17984-9cd8-4881-b87b-7c3e4b9c457d",
+              "title": "memory/2026-04-23.md#0",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "3602a36b-89e7-4fbe-a236-63c3c97643a4",
+              "title": "memory/leidos-dora-training.md#2",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "2b34fa10-1dc6-4c50-bcb4-49ee24fcfdbe",
+              "title": "memory/leidos-dora-training.md#3",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "88a2e47f-d354-4740-a089-464b75aa0dc5",
+              "title": "memory/leidos-dora-training.md#6",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "fd95f6b6-0478-46cf-b9bd-00ad4e631daa",
+              "title": "memory/leidos-dora-training.md#7",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "7e0dbb80-2ca5-4bd3-a42b-389ccbe242a1",
+              "title": "memory/leidos-dora-training.md#9",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "fe2df6b2-0bc4-44a2-99bb-1667c0177e9f",
+              "title": "memory/leidos-dora-training.md#11",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "8e4d28ad-14f5-436f-a592-9e2c4e937f64",
+              "title": "memory/leidos-dora-training.md#12",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "bacb1382-5636-43c6-88b1-8b9e29c6ec8e",
+              "title": "memory/leidos-dora-training.md#13",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "3fba2d8c-cbac-4e1e-a1c5-03696f5bdcb4",
+              "title": "memory/leidos-dora-training.md#14",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "b954c8ae-97d5-44b5-ad4b-dd60e680e000",
+              "title": "memory/leidos-dora-training.md#17",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "5f737fb3-003c-4185-b7a7-092fd99099b8",
+              "title": "memory/leidos-dora-training.md#19",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "43a8690d-00b5-4d9d-9aab-ffa397c440e2",
+              "title": "memory/leidos-dora-training.md#20",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "02a8bb61-8f9d-4a22-96a8-389300a7d3ab",
+              "title": "memory/leidos-dora-training.md#21",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "88853738-52b0-49aa-a042-6f8d9f574000",
+              "title": "memory/leidos-dora-training.md#31",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "bd3efbf8-5f2d-4431-a832-2a4489ca53f9",
+              "title": "memory/leidos-dora-training.md#33",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "2081ba0c-12dd-4a2e-baff-b47bb2844e91",
+              "title": "memory/leidos-first-week-plan.md#0",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "88e0b365-0b24-45c1-8bf0-31e04496c7de",
+              "title": "memory/leidos-first-week-plan.md#7",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "3ecd8735-8103-4619-a832-fce69137b476",
+              "title": "memory/leidos-first-week-plan.md#8",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "6e97158d-011b-4ed2-acef-efb1d313ca93",
+              "title": "memory/leidos-first-week-plan.md#9",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "13fa2b7a-05f1-4462-bfcf-877746324a7d",
+              "title": "memory/leidos-first-week-plan.md#11",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "f3736134-6bc6-4041-abd5-495e305bdd99",
+              "title": "memory/leidos-first-week-plan.md#16",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "8bb42b43-150e-4b5d-b25d-4b8b512f7467",
+              "title": "memory/leidos-first-week-plan.md#20",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "827401b7-0ac0-4d1f-8e4e-0c8360117642",
+              "title": "memory/leidos-first-week-plan.md#21",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "4b27f171-fc33-40c4-9944-2fe8e043f4a0",
+              "title": "memory/leidos-leadership-strategy.md#1",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "4ba8aa00-3183-4fbc-982a-7e5c7c23926f",
+              "title": "memory/leidos-leadership-strategy.md#2",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "f8b73d87-d5df-4cd9-8209-51d4df46750e",
+              "title": "memory/leidos-leadership-strategy.md#4",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "3f106dab-888a-48cc-ac04-18871d34f0fb",
+              "title": "memory/leidos-leadership-strategy.md#6",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "35c69cec-d8f2-426d-9fbe-e5dfe2cbd64f",
+              "title": "memory/leidos-leadership-strategy.md#10",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "7680403c-e7fa-4150-91eb-92041b59b744",
+              "title": "memory/leidos-rfc-training.md#1",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "5bfab6a6-04fd-42e9-9cad-415924f0a9e8",
+              "title": "memory/leidos-rfc-training.md#2",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "12322569-d3c6-478a-9bf9-f9d7c39ccece",
+              "title": "memory/leidos-rfc-training.md#7",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "837dfff6-724a-4f51-b4f0-89e4c89c795d",
+              "title": "memory/leidos-rfc-training.md#8",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "e2df00aa-6b31-4e96-a9ae-de60a587403b",
+              "title": "memory/leidos-rfc-training.md#9",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "53657203-32a9-4f58-96bf-cacbaa5c982f",
+              "title": "memory/leidos-rfc-training.md#11",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "417d36c4-397d-49d8-8f03-fa7099e617fe",
+              "title": "memory/leidos-rfc-training.md#13",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "ca1e74b9-4fb0-4337-b738-009295cda832",
+              "title": "memory/leidos-rfc-training.md#14",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "a2b659c3-0274-40d2-a4fe-255c0c08f434",
+              "title": "memory/leidos-rfc-training.md#16",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "9aee6cbd-64b6-4657-9e3a-c97f64a1b1db",
+              "title": "memory/leidos-rfc-training.md#18",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "94c27cca-d02a-4ea1-a8c7-f62940fd2b55",
+              "title": "memory/leidos-rfc-training.md#22",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "67521b8a-87dd-4f17-a654-1a70c4960878",
+              "title": "memory/leidos-rfc-training.md#23",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "ca02bb2e-257a-457b-8f8e-529571914620",
+              "title": "memory/leidos-rfc-training.md#24",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "f34ba81a-4a5e-44bf-a432-7f057003a585",
+              "title": "memory/leidos-rfc-training.md#27",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "e2694121-b5e7-4dd7-b26d-0ec394a9e881",
+              "title": "memory/leidos-rfc-training.md#28",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "34e2fe41-b2dc-471a-b28a-5c49bd00c5a3",
+              "title": "memory/leidos-self-introductions.md#0",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "a3f94dbc-2e61-4a68-af30-0b1e5940b0d5",
+              "title": "memory/leidos-self-introductions.md#1",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "fefdfe69-9603-4cd6-89ce-cbad18f46c8a",
+              "title": "memory/leidos-self-introductions.md#2",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "86e8e185-c101-4a4e-ba42-d3b6f6a8ccf0",
+              "title": "memory/leidos-self-introductions.md#5",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "d6cce4d2-201a-4759-ae29-3b365b083ef4",
+              "title": "memory/leidos-self-introductions.md#6",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "844d7d9b-edbf-4258-a7e3-b061069323d3",
+              "title": "memory/leidos-self-introductions.md#9",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "85c070c9-3cc4-49b4-bef1-9f3476b9ad34",
+              "title": "memory/leidos-self-introductions.md#10",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "ac90a9b5-5bbd-4921-96a6-a0e80107683b",
+              "title": "memory/leidos-self-introductions.md#12",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "7be1e4bc-ad4e-42be-a7a9-529122cbd130",
+              "title": "memory/leidos-self-introductions.md#13",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "2d5f8ab7-69aa-4f5e-9aa7-c4a59d06c19c",
+              "title": "memory/observations.md#4",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "a1afed79-2d95-427d-b2ed-539ec9c2ab1b",
+              "title": "memory/observations.md#5",
+              "priority": 6,
+              "tier": "short"
+            }
+          ]
+        },
+        "0": {
+          "name": "MEMORY.md#2 (60)",
+          "memory_count": 60,
+          "memories": [
+            {
+              "id": "b8a981bb-6858-495a-8de3-7f550df85005",
+              "title": "MEMORY.md#2",
+              "priority": 6,
+              "tier": "long"
+            },
+            {
+              "id": "f7ec1428-7cf4-4bd6-8170-2cea181213f7",
+              "title": "memory/aa-meetings.md#0",
+              "priority": 6,
+              "tier": "long"
+            },
+            {
+              "id": "3143be10-f113-49e5-913f-871444740b48",
+              "title": "memory/leidos-dora-summary.md#0",
+              "priority": 6,
+              "tier": "long"
+            },
+            {
+              "id": "f0394387-95c2-484b-935f-4a35b0a36f5a",
+              "title": "memory/2026-04-13-2107.md#2",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "71616cab-26cf-4027-90a8-9940a353c27d",
+              "title": "memory/2026-04-13-2107.md#5",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "7214cb43-6eff-4084-8ba8-189f7f5db88e",
+              "title": "memory/2026-04-13-2107.md#6",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "c4c0f172-75ef-46dd-9f79-ee466ce523f9",
+              "title": "memory/2026-04-14-0922.md#1",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "ad7bf09c-ace7-4e37-89da-b2d36ef41252",
+              "title": "memory/2026-04-14-0922.md#4",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "e47c6b1f-4ee4-44a1-81df-133cdd5af42c",
+              "title": "memory/2026-04-20.md#0",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "c57ffa2a-8a58-4cf5-a10f-61820d1b6a40",
+              "title": "memory/2026-04-21-1105.md#0",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "526d3005-40d4-4458-8060-84f892cec287",
+              "title": "memory/2026-04-22-1034.md#0",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "75f14aa9-12ab-4b8b-a0aa-c3f9c56a43c0",
+              "title": "memory/2026-04-22.md#0",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "d29ba17e-518e-4cb9-b4c7-5ecd5786c989",
+              "title": "memory/2026-04-22.md#1",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "6356102f-a5ff-4714-81a5-579aae207f02",
+              "title": "memory/2026-04-22.md#3",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "bc291486-72e8-4717-99c6-d472d3c2464d",
+              "title": "memory/DAILY_METRICS_2026-04-20.md#0",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "72a10b6a-fd17-4a25-bebb-155cb92079b6",
+              "title": "memory/leidos-dora-training.md#1",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "ee0a9e73-8324-486b-896f-0d4fd0b1bc4a",
+              "title": "memory/leidos-dora-training.md#4",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "26552a47-6cd5-4db8-bf3d-8946cd6a7ef9",
+              "title": "memory/leidos-dora-training.md#5",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "21914ffc-dcd9-451f-a070-4d55cdb9cd82",
+              "title": "memory/leidos-dora-training.md#15",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "1c92ea00-1ad0-428f-bc37-8dd859e9114e",
+              "title": "memory/leidos-dora-training.md#24",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "3a968d10-bb13-43c0-9355-d728cbb6a365",
+              "title": "memory/leidos-dora-training.md#25",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "977da9c8-b6d0-4d4c-8ffd-b9e9d8a16b67",
+              "title": "memory/leidos-dora-training.md#28",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "3676c792-4c87-4574-bf72-303e0c406447",
+              "title": "memory/leidos-dora-training.md#29",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "2df0ca19-b690-409e-9463-71c8400760c3",
+              "title": "memory/leidos-dora-training.md#30",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "e753abd1-d4a6-436d-9592-c98d84eb30a5",
+              "title": "memory/leidos-first-week-plan.md#1",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "8fdd47b2-9b70-4619-a935-4648a87cdd91",
+              "title": "memory/leidos-first-week-plan.md#2",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "5d7feaaa-686d-4780-9f06-e4a0036ae38d",
+              "title": "memory/leidos-first-week-plan.md#4",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "20c51a7d-f425-442b-abfe-f1653a8b5cba",
+              "title": "memory/leidos-first-week-plan.md#5",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "325009aa-714b-4fc1-8710-204ffe0075d7",
+              "title": "memory/leidos-first-week-plan.md#6",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "c6f0709d-c14d-479e-a146-8d12f780cdc9",
+              "title": "memory/leidos-first-week-plan.md#12",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "06fb21e6-2119-442d-a389-6cb529e564a5",
+              "title": "memory/leidos-first-week-plan.md#13",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "3ee3d0e0-34ef-4fcf-be5a-f3d9597acec4",
+              "title": "memory/leidos-first-week-plan.md#14",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "d8dea1c2-3b40-4df2-807a-75c542f4f3dc",
+              "title": "memory/leidos-first-week-plan.md#15",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "be53f3a9-a253-4848-87a8-b7a907421352",
+              "title": "memory/leidos-first-week-plan.md#22",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "4ac0beb2-d1a7-4138-9c5b-b4d560d641b1",
+              "title": "memory/leidos-first-week-plan.md#23",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "bf02710e-d875-415d-8417-634d77983ad3",
+              "title": "memory/leidos-first-week-plan.md#25",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "e771f938-e3a7-463c-823b-138318f1a6c8",
+              "title": "memory/leidos-first-week-plan.md#27",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "a2bc34ab-2367-4eab-a621-75e0898e2788",
+              "title": "memory/leidos-first-week-plan.md#28",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "4d2e6430-855d-46b3-8f7a-b58c5c7e406b",
+              "title": "memory/leidos-first-week-plan.md#29",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "17ba57fd-49c2-47c7-bc23-db4980bddfca",
+              "title": "memory/leidos-leadership-strategy.md#0",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "532a5ede-44b4-4892-b460-8d37ade8c968",
+              "title": "memory/leidos-leadership-strategy.md#8",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "3a97830e-7b7c-46e1-b9d5-f5742ab03409",
+              "title": "memory/leidos-leadership-strategy.md#12",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "ba41d325-9d65-4753-9cc2-f7941681d424",
+              "title": "memory/leidos-leadership-strategy.md#15",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "f53041a2-73fb-4d57-a6a9-74a5c7988be9",
+              "title": "memory/leidos-leadership-strategy.md#16",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "69d114a2-c7ca-4acf-9cce-ff225f15ee94",
+              "title": "memory/leidos-leadership-strategy.md#18",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "55dafe91-03c2-4a48-9f30-26a099741a39",
+              "title": "memory/leidos-leadership-strategy.md#20",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "bb5e1627-51e2-4c86-a8aa-0a0ec10efe3b",
+              "title": "memory/leidos-rfc-training.md#0",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "6636f938-f18e-4d93-ba7e-ab6d6c9b06fe",
+              "title": "memory/leidos-rfc-training.md#3",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "b4ea2944-e5ef-4ee9-8a4f-a384daceb23d",
+              "title": "memory/leidos-rfc-training.md#4",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "9516fbb4-50f8-4a6a-90bf-5f51641afc23",
+              "title": "memory/leidos-rfc-training.md#5",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "4de07ee1-72c8-4692-a7f0-10cb6f28e92b",
+              "title": "memory/leidos-rfc-training.md#21",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "e47ed117-909a-4ab0-9be9-75edff9d1244",
+              "title": "memory/leidos-rfc-training.md#25",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "91ab88a4-dfd3-4992-8ac1-5ba4e394778d",
+              "title": "memory/leidos-self-introductions.md#4",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "73bc1501-4650-4bcf-84c6-ff8af84d3c1e",
+              "title": "memory/leidos-self-introductions.md#7",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "d21ccc17-4620-40a7-8ecb-51ad155ca00c",
+              "title": "memory/leidos-self-introductions.md#8",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "4f83f347-2366-4b08-bb23-12cf1b4d114e",
+              "title": "memory/leidos-self-introductions.md#11",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "e6f08ac5-a46c-4929-9cbb-b74be632b72a",
+              "title": "memory/observations.md#1",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "cbb0889f-c04e-44e0-809d-2b9181ed7824",
+              "title": "memory/observations.md#3",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "77817ce0-fa73-4b95-8368-0a2767a7ef09",
+              "title": "memory/observations.md#7",
+              "priority": 6,
+              "tier": "short"
+            },
+            {
+              "id": "3926e76c-1754-4465-a69a-c5a8d9b75324",
+              "title": "memory/observations.md#8",
+              "priority": 6,
               "tier": "short"
             }
           ]

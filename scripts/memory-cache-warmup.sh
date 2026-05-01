@@ -12,7 +12,6 @@ QUERIES=(
     "AA meetings schedule Zoom"
     "Leidos work team lead"
     "email sending Gmail app password"
-    "Rocket.Chat configuration"
     "calendar events today"
     "momo-kibidango speculative decoding"
     "printer Brother print document"

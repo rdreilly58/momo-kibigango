@@ -63,6 +63,12 @@ class ColdStore:
         Falls back to LIKE search if no FTS table exists.
         Returns list of dicts.
         """
+        # Sanitize query for FTS5 (escape '.' etc. that break the parser).
+        try:
+            from memory_db import sanitize_fts5_query
+            safe_query = sanitize_fts5_query(query)
+        except Exception:
+            safe_query = query
         with _conn(self._db_path) as con:
             # Try FTS5 virtual table first (may not exist)
             try:
@@ -72,7 +78,7 @@ class ColdStore:
                        JOIN archived_memories a ON a.rowid = archived_memories_fts.rowid
                        WHERE archived_memories_fts MATCH ?
                        ORDER BY rank LIMIT ?""",
-                    (query, limit),
+                    (safe_query, limit),
                 ).fetchall()
             except sqlite3.OperationalError:
                 # Fall back to per-word LIKE search (OR across all words)

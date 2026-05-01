@@ -7,6 +7,9 @@
 
 set -euo pipefail
 
+# Ensure homebrew bin is on PATH for cron-spawned runs
+export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
+
 # ── Config ────────────────────────────────────────────────────────────────────
 ICLOUD_BACKUP_DIR="$HOME/Library/Mobile Documents/com~apple~CloudDocs/OpenClaw-Backups"
 KEEP_ICLOUD=7      # days of iCloud backups to keep

@@ -44,21 +44,31 @@ explain = sys.argv[2] == "1"
 
 # Pattern → (agent, reason, host_task_type)
 # host_task_type maps to host-router.sh task_type vocabulary
+# ORDER MATTERS — first match wins. More-specific patterns first.
 routes = [
-    (r'cron|schedule|dead.?man|health.?check|monitor|quota|collect.?metrics|allocat', 'ops', 'ops',
-     'System operations, cron wiring, monitoring'),
-    (r'keychain|secret|deploy|infra|server|disk|log rotation|permission|sudo|launchctl', 'ops', 'ops',
-     'Infrastructure and system administration'),
-    (r'memor|remember|daily.?note|lesson.?learn|consolidat|prune|session.?summar|forgot', 'memory', 'general',
-     'Memory management and session documentation'),
-    (r'find|search|explore|how does|what does|read docs|investigat|where|lookup|understand', 'research', 'general',
-     'Code exploration and external research'),
-    (r'train|finetune|fine.?tune|embedding|torch|pytorch|tensorflow|cuda|gpu', 'code', 'ml',
-     'ML/AI training — may prefer high-RAM host'),
-    (r'ios|xcode|swift|iphone|ipad|simulator|provisioning', 'code', 'ios',
-     'iOS/Swift development — prefers mac-aws (Xcode)'),
-    (r'write code|implement|refactor|fix bug|add feature|edit file|coding|create.*function|modify|debug', 'code', 'code',
+    # Finance — money / banking / receipts
+    (r'expense|receipt|invoic|capital one|bank of america|fidelity|credit card|debt|budget|spent\b|owe|paycheck|statement|csv|pdf import', 'finance', 'general',
+     'Personal finance management'),
+    # Code — explicit coding verbs (matched BEFORE memory/research, so "refactor memory search" → code)
+    (r'\bwrite code\b|\bimplement\b|\brefactor\b|\bfix\s+(the\s+)?(bug|crash|error|issue)\b|\bbugfix\b|\badd feature\b|\bedit file\b|\bcoding\b|create .*(function|method|class)|\bmodify\b|\bdebug\b|\brewrite\b|\bport\s+(to|from)\b', 'code', 'code',
      'Code implementation and modification'),
+    # Code — ML/AI specialised
+    (r'\btrain\b|finetune|fine.?tune|\bembedding\b|torch|pytorch|tensorflow|\bcuda\b|\bgpu\b', 'code', 'ml',
+     'ML/AI training — may prefer high-RAM host'),
+    # Code — iOS specialised
+    (r'\bios\b|xcode|\bswift\b|iphone|ipad|simulator|provisioning', 'code', 'ios',
+     'iOS/Swift development — prefers mac-aws (Xcode)'),
+    # Ops — infra and scheduling
+    (r'cron|schedul|dead.?man|health.?check|monitor|quota|collect.?metrics|allocat', 'ops', 'ops',
+     'System operations, cron wiring, monitoring'),
+    (r'keychain|secret|deploy|infra|server|disk|log rotation|permission|sudo|launchctl|launchd|brew\b|reboot|shutdown', 'ops', 'ops',
+     'Infrastructure and system administration'),
+    # Memory — only after code/ops/finance had a chance
+    (r'\bremember\b|daily.?note|lesson.?learn|consolidat|\bprune\b|session.?summar|forgot|update memory|MEMORY\.md|memory file', 'memory', 'general',
+     'Memory management and session documentation'),
+    # Research — catch-all for understand/find/look up
+    (r'\bfind\b|\bsearch\b|explor|how does|what does|read docs|investigat|where|lookup|understand|research|review|summari[sz]e', 'research', 'general',
+     'Code exploration and external research'),
 ]
 
 matched_agent = ""

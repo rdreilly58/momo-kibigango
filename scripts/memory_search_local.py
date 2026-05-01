@@ -1,4 +1,14 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# Auto-relaunch in the workspace venv if sentence_transformers isn't available.
+import os, sys
+try:
+    import sentence_transformers  # noqa: F401
+except ImportError:
+    _venv_py = os.path.expanduser("~/.openclaw/workspace/venv/bin/python3")
+    if os.path.exists(_venv_py) and sys.executable != _venv_py:
+        os.execv(_venv_py, [_venv_py] + sys.argv)
+
 """
 Local Memory Search using Sentence Transformers
 Fast, free, no API keys needed
