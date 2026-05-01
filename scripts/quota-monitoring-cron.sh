@@ -46,6 +46,69 @@ check_brave_quota() {
     fi
 }
 
+check_anthropic_spend() {
+    # Uses Admin API key to pull 7-day rolling spend from the usage report.
+    # Uses token counts × model prices (not cost_report, which includes credit
+    # purchases and has ambiguous units on high-cache days).
+    # Alert thresholds are configurable via env vars (defaults below).
+    local DAILY_ALERT_USD="${ANTHROPIC_DAILY_ALERT_USD:-20}"   # alert if computed day > $20
+    local WEEKLY_ALERT_USD="${ANTHROPIC_WEEKLY_ALERT_USD:-100}" # alert if 7d > $100
+
+    local admin_key
+    admin_key=$(security find-generic-password -s "AnthropicAdminKey" -a "openclaw" -w 2>/dev/null || true)
+    if [ -z "$admin_key" ]; then
+        log "⚠️  Anthropic spend: Admin key not in keychain (AnthropicAdminKey) — skipping"
+        return
+    fi
+
+    local start end usage_resp
+    start=$(date -u -v-7d '+%Y-%m-%dT00:00:00Z' 2>/dev/null || date -u --date='7 days ago' '+%Y-%m-%dT00:00:00Z')
+    end=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
+
+    # Usage report: token counts by model
+    usage_resp=$(curl -s --max-time 15 \
+        "https://api.anthropic.com/v1/organizations/usage_report/messages?starting_at=${start}&ending_at=${end}&bucket_width=1d&group_by[]=model" \
+        -H "anthropic-version: 2023-06-01" \
+        -H "x-api-key: $admin_key" 2>/dev/null)
+
+    if [ -z "$usage_resp" ]; then
+        log "❌ Anthropic spend: no response from Admin API"
+        ALERTS+=("Anthropic Admin API unreachable")
+        return
+    fi
+
+    local err_type
+    err_type=$(echo "$usage_resp" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('error',{}).get('type','none'))" 2>/dev/null || echo "parse_error")
+    if [ "$err_type" != "none" ]; then
+        local err_msg
+        err_msg=$(echo "$usage_resp" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('error',{}).get('message','?'))" 2>/dev/null)
+        log "❌ Anthropic spend: Admin API error — $err_type: $err_msg"
+        ALERTS+=("Anthropic Admin API error: $err_type")
+        return
+    fi
+
+    # Compute cost from token counts via external script
+    local result
+    result=$(echo "$usage_resp" | python3 "$WORKSPACE/scripts/anthropic-spend-check.py" 2>/dev/null)
+
+    if [ -z "$result" ]; then
+        log "⚠️  Anthropic spend: could not compute (check anthropic-spend-check.py)"
+        return
+    fi
+
+    while IFS= read -r line; do
+        if [[ "$line" == ALERT:* ]]; then
+            ALERTS+=("${line#ALERT:}")
+        elif [[ "$line" == ERROR:* ]]; then
+            log "❌ Anthropic spend: ${line#ERROR:}"
+            ALERTS+=("Anthropic spend check error: ${line#ERROR:}")
+        else
+            local icon="✅"
+            [[ "$line" == *High-spend* ]] && icon="⚠️ "
+            log "${icon} ${line}"
+        fi
+    done <<< "$result"
+}
 check_anthropic_credits() {
     # Anthropic doesn't expose a balance endpoint for standard API keys.
     # Best signal: probe with a 1-token request and inspect the error type.
@@ -130,6 +193,7 @@ check_hf_quota() {
 log "🔍 Quota Monitoring Check Started"
 check_openai_quota
 check_brave_quota
+check_anthropic_spend
 check_anthropic_credits
 check_cloudflare_quota
 check_hf_quota
