@@ -1,8 +1,3 @@
-[submodule "OnigashimaDashboard"]
-	path = OnigashimaDashboard
-	url = https://github.com/rdreilly58/Onigashima-macOS.git
-	branch = dashboard
-
 [submodule "leidos/dora-metrics"]
 	path = leidos/dora-metrics
 	url = https://github.com/rdreilly58/leidos-dora-metrics.git
@@ -11,11 +6,6 @@
 [submodule "leidos/rfc-decisions"]
 	path = leidos/rfc-decisions
 	url = https://github.com/rdreilly58/leidos-rfc-decisions.git
-	branch = main
-
-[submodule "lucianandgideon"]
-	path = lucianandgideon
-	url = https://github.com/reillyrd58-ai/lucianandgideon.git
 	branch = main
 
 [submodule "momo-kibidango"]
