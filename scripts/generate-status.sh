@@ -104,10 +104,12 @@ disk_section() {
   echo "## Disk"
   echo ""
   local usage
+  local vol
+  vol=$(df "$WORKSPACE" | awk 'NR==2 {print $1}')
   usage=$(df "$WORKSPACE" | awk 'NR==2 {print $5}' | sed 's/%//')
-  if   [ "$usage" -gt 90 ]; then echo "❌ ${usage}% used — critical"
-  elif [ "$usage" -gt 75 ]; then echo "⚠️  ${usage}% used — warning"
-  else                            echo "✅ ${usage}% used"
+  if   [ "$usage" -gt 90 ]; then echo "❌ ${usage}% used — critical ($vol)"
+  elif [ "$usage" -gt 75 ]; then echo "⚠️  ${usage}% used — warning ($vol)"
+  else                            echo "✅ ${usage}% used ($vol)"
   fi
   echo ""
 }

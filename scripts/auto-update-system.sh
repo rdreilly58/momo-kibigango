@@ -327,3 +327,6 @@ fi
 # ============================================================================
 
 main
+
+# Update dead-man heartbeat
+bash ~/.openclaw/workspace/scripts/cron-heartbeat.sh auto-update $?

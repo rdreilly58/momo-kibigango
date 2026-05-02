@@ -266,3 +266,6 @@ main() {
 }
 
 main "$@"
+
+# Update dead-man heartbeat
+bash ~/.openclaw/workspace/scripts/cron-heartbeat.sh quota-monitoring $?
