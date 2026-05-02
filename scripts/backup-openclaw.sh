@@ -170,3 +170,6 @@ if [[ "$DRY_RUN" == false ]]; then
   echo ""
   echo "Archive: ${ARCHIVE_PATH}.gpg"
 fi
+
+# Update dead-man heartbeat
+bash ~/.openclaw/workspace/scripts/cron-heartbeat.sh backup-openclaw $?

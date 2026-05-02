@@ -108,3 +108,6 @@ echo "[briefing] 📍 Pinging health check..."
 curl -s -X POST "$HEALTHCHECK_URL" > /dev/null 2>&1 && \
   echo "[briefing] ✓ Health check pinged" || \
   echo "[briefing] ⚠️  Health check ping failed (non-fatal)"
+
+# Update dead-man heartbeat
+bash ~/.openclaw/workspace/scripts/cron-heartbeat.sh morning-briefing $?

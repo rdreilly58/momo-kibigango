@@ -43,17 +43,8 @@
 	url = https://github.com/reillyrd58-ai/onigashima.git
 	branch = main
 
-[submodule "projects/momo-kiji"]
-	path = projects/momo-kiji
-	url = https://github.com/ReillyDesignStudio/momo-kiji.git
-	branch = main
-
 [submodule "reillydesignstudio"]
 	path = reillydesignstudio
 	url = https://github.com/rdreilly58/reillydesignstudio.git
 	branch = main
 
-[submodule "repo"]
-	path = repo
-	url = https://github.com/rdreilly58/reillydesignstudio.git
-	branch = main
