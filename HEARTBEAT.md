@@ -28,15 +28,9 @@ things inbox 2>/dev/null | head -5 | sed 's/^/  • /' || true
 
 ## Heartbeat Performance: Isolation Mode
 
-**Current status:** ⏸️ Heartbeat disabled April 19, 2026. The built-in 30-min heartbeat was burning full main session context (no isolation support in v2026.4.15). Disabled until OpenClaw implements `isolatedSession` for built-in heartbeats.
+**Current status:** ✅ Heartbeat re-enabled May 1, 2026. Isolation support confirmed working in v2026.4.29 (`isolatedSession: true`, `lightContext: true`, Haiku model). Fires every 30 min — cheap, isolated, non-disruptive.
 
-Periodic tasks are now handled exclusively by explicit `agentTurn` crons (see sections above), which run in isolated sessions and are significantly cheaper.
-
-> To re-enable: `openclaw config set agents.defaults.heartbeat.enabled true` once isolation is confirmed working. Target config when available:
-> ```bash
-> openclaw config set agents.defaults.heartbeat.isolatedSession true
-> openclaw config set agents.defaults.heartbeat.lightContext true
-> ```
+Config: `agents.defaults.heartbeat = { enabled: true, every: "30m", isolatedSession: true, lightContext: true, model: "anthropic/claude-haiku-4-5" }`
 
 ---
 
