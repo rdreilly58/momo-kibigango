@@ -24,7 +24,7 @@
         "search for",
         "heartbeat"
       ],
-      "simple_model": "anthropic/claude-haiku-4-5-20251001",
+      "simple_model": "anthropic/claude-haiku-4-6",
       "simple_max_words": 50,
 
       "medium_model": "anthropic/claude-sonnet-4-6",

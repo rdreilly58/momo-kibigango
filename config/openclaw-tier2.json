@@ -1,7 +1,7 @@
 {
   "models": {
     "primary": "anthropic/claude-sonnet-4-6",
-    "fallback": "anthropic/claude-haiku-4-5-20251001"
+    "fallback": "anthropic/claude-haiku-4-6"
   },
   "gateway": {
     "bind": "127.0.0.1:18789",
