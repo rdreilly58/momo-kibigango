@@ -103,9 +103,11 @@ else
     --verify \
     2>&1 | tee /tmp/openclaw-backup-last.log || fail "openclaw backup create failed"
 
-  # Find the archive just created (excludes monthly- prefix)
-  ARCHIVE_PATH=$(ls -t "$ICLOUD_BACKUP_DIR"/[0-9]*-openclaw-backup.tar.gz 2>/dev/null | head -1 || true)
-  [[ -z "$ARCHIVE_PATH" ]] && fail "No archive found after backup"
+  # Parse archive path from command output (avoids iCloud sync race with ls glob)
+  ARCHIVE_PATH=$(grep "^Backup archive:" /tmp/openclaw-backup-last.log | tail -1 | sed 's/^Backup archive: //')
+  # Fallback to ls glob if parse fails
+  [[ -z "$ARCHIVE_PATH" ]] && ARCHIVE_PATH=$(ls -t "$ICLOUD_BACKUP_DIR"/[0-9]*-openclaw-backup.tar.gz 2>/dev/null | head -1 || true)
+  [[ -z "$ARCHIVE_PATH" || ! -f "$ARCHIVE_PATH" ]] && fail "No archive found after backup"
   ARCHIVE_SIZE=$(du -sh "$ARCHIVE_PATH" | cut -f1)
   ARCHIVE_NAME=$(basename "$ARCHIVE_PATH")
   log "  ✅ Archive: $ARCHIVE_NAME ($ARCHIVE_SIZE)"
