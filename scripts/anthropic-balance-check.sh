@@ -129,6 +129,38 @@ else
   log "⚠️  Could not determine spend rate"
 fi
 
+# ── Check 3: Claude Code CLI daily notional spend (ccusage) ──────────────────
+log "📊 Checking Claude Code CLI daily spend..."
+CLAUDE_DAILY_COST=$(npx ccusage --json 2>/dev/null | python3 -c "
+import json, sys, datetime
+try:
+    data = json.load(sys.stdin)
+    today = datetime.date.today().isoformat()
+    rows = data.get('daily', data) if isinstance(data, dict) else data
+    for row in rows:
+        if str(row.get('date','')).startswith(today):
+            cost = row.get('cost', 0)
+            print(f'{cost:.2f}')
+            sys.exit(0)
+    print('0.00')
+except Exception as e:
+    print('unknown')
+" 2>/dev/null || echo "unknown")
+
+CLAUDE_DAILY_WARN_THRESHOLD=30  # alert if notional spend > \$30/day
+
+if [[ "$CLAUDE_DAILY_COST" != "unknown" ]] && python3 -c "float('$CLAUDE_DAILY_COST')" 2>/dev/null; then
+  log "💸 Claude Code CLI today: \$$CLAUDE_DAILY_COST notional"
+  OVER_THRESHOLD=$(python3 -c "import sys; sys.exit(0 if float('$CLAUDE_DAILY_COST') >= $CLAUDE_DAILY_WARN_THRESHOLD else 1)" 2>/dev/null && echo "yes" || echo "no")
+  if [[ "$OVER_THRESHOLD" == "yes" ]]; then
+    alert_with_cooldown "claude-cli-spend" "⚠️ Claude Code CLI spend HIGH today: \$$CLAUDE_DAILY_COST notional (threshold: \$${CLAUDE_DAILY_WARN_THRESHOLD}). Risk of hitting rate limits."
+  else
+    rm -f "$STAMP_DIR/balance-claude-cli-spend.stamp" 2>/dev/null || true
+  fi
+else
+  log "⚠️  Could not determine Claude Code CLI spend (ccusage unavailable)"
+fi
+
 # ── Heartbeat ─────────────────────────────────────────────────────────────────
 bash "$SCRIPT_DIR/cron-heartbeat.sh" anthropic-balance-check 0
 log "✅ Done"
