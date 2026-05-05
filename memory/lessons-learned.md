@@ -8,6 +8,18 @@ Format: one entry per problem, structured for fast recall and prevention.
 
 ---
 
+## 2026-05-05
+
+### openclaw backup create --no-include-workspace creates duplicate manifest.json (v2026.5.4 bug)
+- **Commit**: `ffbd1a8` — fix: remove --verify from no-include-workspace backup create
+- **Symptom**: `backup-openclaw.sh` failed at Step 2 with "Expected exactly one backup manifest entry, found 2."
+- **Root cause**: OpenClaw 2026.5.4 bug — `openclaw backup create --no-include-workspace` writes `manifest.json` twice into the tarball. Full backups (no flag) are unaffected.
+- **Fix**: Removed `--verify` from the create call in `backup-openclaw.sh`. The archive content is intact; only the metadata header is duplicated.
+- **Prevention**: When `openclaw` is updated past 2026.5.4, re-test `--no-include-workspace` + `--verify` together and restore the flag once fixed
+- **Check**: `tar -tzf <archive> | grep "^[^/]*/manifest\.json$" | wc -l` — should be 1
+
+---
+
 ## 2026-04-26
 
 ### Archive sweep removed an active script (generate-status.sh)
