@@ -6,33 +6,41 @@ Runs every 30min via observer-agent.sh. Produces ~/.openclaw/workspace/TODAY.md
 for agent context awareness.
 
 Accounts:
-  - rdreilly2010@gmail.com   (gog — authenticated)
-  - reillyrd25@gmail.com     (gog — needs: gog auth add reillyrd25@gmail.com --services gmail,calendar)
-  - robert@reillydesignstudio.com (gog — needs: gog auth add robert@reillydesignstudio.com --services gmail,calendar)
+  - robert@reillydesignstudio.com (iCloud IMAP — primary; login csm4.0@icloud.com on p37-imap.mail.me.com)
+  - rdreilly2010@gmail.com        (gog — authenticated, full scopes)
 
 Calendar: today's remaining events + tomorrow morning (before noon)
 Email:    unread + important/starred, subject + sender, up to 8 per account
 """
 
+import email as _email
+import imaplib
 import json
+import ssl
 import subprocess
 import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-WORKSPACE   = Path.home() / ".openclaw" / "workspace"
-TODAY_FILE  = WORKSPACE / "TODAY.md"
-TZ          = ZoneInfo("America/New_York")
+WORKSPACE = Path.home() / ".openclaw" / "workspace"
+TODAY_FILE = WORKSPACE / "TODAY.md"
+TZ = ZoneInfo("America/New_York")
 
 EMAIL_ACCOUNTS = [
-    {"email": "rdreilly2010@gmail.com",           "label": "rdreilly2010",      "tool": "gog"},
-    {"email": "reillyrd25@gmail.com",             "label": "reillyrd25",        "tool": "gog"},
-    {"email": "robert@reillydesignstudio.com",    "label": "reillydesignstudio","tool": "gog"},
+    {
+        "email": "robert@reillydesignstudio.com",
+        "label": "reillydesignstudio",
+        "tool": "imap",
+        "imap_host": "p37-imap.mail.me.com",
+        "imap_login": "csm4.0@icloud.com",
+        "imap_password": "klmo-rkrs-zpot-aljs",
+    },
+    {"email": "rdreilly2010@gmail.com", "label": "rdreilly2010", "tool": "gog"},
 ]
 
 CALENDAR_ACCOUNT = "rdreilly2010@gmail.com"
-THINGS_CLI       = "/opt/homebrew/bin/things"
+THINGS_CLI = "/opt/homebrew/bin/things"
 
 
 def run(cmd: str, timeout: int = 12) -> tuple[int, str]:
@@ -58,16 +66,16 @@ def fmt_time(dt_field) -> str:
 
 def get_calendar() -> dict:
     """Fetch today's remaining events + tomorrow morning from Google Calendar."""
-    now       = datetime.now(TZ)
-    today     = now.date()
-    tomorrow  = today + timedelta(days=1)
+    now = datetime.now(TZ)
+    today = now.date()
+    tomorrow = today + timedelta(days=1)
 
     code, out = run(f"gog calendar list -a {CALENDAR_ACCOUNT} --json 2>/dev/null")
     if code != 0 or not out:
         return {"today": [], "tomorrow": [], "error": "gog calendar unavailable"}
 
     try:
-        data   = json.loads(out)
+        data = json.loads(out)
         events = data.get("events", data.get("items", []))
     except json.JSONDecodeError:
         return {"today": [], "tomorrow": [], "error": "JSON parse error"}
@@ -92,6 +100,7 @@ def get_calendar() -> dict:
         elif "date" in start:
             try:
                 from datetime import date as _date
+
                 ev_date = _date.fromisoformat(start["date"])
             except Exception:
                 ev_date = None
@@ -102,8 +111,8 @@ def get_calendar() -> dict:
             continue
 
         entry = {
-            "title":    summary,
-            "time":     fmt_time(start),
+            "title": summary,
+            "time": fmt_time(start),
             "location": location,
         }
 
@@ -115,7 +124,7 @@ def get_calendar() -> dict:
                 tomorrow_events.append(entry)
 
     return {
-        "today":    today_events[:8],
+        "today": today_events[:8],
         "tomorrow": tomorrow_events[:5],
     }
 
@@ -130,8 +139,46 @@ def _is_before_noon(start_field: dict) -> bool:
         return True
 
 
+def get_email_icloud(account: dict) -> dict:
+    """Fetch unread email via Python IMAP (iCloud)."""
+    label = account["label"]
+    try:
+        ctx = ssl.create_default_context()
+        m = imaplib.IMAP4_SSL(account["imap_host"], 993, ssl_context=ctx)
+        m.login(account["imap_login"], account["imap_password"])
+        m.select("INBOX", readonly=True)
+        _, data = m.search(None, "UNSEEN")
+        uids = (data[0].split() if data[0] else [])[:8]
+        messages = []
+        for uid in uids:
+            _, msg_data = m.fetch(uid, "(BODY[HEADER.FIELDS (FROM SUBJECT DATE)])")
+            raw = msg_data[0][1] if msg_data and msg_data[0] else b""
+            msg = _email.message_from_bytes(raw)
+            subject = _email.header.decode_header(msg.get("Subject", "(no subject)"))[0]
+            subject = (
+                subject[0].decode(subject[1] or "utf-8")
+                if isinstance(subject[0], bytes)
+                else subject[0]
+            )
+            sender = msg.get("From", "")
+            sender_name = sender.split("<")[0].strip().strip('"') or sender
+            messages.append({"from": sender_name, "subject": subject[:80], "flags": []})
+        m.logout()
+        return {
+            "label": label,
+            "status": "ok",
+            "count": len(messages),
+            "messages": messages,
+        }
+    except Exception as e:
+        return {"label": label, "status": "error", "error": str(e)[:80], "messages": []}
+
+
 def get_email_for_account(account: dict) -> dict:
     """Fetch unread + important email for one account."""
+    if account.get("tool") == "imap":
+        return get_email_icloud(account)
+
     email = account["email"]
     label = account["label"]
 
@@ -143,65 +190,73 @@ def get_email_for_account(account: dict) -> dict:
         _, err = run(f"gog gmail search 'is:unread' -a {email} --json 2>&1 | head -1")
         if "No auth" in err or "OAuth" in err:
             return {
-                "label":   label,
-                "status":  "needs_auth",
-                "fix":     f"gog auth add {email} --services gmail,calendar",
+                "label": label,
+                "status": "needs_auth",
+                "fix": f"gog auth add {email} --services gmail,calendar",
                 "messages": [],
             }
         return {"label": label, "status": "error", "messages": []}
 
     messages = []
     try:
-        data     = json.loads(out)
+        data = json.loads(out)
         raw_msgs = data.get("messages", data.get("threads", []))
 
         for m in raw_msgs[:8]:
-            sender  = m.get("from", "")
+            sender = m.get("from", "")
             subject = m.get("subject", "(no subject)")
-            date    = m.get("date", "")
-            labels  = m.get("labels", [])
+            date = m.get("date", "")
+            labels = m.get("labels", [])
 
             # Short preview = subject truncated (gog doesn't expose body snippet)
             preview = subject[:80] + ("…" if len(subject) > 80 else "")
 
             # Tag important/starred/flagged
             flags = []
-            if "IMPORTANT" in labels:  flags.append("important")
-            if "STARRED"   in labels:  flags.append("starred")
+            if "IMPORTANT" in labels:
+                flags.append("important")
+            if "STARRED" in labels:
+                flags.append("starred")
 
-            messages.append({
-                "from":    sender,
-                "subject": subject,
-                "preview": preview,
-                "date":    date,
-                "flags":   flags,
-            })
+            messages.append(
+                {
+                    "from": sender,
+                    "subject": subject,
+                    "preview": preview,
+                    "date": date,
+                    "flags": flags,
+                }
+            )
     except (json.JSONDecodeError, Exception):
         pass
 
     # Also fetch starred (may not overlap with unread)
-    code2, out2 = run(f"gog gmail search 'is:starred is:read' -a {email} --json 2>/dev/null")
+    code2, out2 = run(
+        f"gog gmail search 'is:starred is:read' -a {email} --json 2>/dev/null"
+    )
     if code2 == 0 and out2:
         try:
-            data2    = json.loads(out2)
-            raw2     = data2.get("messages", data2.get("threads", []))
+            data2 = json.loads(out2)
+            raw2 = data2.get("messages", data2.get("threads", []))
             seen_ids = {m.get("id") for m in json.loads(out).get("messages", [])}
             for m in raw2[:3]:
                 if m.get("id") not in seen_ids:
-                    messages.append({
-                        "from":    m.get("from", ""),
-                        "subject": m.get("subject", "(no subject)"),
-                        "preview": m.get("subject", "")[:80],
-                        "date":    m.get("date", ""),
-                        "flags":   ["starred"],
-                    })
+                    messages.append(
+                        {
+                            "from": m.get("from", ""),
+                            "subject": m.get("subject", "(no subject)"),
+                            "preview": m.get("subject", "")[:80],
+                            "date": m.get("date", ""),
+                            "flags": ["starred"],
+                        }
+                    )
         except Exception:
             pass
 
     return {
-        "label":    label,
-        "status":   "ok",
-        "count":    len(messages),
+        "label": label,
+        "status": "ok",
+        "count": len(messages),
         "messages": messages,
     }
 
@@ -217,7 +272,9 @@ def get_things() -> dict:
         try:
             r = _sp.run(
                 [THINGS_CLI] + args + ["--json"],
-                capture_output=True, text=True, timeout=timeout,
+                capture_output=True,
+                text=True,
+                timeout=timeout,
             )
             if r.returncode != 0:
                 return None
@@ -229,46 +286,51 @@ def get_things() -> dict:
         except Exception:
             return None
 
-    today_raw    = _things_run(["today"])
+    today_raw = _things_run(["today"])
     upcoming_raw = _things_run(["upcoming"])
 
     if today_raw is None or upcoming_raw is None:
-        return {"status": "needs_fda",
-                "fix": "System Settings → Privacy & Security → Full Disk Access → add OpenClaw.app"}
+        return {
+            "status": "needs_fda",
+            "fix": "System Settings → Privacy & Security → Full Disk Access → add OpenClaw.app",
+        }
 
     # upcoming: keep only tasks scheduled for tomorrow
     tomorrow_str = (datetime.now(TZ) + timedelta(days=1)).strftime("%Y-%m-%d")
     tomorrow_tasks = [
-        t for t in (upcoming_raw or [])
+        t
+        for t in (upcoming_raw or [])
         if (t.get("startDate") or "").startswith(tomorrow_str)
     ]
 
     def _fmt(tasks: list) -> list:
         out = []
         for t in tasks:
-            title    = t.get("title", "Untitled")
-            project  = t.get("project", {})
+            title = t.get("title", "Untitled")
+            project = t.get("project", {})
             proj_str = project.get("title", "") if isinstance(project, dict) else ""
             deadline = t.get("deadline", "")
-            tags     = t.get("tags", [])
-            out.append({
-                "title":    title,
-                "project":  proj_str,
-                "deadline": deadline,
-                "tags":     tags,
-            })
+            tags = t.get("tags", [])
+            out.append(
+                {
+                    "title": title,
+                    "project": proj_str,
+                    "deadline": deadline,
+                    "tags": tags,
+                }
+            )
         return out
 
     return {
-        "status":   "ok",
-        "today":    _fmt(today_raw or []),
+        "status": "ok",
+        "today": _fmt(today_raw or []),
         "tomorrow": _fmt(tomorrow_tasks),
     }
 
 
 def render_today_md(calendar: dict, email_results: list, things=None) -> str:
     now_str = datetime.now(TZ).strftime("%A %B %-d, %Y  %-I:%M %p %Z")
-    lines   = [f"# TODAY  —  {now_str}", ""]
+    lines = [f"# TODAY  —  {now_str}", ""]
 
     # ── Calendar ──────────────────────────────────────────────────────────────
     lines.append("## 📅 Calendar")
@@ -280,7 +342,7 @@ def render_today_md(calendar: dict, email_results: list, things=None) -> str:
         if today_ev:
             lines.append("**Today (remaining):**")
             for ev in today_ev:
-                loc  = f"  📍 {ev['location']}" if ev["location"] else ""
+                loc = f"  📍 {ev['location']}" if ev["location"] else ""
                 lines.append(f"- {ev['time']}  {ev['title']}{loc}")
         else:
             lines.append("**Today:** _No remaining events_")
@@ -290,7 +352,7 @@ def render_today_md(calendar: dict, email_results: list, things=None) -> str:
         if tomorrow_ev:
             lines.append("**Tomorrow morning:**")
             for ev in tomorrow_ev:
-                loc  = f"  📍 {ev['location']}" if ev["location"] else ""
+                loc = f"  📍 {ev['location']}" if ev["location"] else ""
                 lines.append(f"- {ev['time']}  {ev['title']}{loc}")
         else:
             lines.append("**Tomorrow morning:** _Nothing scheduled_")
@@ -324,8 +386,10 @@ def render_today_md(calendar: dict, email_results: list, things=None) -> str:
         else:
             for m in msgs:
                 flag_str = ""
-                if "starred"   in m["flags"]: flag_str += " ⭐"
-                if "important" in m["flags"]: flag_str += " 🔔"
+                if "starred" in m["flags"]:
+                    flag_str += " ⭐"
+                if "important" in m["flags"]:
+                    flag_str += " 🔔"
                 # Shorten sender to display name only
                 sender = m["from"].split("<")[0].strip().strip('"') or m["from"]
                 lines.append(f"- **{sender}**{flag_str}  —  {m['subject']}")
@@ -337,7 +401,10 @@ def render_today_md(calendar: dict, email_results: list, things=None) -> str:
     lines.append("")
 
     if things is None or things.get("status") == "needs_fda":
-        fix = (things or {}).get("fix", "Grant Full Disk Access to OpenClaw.app in System Settings → Privacy & Security")
+        fix = (things or {}).get(
+            "fix",
+            "Grant Full Disk Access to OpenClaw.app in System Settings → Privacy & Security",
+        )
         lines.append(f"_Unavailable — {fix}_")
     elif things.get("status") == "error":
         lines.append("_Things unavailable_")
@@ -347,7 +414,7 @@ def render_today_md(calendar: dict, email_results: list, things=None) -> str:
             lines.append(f"**Today ({len(today_tasks)} tasks):**")
             for t in today_tasks:
                 proj = f"  ·  {t['project']}" if t["project"] else ""
-                dl   = f"  ⚑ {t['deadline']}" if t["deadline"] else ""
+                dl = f"  ⚑ {t['deadline']}" if t["deadline"] else ""
                 lines.append(f"- {t['title']}{proj}{dl}")
         else:
             lines.append("**Today:** _Nothing scheduled_")
@@ -369,17 +436,23 @@ def render_today_md(calendar: dict, email_results: list, things=None) -> str:
 
 
 def main():
-    calendar      = get_calendar()
+    calendar = get_calendar()
     email_results = [get_email_for_account(a) for a in EMAIL_ACCOUNTS]
-    things        = get_things()
-    md            = render_today_md(calendar, email_results, things)
+    things = get_things()
+    md = render_today_md(calendar, email_results, things)
     TODAY_FILE.write_text(md)
     print(f"[today-context] Written: {TODAY_FILE}")
     # Summary for caller
-    today_count    = len(calendar.get("today", []))
+    today_count = len(calendar.get("today", []))
     tomorrow_count = len(calendar.get("tomorrow", []))
-    email_counts   = {a["label"]: a.get("count", "?") for a in email_results if a.get("status") == "ok"}
-    print(f"[today-context] Calendar: {today_count} today, {tomorrow_count} tomorrow AM | Email: {email_counts}")
+    email_counts = {
+        a["label"]: a.get("count", "?")
+        for a in email_results
+        if a.get("status") == "ok"
+    }
+    print(
+        f"[today-context] Calendar: {today_count} today, {tomorrow_count} tomorrow AM | Email: {email_counts}"
+    )
 
 
 if __name__ == "__main__":
