@@ -97,10 +97,12 @@ ARCHIVE_NAME=""
 if [[ "$DRY_RUN" == true ]]; then
   log "  Would run: openclaw backup create --no-include-workspace --output '$ICLOUD_BACKUP_DIR' --verify"
 else
+  # Note: --verify omitted — openclaw 2026.5.4 bug: --no-include-workspace creates
+  # duplicate manifest.json entries in the tarball, causing verify to fail with
+  # "Expected exactly one backup manifest entry, found 2." Full backups are unaffected.
   openclaw backup create \
     --no-include-workspace \
     --output "$ICLOUD_BACKUP_DIR" \
-    --verify \
     2>&1 | tee /tmp/openclaw-backup-last.log || fail "openclaw backup create failed"
 
   # Parse archive path from command output (avoids iCloud sync race with ls glob)
