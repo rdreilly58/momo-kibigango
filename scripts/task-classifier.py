@@ -21,34 +21,19 @@ class TaskClassifier:
     Returns: TaskComplexity enum + reasoning
     """
 
-    # Keywords that require Opus — deep reasoning, architecture, multi-step execution
+    # Keywords that require Opus — true deep reasoning, multi-step architecture, large migrations
     OPUS_KEYWORDS = {
-        # Deep coding/architecture
+        # Deep coding/architecture (large scope only)
         "refactor",
         "architecture",
         "algorithm",
-        "implement",
         "unit test",
         "integration test",
-        # Strategic / multi-step
-        "strategy",
-        "audit",
+        # Strategic / irreversible / multi-step
         "migrate",
         "automate",
         "troubleshoot",
         "workflow",
-        "procedure",
-        # Research + synthesis
-        "research",
-        "analyze",
-        "evaluate",
-        "assess",
-        "optimize",
-        # Project-specific context
-        "momo",
-        "kibidango",
-        "ios",
-        "leidos",
     }
 
     # Keywords that need Sonnet — conversational analysis, writing, medium coding
@@ -77,6 +62,17 @@ class TaskClassifier:
         "error",
         "issue",
         "bug",
+        # Analysis (moved from Opus — Sonnet handles these fine)
+        "analyze",
+        "analyse",
+        "evaluate",
+        "assess",
+        "optimize",
+        "research",
+        "strategy",
+        "audit",
+        "procedure",
+        "implement",
         # Analysis lite
         "explain",
         "interpret",
@@ -186,7 +182,7 @@ class TaskClassifier:
         return {
             TaskComplexity.SIMPLE: "anthropic/claude-haiku-4-5-20251001",
             TaskComplexity.MEDIUM: "anthropic/claude-sonnet-4-6",
-            TaskComplexity.COMPLEX: "anthropic/claude-opus-4-6",
+            TaskComplexity.COMPLEX: "anthropic/claude-opus-4-7",
         }[complexity]
 
     @staticmethod

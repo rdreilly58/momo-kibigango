@@ -43,8 +43,8 @@ MEMORY_DIR = Path.home() / ".openclaw" / "workspace" / "memory"
 MIN_AGE_DAYS = 7
 MIN_SIZE_BYTES = 5 * 1024  # 5 KB
 HAIKU_MODEL = "claude-haiku-4-5-20251001"
-MAX_TOKENS_IN = 4000    # truncate input to avoid Haiku context limits
-MAX_TOKENS_OUT = 1200   # max summary length
+MAX_TOKENS_IN = 4000  # truncate input to avoid Haiku context limits
+MAX_TOKENS_OUT = 1200  # max summary length
 
 COMPRESSION_HEADER = "# [COMPRESSED {date}] Original: {orig_kb}KB → {new_kb}KB\n\n"
 
@@ -59,7 +59,7 @@ DAILY_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}")
 
 
 def _get_api_key() -> str:
-    """Get ANTHROPIC_API_KEY from env or briefing.env."""
+    """Get ANTHROPIC_API_KEY from env, briefing.env, or macOS keychain."""
     key = os.environ.get("ANTHROPIC_API_KEY", "")
     if key:
         return key
@@ -68,8 +68,21 @@ def _get_api_key() -> str:
         for line in env_file.read_text(encoding="utf-8").splitlines():
             if line.startswith("ANTHROPIC_API_KEY="):
                 return line.split("=", 1)[1].strip()
+    import subprocess as _sp
+
+    try:
+        result = _sp.run(
+            ["security", "find-generic-password", "-s", "AnthropicAPIKey", "-w"],
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+        if result.returncode == 0 and result.stdout.strip():
+            return result.stdout.strip()
+    except Exception:
+        pass
     raise RuntimeError(
-        "ANTHROPIC_API_KEY not set. Add to env or config/briefing.env."
+        "ANTHROPIC_API_KEY not set. Add to env, config/briefing.env, or keychain (AnthropicAPIKey)."
     )
 
 
@@ -130,13 +143,15 @@ def find_candidates(
         if _is_already_compressed(f):
             continue
         content = f.read_text(encoding="utf-8", errors="replace")
-        candidates.append({
-            "path": f,
-            "age_days": age,
-            "size_bytes": size,
-            "tokens_est": _estimate_tokens(content),
-            "content": content,
-        })
+        candidates.append(
+            {
+                "path": f,
+                "age_days": age,
+                "size_bytes": size,
+                "tokens_est": _estimate_tokens(content),
+                "content": content,
+            }
+        )
     return candidates
 
 
@@ -145,11 +160,16 @@ def _summarize_with_haiku(content: str, api_key: str) -> str:
     try:
         import anthropic
     except ImportError:
-        raise RuntimeError("anthropic package not installed. Run: pip install anthropic")
+        raise RuntimeError(
+            "anthropic package not installed. Run: pip install anthropic"
+        )
 
     # Truncate if too long
     if len(content) > MAX_TOKENS_IN * 4:
-        content = content[:MAX_TOKENS_IN * 4] + "\n\n[... content truncated for compression ...]"
+        content = (
+            content[: MAX_TOKENS_IN * 4]
+            + "\n\n[... content truncated for compression ...]"
+        )
 
     client = anthropic.Anthropic(api_key=api_key)
     msg = client.messages.create(
@@ -189,17 +209,27 @@ def compress_file(
     }
 
     if verbose:
-        print(f"  {'[DRY]' if dry_run else '[APPLY]'} {path.name} ({orig_size//1024}KB, {candidate['age_days']:.0f}d old)")
+        print(
+            f"  {'[DRY]' if dry_run else '[APPLY]'} {path.name} ({orig_size // 1024}KB, {candidate['age_days']:.0f}d old)"
+        )
 
     if dry_run:
         # Estimate: summaries are typically 10-20% of original
         est_summary_size = max(500, orig_size // 6)
-        header_size = len(COMPRESSION_HEADER.format(date=date_str, orig_kb=orig_size//1024, new_kb=est_summary_size//1024))
+        header_size = len(
+            COMPRESSION_HEADER.format(
+                date=date_str,
+                orig_kb=orig_size // 1024,
+                new_kb=est_summary_size // 1024,
+            )
+        )
         est_total = header_size + est_summary_size
         result["new_size_bytes"] = est_total
         result["compression_ratio"] = round(est_total / orig_size, 2)
         if verbose:
-            print(f"    Est: {orig_size//1024}KB → {est_total//1024}KB ({result['compression_ratio']:.0%})")
+            print(
+                f"    Est: {orig_size // 1024}KB → {est_total // 1024}KB ({result['compression_ratio']:.0%})"
+            )
         return result
 
     # Apply: backup + summarize + write
@@ -214,7 +244,9 @@ def compress_file(
         # 3. Build compressed content
         orig_kb = orig_size // 1024
         new_kb = len(summary) // 1024
-        header = COMPRESSION_HEADER.format(date=date_str, orig_kb=orig_kb, new_kb=max(1, new_kb))
+        header = COMPRESSION_HEADER.format(
+            date=date_str, orig_kb=orig_kb, new_kb=max(1, new_kb)
+        )
         compressed = header + summary
 
         # 4. Write back
@@ -224,8 +256,10 @@ def compress_file(
         result["new_size_bytes"] = new_size
         result["compression_ratio"] = round(new_size / orig_size, 2)
 
-        print(f"    ✓ {path.name}: {orig_size//1024}KB → {new_size//1024}KB "
-              f"(backup: {backup_path.name})")
+        print(
+            f"    ✓ {path.name}: {orig_size // 1024}KB → {new_size // 1024}KB "
+            f"(backup: {backup_path.name})"
+        )
 
     except Exception as e:
         result["error"] = str(e)
@@ -253,7 +287,7 @@ def run_compression(
     print(f"[memory-compress] Found {len(candidates)} file(s) eligible for compression")
     if candidates:
         print(f"  Total size: {total_orig // 1024}KB | Est. tokens: {total_tokens:,}")
-        print(f"  Threshold: >{min_age_days} days old AND >{min_size_bytes//1024}KB")
+        print(f"  Threshold: >{min_age_days} days old AND >{min_size_bytes // 1024}KB")
         print()
 
     if not candidates:
@@ -285,7 +319,9 @@ def run_compression(
     print(f"  Files processed: {len(ok)}/{len(candidates)}")
     print(f"  Original size:   {total_orig // 1024}KB")
     print(f"  New size (est):  {total_new // 1024}KB")
-    print(f"  Savings (est):   {savings_kb}KB (~{round(total_new/total_orig*100) if total_orig else 0}% of original)")
+    print(
+        f"  Savings (est):   {savings_kb}KB (~{round(total_new / total_orig * 100) if total_orig else 0}% of original)"
+    )
     if errors:
         print(f"  Errors:          {len(errors)}")
     if dry_run:
@@ -300,9 +336,15 @@ def run_compression(
         "total_new_kb": total_new // 1024,
         "savings_kb": savings_kb,
         "dry_run": dry_run,
-        "files": [{"name": r["name"], "orig_kb": r["orig_size_bytes"]//1024,
-                   "new_kb": (r["new_size_bytes"] or 0)//1024,
-                   "error": r.get("error")} for r in results],
+        "files": [
+            {
+                "name": r["name"],
+                "orig_kb": r["orig_size_bytes"] // 1024,
+                "new_kb": (r["new_size_bytes"] or 0) // 1024,
+                "error": r.get("error"),
+            }
+            for r in results
+        ],
     }
 
 
@@ -310,18 +352,37 @@ def main():
     ap = argparse.ArgumentParser(
         description="Compress old daily memory files using Haiku summarization"
     )
-    ap.add_argument("--dry-run", action="store_true", default=False,
-                    help="Show what would be compressed (no writes)")
-    ap.add_argument("--apply", action="store_true",
-                    help="Actually compress files (writes .md.orig backup + new summary)")
-    ap.add_argument("--verbose", "-v", action="store_true",
-                    help="Show per-file details")
-    ap.add_argument("--min-age", type=int, default=MIN_AGE_DAYS,
-                    help=f"Minimum file age in days (default: {MIN_AGE_DAYS})")
-    ap.add_argument("--min-size", type=int, default=MIN_SIZE_BYTES,
-                    help=f"Minimum file size in bytes (default: {MIN_SIZE_BYTES} = 5KB)")
-    ap.add_argument("--memory-dir", default=str(MEMORY_DIR),
-                    help=f"Memory directory (default: {MEMORY_DIR})")
+    ap.add_argument(
+        "--dry-run",
+        action="store_true",
+        default=False,
+        help="Show what would be compressed (no writes)",
+    )
+    ap.add_argument(
+        "--apply",
+        action="store_true",
+        help="Actually compress files (writes .md.orig backup + new summary)",
+    )
+    ap.add_argument(
+        "--verbose", "-v", action="store_true", help="Show per-file details"
+    )
+    ap.add_argument(
+        "--min-age",
+        type=int,
+        default=MIN_AGE_DAYS,
+        help=f"Minimum file age in days (default: {MIN_AGE_DAYS})",
+    )
+    ap.add_argument(
+        "--min-size",
+        type=int,
+        default=MIN_SIZE_BYTES,
+        help=f"Minimum file size in bytes (default: {MIN_SIZE_BYTES} = 5KB)",
+    )
+    ap.add_argument(
+        "--memory-dir",
+        default=str(MEMORY_DIR),
+        help=f"Memory directory (default: {MEMORY_DIR})",
+    )
     args = ap.parse_args()
 
     dry_run = not args.apply
@@ -339,6 +400,7 @@ def main():
     )
 
     import json
+
     print("\n[stats]", json.dumps(stats, indent=2))
 
 

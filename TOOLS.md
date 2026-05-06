@@ -1,4 +1,3 @@
-
 ## Calendar (Primary — Apple Calendar)
 
 **Tool:** `apple-calendar-cli` at `/opt/homebrew/bin/apple-calendar-cli`
@@ -13,15 +12,13 @@
 |------|-------|
 | reillydesignstudio | robert.reilly@peraton.com (global default — Vercel requires this) |
 | momo-kibigango (workspace) | rdreilly2010@gmail.com (local override) |
-| All others | robert.reilly@peraton.com |
 
 ---
 
 ## Email Operations
 
 - **`rdreilly2010@gmail.com`** — ✅ Active, full OAuth (primary for all read/search/calendar)
-- **`robert@reillydesignstudio.com`** — ✅ Active OAuth (gmail scope, added 2026-04-27)
-- ~~`reillyrd58@gmail.com`~~ — 🗑️ Abandoned. Do NOT use.
+- **`robert@reillydesignstudio.com`** — ✅ Active OAuth (added 2026-04-27)
 
 **Send to Bob:** `gog gmail send -a "rdreilly2010@gmail.com" --to "..."`
 **Send as RDS:** `gog gmail send -a robert@reillydesignstudio.com --to "..." --subject "..." --body "..."`
@@ -34,15 +31,6 @@
 → `~/.openclaw/workspace/scripts/total_recall_search.py`
 
 **With reranking:** `total-recall-search "query" --rerank --json`
-
----
-
-## Compute
-
-| Priority | Resource | Status |
-|----------|----------|--------|
-| 1 | Local M4 Mac Mini GPU (MLX) | ✅ Primary |
-| 2 | Google Colab H100 | ✅ Available (manual) |
 
 ---
 
@@ -66,7 +54,6 @@ curl -s "https://api.anthropic.com/v1/organizations/usage_report/messages?starti
 bob-reboot      # graceful restart — quits Mail/Music/Photos/Safari first
 bob-shutdown    # graceful power-off
 ```
-Scripts: `~/.openclaw/workspace/scripts/pre-reboot-quit-apps.sh` + `bob-reboot.sh`
 
 ---
 

@@ -182,7 +182,7 @@ _log "Phase 1.5 done: ${DEDUP_CLEANED} files deduped, ~${DEDUP_LINES_SAVED} line
 CROSS_DEDUP_CLEANED=0
 CROSS_DEDUP_LINES_SAVED=0
 
-declare -A SEEN_LINES
+SEEN_LINES_FILE=$(mktemp)
 
 if ! $DRY_RUN; then
     # Build corpus of lines seen in earlier files (chronological order)
@@ -198,11 +198,11 @@ if ! $DRY_RUN; then
             trimmed="${line#"${line%%[![:space:]]*}"}"
             if [[ "$trimmed" =~ ^[-*•] ]] && [ ${#trimmed} -gt 20 ]; then
                 key="${trimmed}"
-                if [[ -n "${SEEN_LINES[$key]+x}" ]]; then
+                if grep -qxF "$key" "$SEEN_LINES_FILE" 2>/dev/null; then
                     ((DROPPED++)) || true
                     continue
                 else
-                    SEEN_LINES[$key]=1
+                    echo "$key" >> "$SEEN_LINES_FILE"
                 fi
             fi
             echo "$line" >> "$tmp"
@@ -218,6 +218,7 @@ if ! $DRY_RUN; then
         fi
     done
 fi
+rm -f "$SEEN_LINES_FILE"
 
 _log "Phase 1.6 done: ${CROSS_DEDUP_CLEANED} files cleaned, ${CROSS_DEDUP_LINES_SAVED} duplicate lines removed"
 
