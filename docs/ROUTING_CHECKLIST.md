@@ -42,8 +42,8 @@
    - COMPLEX: Load SOUL.md + USER.md + MEMORY.md + TOOLS.md + today's memory (~50 KB)
 
 3. **Select model:**
-   - SIMPLE: `anthropic/claude-haiku-4-5` (0.5-1s)
-   - COMPLEX: `anthropic/claude-opus-4-0` (1-2s)
+   - SIMPLE: `anthropic/claude-haiku-4-6` (0.5-1s)
+   - COMPLEX: `anthropic/claude-opus-4-7` (1-2s)
 
 4. **Set thinking level:**
    - SIMPLE: `thinking="off"` (skip reasoning overhead)

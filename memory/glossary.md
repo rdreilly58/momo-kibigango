@@ -72,7 +72,7 @@ Check here before writing a new memory — use the term on the left, avoid the a
 
 | Canonical | Model ID | Use |
 |-----------|----------|-----|
-| **Haiku** | `claude-haiku-4-5` | Simple tasks, crons, heartbeats |
+| **Haiku** | `claude-haiku-4-6` | Simple tasks, crons, heartbeats |
 | **Sonnet** | `claude-sonnet-4-6` | Default — most tasks |
 | **Opus** | `claude-opus-4-7` | Complex only — costs 25× Haiku |
 | **Gemini** | `google/gemini-2.5-flash` | Fallback (Anthropic timeout/quota) |

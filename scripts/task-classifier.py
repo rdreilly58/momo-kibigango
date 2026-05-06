@@ -180,7 +180,7 @@ class TaskClassifier:
     def get_model(complexity: TaskComplexity) -> str:
         """Return recommended model for complexity level."""
         return {
-            TaskComplexity.SIMPLE: "anthropic/claude-haiku-4-5-20251001",
+            TaskComplexity.SIMPLE: "anthropic/claude-haiku-4-6",
             TaskComplexity.MEDIUM: "anthropic/claude-sonnet-4-6",
             TaskComplexity.COMPLEX: "anthropic/claude-opus-4-7",
         }[complexity]

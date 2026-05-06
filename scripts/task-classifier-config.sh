@@ -28,7 +28,7 @@ cat > ~/.openclaw/workspace/config/classifier-config.json << 'EOF'
         "this week",
         "search for"
       ],
-      "simple_model": "anthropic/claude-haiku-4-5",
+      "simple_model": "anthropic/claude-haiku-4-6",
       "complex_keywords": [
         "build",
         "refactor",

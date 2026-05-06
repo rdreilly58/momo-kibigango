@@ -9,7 +9,7 @@
     "maxAge": 7
   },
   "defaults": {
-    "model": "anthropic/claude-haiku-4-5",
+    "model": "anthropic/claude-haiku-4-6",
     "reasoning": "off"
   },
   "overrides": {}

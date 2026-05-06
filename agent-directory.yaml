@@ -4,8 +4,8 @@ version: 1
 agent_types:
   coding:
     description: "Software implementation, debugging, refactoring"
-    default_model: "claude-opus-4-6"
-    fallback_model: "claude-haiku-4-5-20251001"
+    default_model: "claude-opus-4-7"
+    fallback_model: "claude-haiku-4-6"
     max_concurrent: 3
     timeout_seconds: 900
     context_files:
@@ -14,8 +14,8 @@ agent_types:
 
   observer:
     description: "Read-only workspace scanning and memory updates"
-    default_model: "claude-haiku-4-5-20251001"
-    fallback_model: "claude-haiku-4-5-20251001"
+    default_model: "claude-haiku-4-6"
+    fallback_model: "claude-haiku-4-6"
     max_concurrent: 1
     timeout_seconds: 300
     context_files:
@@ -24,7 +24,7 @@ agent_types:
   research:
     description: "Web search, summarization, analysis"
     default_model: "claude-sonnet-4-6"
-    fallback_model: "claude-haiku-4-5-20251001"
+    fallback_model: "claude-haiku-4-6"
     max_concurrent: 2
     timeout_seconds: 600
     context_files:
@@ -33,7 +33,7 @@ agent_types:
   ops:
     description: "Infrastructure, cron, deployment"
     default_model: "claude-sonnet-4-6"
-    fallback_model: "claude-haiku-4-5-20251001"
+    fallback_model: "claude-haiku-4-6"
     max_concurrent: 1
     timeout_seconds: 600
     context_files:

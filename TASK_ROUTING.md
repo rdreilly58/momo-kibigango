@@ -28,7 +28,7 @@
 - ✅ `thinking="off"` — skip reasoning overhead
 - Saves 2-3 seconds per request
 
-**Model:** `anthropic/claude-haiku-4-5`
+**Model:** `anthropic/claude-haiku-4-6`
 
 **Hard rule:** If message word count > 50, minimum tier is Sonnet. No exceptions.
 
@@ -137,7 +137,7 @@
 **Gateway defaults (updated May 2026):**
 - `model.default`: `anthropic/claude-sonnet-4-6` (was `claude-opus-4-0`)
 - `model.complex`: `anthropic/claude-opus-4-7`
-- `model.fallback`: `google/gemini-2.5-flash` → `anthropic/claude-haiku-4-5`
+- `model.fallback`: `google/gemini-2.5-flash` → `anthropic/claude-haiku-4-6`
 - Telegram channel: explicit `anthropic/claude-sonnet-4-6` override
 
 **Context loader (load order matters — primacy/recency bias):**
