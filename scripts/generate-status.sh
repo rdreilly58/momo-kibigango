@@ -203,7 +203,14 @@ tasks_section() {
   echo "## Today's Tasks (Things 3)"
   echo ""
   local raw
-  raw=$(perl -e 'alarm 5; exec "things", "today"' 2>/dev/null || echo "")
+  # things CLI hangs when app is closed; use kill-based 5s timeout
+  local _tmp; _tmp=$(mktemp)
+  things today > "$_tmp" 2>/dev/null &
+  local _pid=$!
+  ( sleep 5; kill "$_pid" 2>/dev/null ) &
+  local _killer=$!
+  wait "$_pid" 2>/dev/null && kill "$_killer" 2>/dev/null || true
+  raw=$(cat "$_tmp"); rm -f "$_tmp"
   if [ -z "$raw" ]; then
     echo "_No incomplete tasks today._"
     echo ""
