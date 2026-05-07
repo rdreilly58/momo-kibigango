@@ -135,10 +135,12 @@
 6. **Default** → MEDIUM (Sonnet — never default to Haiku or Opus)
 
 **Gateway defaults (updated May 2026):**
-- `model.default`: `anthropic/claude-sonnet-4-6` (was `claude-opus-4-0`)
+- `model.default`: `claude-cli/claude-haiku-4-6`
+- `model.fallbacks`: `claude-cli/claude-sonnet-4-6` → `anthropic/claude-haiku-4-6` → `ollama/gemma4:e2b`
 - `model.complex`: `anthropic/claude-opus-4-7`
-- `model.fallback`: `google/gemini-2.5-flash` → `anthropic/claude-haiku-4-6`
-- Telegram channel: explicit `anthropic/claude-sonnet-4-6` override
+- Cron isolated (simple): `ollama/gemma4:e2b`
+- Cron isolated (memory/reasoning): `claude-cli/claude-sonnet-4-6`
+- Telegram channel: inherits agent default (`claude-cli/claude-haiku-4-6`)
 
 **Context loader (load order matters — primacy/recency bias):**
 ```
