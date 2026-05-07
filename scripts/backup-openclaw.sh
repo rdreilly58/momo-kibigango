@@ -72,7 +72,21 @@ TIMESTAMP=$(date -u '+%Y-%m-%dT%H-%M-%SZ')
 log "OpenClaw Backup — $TIMESTAMP"
 [[ "$DRY_RUN" == true ]] && log "DRY RUN mode"
 
-mkdir -p "$ICLOUD_BACKUP_DIR"
+# Verify iCloud Drive is writable before attempting backup
+# iCloud root may exist but be empty/unsynced — use a write test to confirm availability
+ICLOUD_ROOT="$HOME/Library/Mobile Documents/com~apple~CloudDocs"
+ICLOUD_AVAILABLE=false
+if [[ -d "$ICLOUD_ROOT" ]]; then
+  mkdir -p "$ICLOUD_BACKUP_DIR" 2>/dev/null || true
+  if touch "$ICLOUD_BACKUP_DIR/.momo-writetest" 2>/dev/null; then
+    rm -f "$ICLOUD_BACKUP_DIR/.momo-writetest"
+    ICLOUD_AVAILABLE=true
+  else
+    log "⚠️ iCloud Drive not writable — skipping iCloud backup steps"
+  fi
+else
+  log "⚠️ iCloud Drive unavailable ($ICLOUD_ROOT not found) — skipping iCloud backup steps"
+fi
 
 # ── Step 1: Workspace backup via git push ──────────────────────────────────────
 log "Step 1: Workspace backup via git push..."
@@ -94,15 +108,17 @@ ARCHIVE_PATH=""
 ARCHIVE_SIZE=""
 ARCHIVE_NAME=""
 
-if [[ "$DRY_RUN" == true ]]; then
+if [[ "$ICLOUD_AVAILABLE" == false ]]; then
+  log "  ⚠️ Skipping — iCloud unavailable"
+elif [[ "$DRY_RUN" == true ]]; then
   log "  Would run: openclaw backup create --no-include-workspace --output '$ICLOUD_BACKUP_DIR' --verify"
 else
   # Note: --verify omitted — openclaw 2026.5.4 bug: --no-include-workspace creates
   # duplicate manifest.json entries in the tarball, causing verify to fail with
   # "Expected exactly one backup manifest entry, found 2." Full backups are unaffected.
-  openclaw backup create \
-    --no-include-workspace \
-    --output "$ICLOUD_BACKUP_DIR" \
+  # Wrapped in perl alarm (600s) to prevent indefinite hang if iCloud becomes unresponsive mid-run.
+  perl -e 'alarm 600; exec "openclaw", "backup", "create",
+    "--no-include-workspace", "--output", $ARGV[0]' "$ICLOUD_BACKUP_DIR" \
     2>&1 | tee /tmp/openclaw-backup-last.log || fail "openclaw backup create failed"
 
   # Parse archive path from command output (avoids iCloud sync race with ls glob)
@@ -121,7 +137,9 @@ fi
 
 # ── Step 3: Config-only backup (fast restore reference) ───────────────────────
 log "Step 3: Config-only backup → iCloud..."
-if [[ "$DRY_RUN" == true ]]; then
+if [[ "$ICLOUD_AVAILABLE" == false ]]; then
+  log "  ⚠️ Skipping — iCloud unavailable"
+elif [[ "$DRY_RUN" == true ]]; then
   log "  Would run: openclaw backup create --only-config --output '$ICLOUD_BACKUP_DIR'"
 else
   openclaw backup create \
@@ -153,7 +171,10 @@ fi
 
 # ── Step 5: Rotate old iCloud daily backups ────────────────────────────────────
 log "Step 5: Rotating old iCloud daily backups (keep ${KEEP_ICLOUD} days)..."
-if [[ "$DRY_RUN" == false ]]; then
+ICLOUD_COUNT=0
+if [[ "$ICLOUD_AVAILABLE" == false ]]; then
+  log "  ⚠️ Skipping — iCloud unavailable"
+elif [[ "$DRY_RUN" == false ]]; then
   find "$ICLOUD_BACKUP_DIR" -name "[0-9]*-openclaw-backup.tar.gz*" -mtime +${KEEP_ICLOUD} -delete 2>/dev/null || true
   ICLOUD_COUNT=$(ls "$ICLOUD_BACKUP_DIR"/[0-9]*-openclaw-backup.tar.gz* 2>/dev/null | wc -l | tr -d ' ')
   log "  iCloud daily backups retained: $ICLOUD_COUNT"
@@ -163,16 +184,23 @@ fi
 log "✅ Backup complete!"
 
 if [[ "$DRY_RUN" == false ]]; then
-  MSG="✅ *OpenClaw Backup Complete*
+  if [[ "$ICLOUD_AVAILABLE" == false ]]; then
+    MSG="⚠️ *OpenClaw Backup Partial*
+✅ Git push complete
+❌ iCloud unavailable — skipped steps 2-5
+🗓 $(date '+%Y-%m-%d %H:%M EDT')"
+  else
+    MSG="✅ *OpenClaw Backup Complete*
 📦 \`$ARCHIVE_NAME\` (encrypted)
 💾 Size: $ARCHIVE_SIZE
 🔒 GPG AES-256 encrypted
 ☁️ iCloud: syncing
 📁 iCloud copies: $ICLOUD_COUNT
 🗓 $(date '+%Y-%m-%d %H:%M EDT')"
+  fi
   telegram_notify "$MSG"
   echo ""
-  echo "Archive: ${ARCHIVE_PATH}.gpg"
+  [[ -n "$ARCHIVE_PATH" ]] && echo "Archive: ${ARCHIVE_PATH}.gpg"
 fi
 
 # Update dead-man heartbeat

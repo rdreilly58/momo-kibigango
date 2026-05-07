@@ -203,7 +203,7 @@ tasks_section() {
   echo "## Today's Tasks (Things 3)"
   echo ""
   local raw
-  raw=$(things today 2>/dev/null || echo "")
+  raw=$(perl -e 'alarm 5; exec "things", "today"' 2>/dev/null || echo "")
   if [ -z "$raw" ]; then
     echo "_No incomplete tasks today._"
     echo ""

@@ -8,6 +8,22 @@ Format: one entry per problem, structured for fast recall and prevention.
 
 ---
 
+## 2026-05-07
+
+### generate-status.sh hangs at 2:30 AM on `things today` CLI call
+- **Symptom**: `generate-status.sh` cron never completes overnight; process hangs on `things today` subprocess
+- **Root cause**: Things 3 CLI is unresponsive when called at night (2:30 AM) — likely requires the app to be open or has IPC timeout behavior that blocks indefinitely
+- **Fix needed**: Wrap `things today` call in generate-status.sh with a timeout (e.g., `perl -e 'alarm 5; exec "things today"'`) or skip the Things section if it hangs
+- **Prevention**: Any CLI that relies on a macOS app being open (Things, Reminders, etc.) must have a timeout guard in cron-driven scripts
+
+### backup-openclaw.sh hangs when iCloud backup directory doesn't exist
+- **Symptom**: `openclaw backup create --no-include-workspace --output <iCloud-path>` hangs indefinitely when the iCloud output directory doesn't exist (git push succeeds, Step 2 hangs ~13+ min)
+- **Root cause**: `openclaw backup create` appears to block waiting for iCloud to sync/create the directory rather than failing fast when the target path is unavailable
+- **Fix needed**: Pre-check iCloud dir existence before calling openclaw backup create; skip or fallback to local backup if iCloud is unavailable. Also: investigate why iCloud Drive `OpenClaw-Backups` dir doesn't exist anymore
+- **Prevention**: Always pre-check that backup target directories exist before invoking `openclaw backup create`; add `[[ -d "$ICLOUD_BACKUP_DIR" ]] || { log "iCloud unavailable — skipping"; exit 0; }` guard
+
+---
+
 ## 2026-05-05
 
 ### openclaw backup create --no-include-workspace creates duplicate manifest.json (v2026.5.4 bug)
