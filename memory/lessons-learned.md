@@ -11,16 +11,20 @@ Format: one entry per problem, structured for fast recall and prevention.
 ## 2026-05-07
 
 ### generate-status.sh hangs at 2:30 AM on `things today` CLI call
+- **Commits**: `f7bc287` (perl alarm), `24f4649` (kill-based timeout — final fix)
 - **Symptom**: `generate-status.sh` cron never completes overnight; process hangs on `things today` subprocess
-- **Root cause**: Things 3 CLI is unresponsive when called at night (2:30 AM) — likely requires the app to be open or has IPC timeout behavior that blocks indefinitely
-- **Fix needed**: Wrap `things today` call in generate-status.sh with a timeout (e.g., `perl -e 'alarm 5; exec "things today"'`) or skip the Things section if it hangs
-- **Prevention**: Any CLI that relies on a macOS app being open (Things, Reminders, etc.) must have a timeout guard in cron-driven scripts
+- **Root cause**: Things 3 CLI is unresponsive when the app is closed at night (IPC blocks indefinitely). `perl alarm` alone doesn't work because it doesn't survive `exec` — the Things binary ignores SIGALRM
+- **Fix**: Background-process + sleep + kill pattern: launch `things today` in background, sleep 5s, then `kill` the PID if still running. Hard timeout that survives exec
+- **Prevention**: Any CLI that calls a macOS app via IPC in cron must use a background+kill timeout, not `perl alarm` or `timeout` (both ineffective against exec'd binaries that ignore signals)
+- **Check**: `grep -A5 "things today" scripts/generate-status.sh` — should show background PID pattern
 
-### backup-openclaw.sh hangs when iCloud backup directory doesn't exist
-- **Symptom**: `openclaw backup create --no-include-workspace --output <iCloud-path>` hangs indefinitely when the iCloud output directory doesn't exist (git push succeeds, Step 2 hangs ~13+ min)
-- **Root cause**: `openclaw backup create` appears to block waiting for iCloud to sync/create the directory rather than failing fast when the target path is unavailable
-- **Fix needed**: Pre-check iCloud dir existence before calling openclaw backup create; skip or fallback to local backup if iCloud is unavailable. Also: investigate why iCloud Drive `OpenClaw-Backups` dir doesn't exist anymore
-- **Prevention**: Always pre-check that backup target directories exist before invoking `openclaw backup create`; add `[[ -d "$ICLOUD_BACKUP_DIR" ]] || { log "iCloud unavailable — skipping"; exit 0; }` guard
+### backup-openclaw.sh hangs when iCloud is unavailable
+- **Commit**: `f7bc287`
+- **Symptom**: `backup-openclaw.sh` hangs ~13+ min at Step 2 when iCloud Drive target directory doesn't exist; seen 2026-05-07 02:31 AM
+- **Root cause**: `openclaw backup create` blocks waiting for iCloud to sync/create the path rather than failing fast
+- **Fix**: Added iCloud write-test pre-flight (`echo test > $ICLOUD_BACKUP_DIR/.write_test`) before any backup steps. Steps 2–5 are gated behind `ICLOUD_AVAILABLE` flag; `openclaw backup create` also wrapped in 600s `perl alarm` as a final safety net
+- **Prevention**: Always pre-flight test iCloud write access before invoking any iCloud-dependent step in cron. Guard entire iCloud block behind availability flag so partial iCloud outages don't hang or corrupt the run
+- **Check**: `grep -A3 "ICLOUD_AVAILABLE" scripts/backup-openclaw.sh`
 
 ---
 
