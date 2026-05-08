@@ -1,5 +1,12 @@
 # TASK ROUTING & OPTIMIZATION
 
+## Status
+
+**Last updated:** 2026-05-08
+**Classifier:** `scripts/task-classifier-v2.py` | **Config:** `config/classifier-config.json`
+**Strategy:** Hybrid (keyword + length + code detection)
+**Models:** haiku-4-6 (simple) · sonnet-4-6 (medium/default) · opus-4-7 (complex)
+
 **Purpose:** Route tasks to optimal models and context sizes for speed + quality.
 
 ---
@@ -126,7 +133,7 @@
 
 ## Implementation
 
-**Classifier logic** (implemented in `scripts/task-classifier.py` + `config/classifier-config.json`):
+**Classifier logic** (implemented in `scripts/task-classifier-v2.py` + `config/classifier-config.json`):
 1. **Code patterns** (```` ``` ````, `def `, `class `) → MEDIUM (Sonnet) minimum
 2. **Opus keywords** (refactor, architecture, audit, migrate, benchmark, deploy) → COMPLEX
 3. **Sonnet keywords** (write, email, explain, fix, code, review, design, analyze, plan, strategy, debug, optimize, improve, create, examine, recommend) → MEDIUM
@@ -138,8 +145,8 @@
 - `model.default`: `claude-cli/claude-haiku-4-6`
 - `model.fallbacks`: `claude-cli/claude-sonnet-4-6` → `anthropic/claude-haiku-4-6` → `ollama/gemma4:e2b`
 - `model.complex`: `anthropic/claude-opus-4-7`
-- Cron isolated (simple): `ollama/gemma4:e2b`
-- Cron isolated (memory/reasoning): `claude-cli/claude-sonnet-4-6`
+- Cron isolated (simple tasks — memory-decay, prune, lint, compress): `anthropic/claude-haiku-4-6`
+- Cron isolated (complex tasks — briefing, consolidation, dreams): `anthropic/claude-sonnet-4-6`
 - Telegram channel: inherits agent default (`claude-cli/claude-haiku-4-6`)
 
 **Context loader (load order matters — primacy/recency bias):**
@@ -205,6 +212,18 @@ Rules by tier:
 
 ---
 
+
+## Known Limitations
+
+1. **Classifier is advisory only** — the gateway does not auto-route per-message based on classifier output. The classifier (`task-classifier-v2.py`) is a reference tool; actual routing is controlled by gateway config and channel defaults.
+
+2. **Context loading is currently static** — the gateway loads approximately 36k tokens of context regardless of classified tier. The tiered context loading defined here (`context_simple`, `context_medium`, `context_complex`) is a design target, not yet fully enforced at runtime.
+
+3. **Haiku is used for cron jobs but not for main session simple queries** — Telegram/main session messages always go to the agent default model (Sonnet via `claude-cli`), even when classified as simple. Haiku savings only apply to isolated cron jobs.
+
+4. **Keyword classifier has false positives** — words like "check" or "list" in complex messages may partially match simple patterns. Confidence scoring helps, but human review is still needed when classifier accuracy matters.
+
+---
 
 ## Review & Adjust
 

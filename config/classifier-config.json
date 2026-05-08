@@ -2,17 +2,26 @@
   "routing": {
     "classifier": {
       "enabled": true,
-      "strategy": "keyword",
+      "strategy": "hybrid",
+      "description": "Hybrid classifier: keyword matching + length signals + code detection",
+      "implementation": "scripts/task-classifier-v2.py",
 
       "simple_keywords": [
         "weather",
         "date",
         "time",
+        "calendar",
+        "schedule",
         "status",
-        "list",
         "check",
         "remind",
+        "reminder",
+        "heartbeat",
+        "list",
         "what is",
+        "what's",
+        "what are",
+        "is there",
         "how many",
         "how much",
         "current",
@@ -22,22 +31,43 @@
         "tomorrow",
         "this week",
         "search for",
-        "heartbeat"
+        "ping",
+        "hi",
+        "hello"
       ],
-      "simple_model": "anthropic/claude-haiku-4-6",
       "simple_max_words": 50,
+      "simple_max_tokens": 15,
+      "simple_model": "anthropic/claude-haiku-4-6",
 
       "medium_model": "anthropic/claude-sonnet-4-6",
 
       "complex_keywords": [
         "refactor",
         "architecture",
-        "audit",
+        "algorithm",
         "migrate",
+        "migration",
         "benchmark",
-        "deploy"
+        "deploy",
+        "audit",
+        "redesign",
+        "overhaul",
+        "security review",
+        "data migration",
+        "system design",
+        "design system",
+        "infrastructure",
+        "performance analysis"
       ],
       "complex_model": "anthropic/claude-opus-4-7",
+
+      "override_signals": {
+        "multiline_min_medium": true,
+        "multiline_threshold_lines": 3,
+        "long_message_min_medium": true,
+        "long_message_threshold_words": 100,
+        "code_block_min_medium": true
+      },
 
       "context_simple": {
         "max_chars": 5000,
