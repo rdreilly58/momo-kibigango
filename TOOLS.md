@@ -4,6 +4,13 @@
 **Always use `--json`.** Google Calendar tools (`memory__calendar_today` / `memory__calendar_range`) are secondary fallback only.
 **Skill:** `~/.openclaw/workspace/skills/apple-calendar-cli/SKILL.md`
 
+**Correct syntax:**
+```bash
+apple-calendar-cli list-events --json --from YYYY-MM-DD --to YYYY-MM-DD
+apple-calendar-cli list-calendars --json
+```
+⚠️ `--date` flag does NOT exist. Use `--from` + `--to` on the `list-events` subcommand.
+
 ---
 
 ## Git Commit Author (ENFORCED)

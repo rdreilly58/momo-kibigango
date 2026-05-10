@@ -14,15 +14,10 @@ things inbox 2>/dev/null | head -5 | sed 's/^/  • /' || true
 
 Things 3 is the authoritative task tracker (since April 2026). Use `things today` / `things inbox` from CLI.
 
-## Telegraph Status Report
+## ## Telegraph Status Report
 
 Publish tasks, calendar, and system metrics to Telegraph:
-
-```bash
-python3 ~/.openclaw/workspace/scripts/telegraph_heartbeat.py
-```
-
-Skip if no pending tasks and no upcoming events.
+(Script removed due to deprecation)
 
 ## GPU / Compute
 

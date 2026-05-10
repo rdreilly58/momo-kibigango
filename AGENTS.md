@@ -21,18 +21,27 @@ If `BOOTSTRAP.md` exists, that's your birth certificate. Follow it, figure out w
 
 Don't ask permission. Just do it.
 
-## Pre-Compaction Flush (CRITICAL)
+## Context Management: Pre-Compaction Flush (CRITICAL)
 
-**Before any context compaction or daily session reset, write 1 paragraph to `SESSION_CONTEXT.md`.**
+**This step is MANDATORY.** Before any context compaction or daily session reset, you must write a summary to `SESSION_CONTEXT.md`. This process flushes the most vital information into a clean, digestible summary, preventing the active conversation window from hitting hard limits.
 
-Trigger when: context >80%, end of significant work block, before `/reset`.
+**🚨 Trigger this flush when:**
+*   The context begins to feel unwieldy (e.g., >80% usage).
+*   You complete a significant task block.
+*   You are about to initiate a session reset or restart.
 
-```
+**Flush Template:**
+Always write a single paragraph (max ~200 words) that summarizes the *current* state. Overwrite the file, never append.
+
+\`\`\`
 [DATE TIME] Flushed before [compaction/reset/end-of-session].
-Active: [task summary]. Decided: [key decision]. Next: [next action]. Blocked: [blocker or "none"].
-```
+Active: [Task summary: What were we doing?]. Decided: [Key decision made in this block]. Next: [Next immediate action]. Blocked: [Blocker or "none"].
+\`\`\`
 
-Rules: overwrite (not append), max ~200 words, no secrets or full code.
+**🚨 Rules:**
+*   **Overwrite:** Always overwrite the file. Never append.
+*   **Concise:** Keep it focused and actionable.
+*   **No Secrets:** Never include sensitive data or full code snippets.
 
 ## Memory
 
