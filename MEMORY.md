@@ -19,7 +19,7 @@
 ## 🛠️ Memory System (Updated May 1, 2026)
 
 Memory system fully overhauled. Key scripts:
-- `scripts/total_recall_search.py` — canonical search (use `--rerank` for recency-weighted results)
+- `scripts/total-recall-search.py` — canonical search (use `--rerank` for recency-weighted results)
 - `scripts/memory_tier_manager.py` — hot/warm/cold tier management
 - `scripts/memory-auto-promote.py` — promote memories by priority/tags
 - `scripts/spawn-with-memory.py` — inject memory context into subagent spawns (Phase 1)
