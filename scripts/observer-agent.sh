@@ -13,7 +13,7 @@ set -euo pipefail
 # ── Idempotency lock (prevent concurrent runs) ────────────────────────────────
 LOCK_FILE="/tmp/observer-agent-$(date +%Y-%m-%d-%H).lock"
 if [ -e "$LOCK_FILE" ]; then
-    echo "[observer-agent] Already ran this hour (lock: $LOCK_FILE). Skipping." >&2
+    echo "[observer:INFO] Lock file created: $LOCK_FILE" >&2
     exit 0
 fi
 touch "$LOCK_FILE"
@@ -30,7 +30,7 @@ HARNESS_CHECK=0
 bash "$WORKSPACE/scripts/harness-fallback.sh" "observer-agent" >/dev/null 2>&1 || HARNESS_CHECK=1
 
 if [ $HARNESS_CHECK -eq 1 ]; then
-  echo "[observer:error] No harness available (tried: anthropic, ollama, local)" | tee -a "$HARNESS_LOG"
+  echo "[observer:INFO] No harness available (tried: anthropic, ollama, local)" | tee -a "$HARNESS_LOG"
 fi
 
 # Submit + immediately start coordinator task (observer has no external session ID)
@@ -50,14 +50,14 @@ fi
 # Init stamp if missing (first run or recovery)
 if [ ! -f "$STAMP" ]; then
   echo "$(date +%s)" > "$STAMP"
-  echo "[observer] Stamp initialised: $(date)"
+  echo "[observer:INFO] Stamp initialised: $(date)"
 fi
 
 LAST_RUN=$(cat "$STAMP")
 NOW=$(date +%s)
 AGE_SECONDS=$(( NOW - LAST_RUN ))
 
-echo "[observer] Last run: ${AGE_SECONDS}s ago"
+echo "[observer:INFO] Last run: ${AGE_SECONDS}s ago"
 
 # Check for new git activity since last run
 NEW_COMMITS=$(git -C "$WORKSPACE" log --oneline --since="@${LAST_RUN}" 2>/dev/null || true)
@@ -67,7 +67,7 @@ NEW_MEMORY=$(find "$WORKSPACE/memory" -name "*.md" -newer "$STAMP" \
   ! -name "observations.md" 2>/dev/null | head -5 || true)
 
 if [ -z "$NEW_COMMITS" ] && [ -z "$NEW_MEMORY" ]; then
-  echo "[observer] No new activity — updating stamp only"
+  echo "[observer:INFO] No new activity — updating stamp only"
   echo "$(date +%s)" > "$STAMP"
   if [ -n "$COORDINATOR_TASK_ID" ]; then
     python3 "$WORKSPACE/scripts/agent_coordinator.py" \
@@ -121,7 +121,7 @@ bash "$WORKSPACE/scripts/generate-status.sh" 2>/dev/null || echo "[observer] STA
 
 # Update stamp
 echo "$(date +%s)" > "$STAMP"
-echo "[observer] Done — observations written"
+echo "[observer:INFO] Done — observations written"
 
 # Complete coordinator task before heartbeat
 COMMITS_FOUND=$(echo "$NEW_COMMITS" | grep -c . 2>/dev/null || echo 0)
