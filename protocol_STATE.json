@@ -1,0 +1,49 @@
+# Project State File Protocol: STATE.json
+
+This file serves as the canonical, machine-readable checkpoint for long-running, multi-session projects. It must be updated at every major milestone and is the source of truth for project continuation, overriding ephemeral memory context when a session starts or resumes.
+
+**Location:** ~/.openclaw/workspace/state/STATE.json
+
+**Purpose:** To track the current, authoritative state of a project, independent of conversational history or temporary memory flushes.
+
+## JSON Schema Definition
+
+```json
+{
+  "project_name": "string",          // The human-readable name of the project (e.g., "Onigashima Platform").
+  "project_id": "string",            // A canonical, unique slug or ID for the project (e.g., "onigashima-v1").
+  "current_step": {
+    "step_title": "string",          // A short, descriptive title for the current phase (e.g., "UX Mockups for Dashboard").
+    "step_goal": "string",            // The specific objective for the current step (e.g., "Finalize wireframes for user profile page").
+    "progress_percent": "number"      // 0-100% completion of the current step.
+  },
+  "progress_history": [               // An array to track milestones achieved.
+    {
+      "milestone": "string",           // Name of the milestone (e.g., "Business Model Approved").
+      "completion_date": "YYYY-MM-DD",
+      "summary_log": "string"          // A brief description of what was accomplished in that milestone.
+    }
+  ],
+  "knowledge_assets": {               // Key files or generated assets associated with the project.
+    "files": [
+      {
+        "name": "string",              // File name (e.g., "design-specs.pdf").
+        "path": "relative/path/to/file.pdf", // Path relative to the project directory.
+        "version": "string"            // Semantic version (v1.0, v1.1).
+      }
+    ],
+    "tags": ["tag1", "tag2"]         // Canonical tags used to categorize the project.
+  },
+  "last_updated": "ISO-8601 Timestamp", // Mandatory timestamp of the last successful update.
+  "active_action_required": {         // Instructions for the next human or agent action.
+    "prompt": "string",              // Specific directive for the next step.
+    "expected_output": "string"      // What the user/agent is expected to deliver.
+  }
+}
+```
+
+## Protocol Notes:
+
+1.  **Immutability:** The `STATE.json` should only be updated by controlled, explicit processes (e.g., a dedicated `write-state` function or a successful cron-triggered checkpoint).
+2.  **Initialization:** Must be created with minimal data when a project starts, with `progress_percent` set to 0 and `last_updated` set to the start time.
+3.  **Retrieval:** When resuming a project, the very first action must be to read and parse this `STATE.json` before reading the conversational history or memory, anchoring the agent's focus immediately.
