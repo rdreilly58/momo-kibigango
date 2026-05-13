@@ -21,5 +21,14 @@ This project's core objective is to create and maintain a reliable, persistent, 
     *   Defined the three-step workflow (Initialize, Work/Log, Conclude).
 
 ## 💡 Next Steps
-1.  Formalize and implement the mandatory Front Matter structure into our core task handling logic (The next phase of development).
+1.  **Protocol: Enforcing Structured Memory Capture** (Implemented and Active)
+    *   **Trigger Condition:** Finalization of a decision, completion of a major work chunk, or definition of a new process.
+    *   **Logging Sequence (The 5 Rs):**
+        1.  **Review:** Review immediate chat context for subject, decision, action.
+        2.  **Refine:** Draft preliminary YAML structure.
+        3.  **Record:** Create new Markdown file in `never-forget` vault.
+        4.  **Structure:** Place complete YAML Front Matter at the top.
+        5.  **Rally:** Prompt user for review/confirmation.
+    *   **Operational Constraints:** Mandatory fill for all keys, clear goals/decisions, source linking for external info.
+
 2.  Begin logging all project design decisions and completed tasks in this central repository.
